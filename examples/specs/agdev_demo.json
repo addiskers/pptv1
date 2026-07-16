@@ -1,0 +1,515 @@
+{
+  "schema_version": 1,
+  "theme": "consulting_navy",
+  "meta": {
+    "title": "Agricultural Development — India Impact Review",
+    "date": "6 July 2026",
+    "footer_org": "©DeckEngine Demo",
+    "confidentiality": "DRAFT — internal"
+  },
+  "slides": [
+    {
+      "slide_type": "title",
+      "title": "Agricultural Development in India: 2024-25 Impact Review",
+      "subtitle": "Farm and farmer outcomes across Uttar Pradesh, Bihar and Odisha",
+      "date": "6 July 2026",
+      "org": "DeckEngine Demo"
+    },
+    {
+      "slide_type": "exec_summary",
+      "title": "Interventions lifted incomes above state averages in all three focus states",
+      "sections": [
+        {
+          "heading": "Reach",
+          "body": "Programs reached **3M farmers directly** and 3M more through diffusion in AY 2024-25, with digital channels adding **66M** touchpoints across advisory, market linkage and DPI rails."
+        },
+        {
+          "heading": "Income",
+          "body": "Direct-beneficiary households out-earned state averages in every geography — **+2.7%** in Uttar Pradesh, **+5%** in Bihar and **+4.8%** in Odisha from crops and livestock."
+        },
+        {
+          "heading": "Resilience",
+          "body": "Advisory recipients cut crop losses by **2-8 percentage points**, worth $14-31 per farmer per season depending on state."
+        },
+        {
+          "heading": "Leverage",
+          "body": "Government and private partners co-invested **$1,426 Mn** against program funding, with a 64% adoption rate of programmatic interventions."
+        }
+      ]
+    },
+    {
+      "slide_type": "section_divider",
+      "number": "1",
+      "title": "State-level outcomes",
+      "subtitle": "Farmers benefitted, income, climate resilience and cost of cultivation"
+    },
+    {
+      "slide_type": "n_column_comparison",
+      "title": "In **2024-25**, our interventions resulted in the following farm and farmer outcomes:",
+      "row_labels": [
+        "FARMERS BENEFITTED",
+        "INCOME INCREASE",
+        "CLIMATE RESILIENCE",
+        "COST OF CULTIVATION ($/ha)"
+      ],
+      "columns": [
+        {
+          "header": "UTTAR PRADESH",
+          "cells": [
+            {
+              "kind": "stat_row",
+              "stats": [
+                {
+                  "label": "Direct",
+                  "value": "1.03M"
+                },
+                {
+                  "label": "Diffusion",
+                  "value": "0.83M"
+                },
+                {
+                  "label": "Digital",
+                  "value": "2M"
+                }
+              ]
+            },
+            {
+              "kind": "text_block",
+              "text": "Agricultural HH (direct beneficiaries) reported an avg. income of $1,216 from C&L = **2.7% more** than the state average of $1,183.",
+              "align": "center",
+              "size_role": "small"
+            },
+            {
+              "kind": "text_block",
+              "text": "**8% reduction in crop loss** (from 22% vs 14%) for farmers who received advisory. (savings of ~$19/farmer)",
+              "align": "center",
+              "size_role": "small"
+            },
+            {
+              "kind": "mini_table",
+              "headers": [
+                "Crop",
+                "Beneficiary",
+                "State Avg.",
+                "Delta"
+              ],
+              "rows": [
+                [
+                  "Paddy",
+                  "90",
+                  "91",
+                  "- 1"
+                ],
+                [
+                  "Wheat",
+                  "94",
+                  "93",
+                  "+1"
+                ],
+                [
+                  "Maize",
+                  "100",
+                  "104",
+                  "+ 4"
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "header": "BIHAR",
+          "cells": [
+            {
+              "kind": "stat_row",
+              "stats": [
+                {
+                  "label": "Direct",
+                  "value": "0.39M"
+                },
+                {
+                  "label": "Diffusion",
+                  "value": "0.62M"
+                },
+                {
+                  "label": "Digital",
+                  "value": "20M"
+                }
+              ]
+            },
+            {
+              "kind": "text_block",
+              "text": "Agricultural HH (direct beneficiaries) reported an avg. income of $1,453 from C&L = **5% more** than the state average of $1,373.",
+              "align": "center",
+              "size_role": "small"
+            },
+            {
+              "kind": "text_block",
+              "text": "**2% reduction in crop loss** (from 19% vs 17%) for farmers who received advisory. (savings of ~14$/farmer)",
+              "align": "center",
+              "size_role": "small"
+            },
+            {
+              "kind": "mini_table",
+              "headers": [
+                "Crop",
+                "Beneficiary",
+                "State Avg.",
+                "Delta"
+              ],
+              "rows": [
+                [
+                  "Paddy",
+                  "89",
+                  "93",
+                  "-4"
+                ],
+                [
+                  "Wheat",
+                  "91",
+                  "91",
+                  "0"
+                ],
+                [
+                  "Maize",
+                  "84",
+                  "83",
+                  "+ 1"
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "header": "ODISHA",
+          "cells": [
+            {
+              "kind": "stat_row",
+              "stats": [
+                {
+                  "label": "Direct",
+                  "value": "0.76M"
+                },
+                {
+                  "label": "Diffusion",
+                  "value": "1.35M"
+                },
+                {
+                  "label": "Digital",
+                  "value": "3.35M"
+                }
+              ]
+            },
+            {
+              "kind": "text_block",
+              "text": "Agricultural HH (direct beneficiaries) reported an avg. income of $1,209 from C&L = **4.8% more** than the state average of $1,153.",
+              "align": "center",
+              "size_role": "small"
+            },
+            {
+              "kind": "text_block",
+              "text": "**3% reduction in crop loss** (from 18% vs 15%) for farmers who received advisory. (savings of ~$31/farmer)",
+              "align": "center",
+              "size_role": "small"
+            },
+            {
+              "kind": "mini_table",
+              "headers": [
+                "Crop",
+                "Beneficiary",
+                "State Avg.",
+                "Delta"
+              ],
+              "rows": [
+                [
+                  "Paddy",
+                  "111",
+                  "114",
+                  "- 3"
+                ],
+                [
+                  "Cotton",
+                  "584",
+                  "676",
+                  "92"
+                ],
+                [
+                  "Brinjal",
+                  "31",
+                  "22",
+                  "+ 9"
+                ]
+              ]
+            }
+          ]
+        }
+      ],
+      "summary_band": {
+        "kind": "callout_band",
+        "label": "TOTAL (AY 2024-25)",
+        "icon": "👨‍🌾",
+        "segments": [
+          "**FARMERS BENEFITED**\nDirect **3M**  Diffusion **3M**  Digital* **66M**",
+          "**30%** of beneficiaries (both direct and diffusion) **are women**",
+          "New funds leveraged from govt/private sector: **$1,426 Mn**",
+          "Adoption rate of programmatic interventions: **64%**"
+        ]
+      },
+      "footnote": "*Includes digital work including AI, DPI and non-AI related as well"
+    },
+    {
+      "slide_type": "data_deep_dive",
+      "title": "Priority products within our innovation pipeline are concentrated in six business lines",
+      "subtitle": "2025 readiness stage shown as share of asset budget across TRL bands",
+      "legend": {
+        "kind": "legend_row",
+        "items": [
+          {
+            "code": "LIV",
+            "label": "Livestock (19%)"
+          },
+          {
+            "code": "CRO",
+            "label": "Crops R&D (24%)"
+          },
+          {
+            "code": "ADS",
+            "label": "Ag Delivery Systems (30%)"
+          },
+          {
+            "code": "A&E",
+            "label": "Adaptive & Equitable Food Systems (9%)"
+          }
+        ]
+      },
+      "table": {
+        "kind": "data_table",
+        "columns": [
+          {
+            "label": "Priority Product Areas",
+            "frac": 0.16,
+            "cell_kind": "text"
+          },
+          {
+            "label": "High Impact Priority Assets",
+            "frac": 0.34,
+            "cell_kind": "text"
+          },
+          {
+            "label": "Badge",
+            "frac": 0.08,
+            "cell_kind": "badge",
+            "align": "center"
+          },
+          {
+            "label": "$M",
+            "frac": 0.07,
+            "cell_kind": "number",
+            "align": "right"
+          },
+          {
+            "label": "Discovery TRL 1-4",
+            "frac": 0.12,
+            "cell_kind": "heatmap",
+            "align": "center"
+          },
+          {
+            "label": "Develop. TRL 5-6",
+            "frac": 0.12,
+            "cell_kind": "heatmap",
+            "align": "center"
+          },
+          {
+            "label": "Delivery TRL 7-9",
+            "frac": 0.11,
+            "cell_kind": "heatmap",
+            "align": "center"
+          }
+        ],
+        "heatmap_lo": 0,
+        "heatmap_hi": 100,
+        "groups": [
+          {
+            "label": "Animal Breeds",
+            "rows": [
+              [
+                "Adoption of Cross-Bred Cows",
+                "LIV",
+                "96",
+                "40%",
+                "30%",
+                "30%"
+              ],
+              [
+                "Aquaculture",
+                "LIV",
+                "32",
+                "10%",
+                "30%",
+                "60%"
+              ],
+              [
+                "Offtake Solutions for Ruminant Meats",
+                "LIV",
+                "50",
+                "",
+                "",
+                ""
+              ]
+            ]
+          },
+          {
+            "label": "Animal Health",
+            "rows": [
+              [
+                "Alternative Feed and Fodder Innovations",
+                "LIV",
+                "66",
+                "50%",
+                "40%",
+                "10%"
+              ],
+              [
+                "FMD Control in India and East Africa",
+                "LIV",
+                "43",
+                "25%",
+                "60%",
+                "15%"
+              ],
+              [
+                "Solutions for Bovine TB, Ticks and Tryps",
+                "LIV",
+                "60",
+                "50%",
+                "40%",
+                "10%"
+              ]
+            ]
+          },
+          {
+            "label": "Data & Advisory",
+            "rows": [
+              [
+                "AI Advisory",
+                "ADS",
+                "85",
+                "15%",
+                "10%",
+                "75%"
+              ],
+              [
+                "Better Weather",
+                "CRO",
+                "60",
+                "70%",
+                "30%",
+                "0%"
+              ],
+              [
+                "Crops Measurement and Evaluation",
+                "CRO",
+                "70",
+                "65%",
+                "35%",
+                "0%"
+              ]
+            ]
+          },
+          {
+            "label": "Seeds",
+            "rows": [
+              [
+                "Biotech Commercialization (TELA)",
+                "CRO",
+                "75",
+                "0%",
+                "10%",
+                "90%"
+              ],
+              [
+                "Hybrid Cereals Gen 1",
+                "CRO",
+                "150",
+                "40%",
+                "60%",
+                "0%"
+              ],
+              [
+                "Non-cereal Breakthrough Varieties Gen 1",
+                "CRO",
+                "115",
+                "0%",
+                "85%",
+                "15%"
+              ]
+            ]
+          }
+        ]
+      },
+      "insights_heading": "What this shows",
+      "insights": [
+        {
+          "text": "**44% of budget** sits in Big Bets, concentrated in Seeds and Animal Breeds."
+        },
+        {
+          "text": "Delivery-stage assets cluster in **AI Advisory (75%)** and **TELA (90%)**."
+        },
+        {
+          "text": "Early-discovery weight in Better Weather signals a 3-5 year runway."
+        }
+      ],
+      "footnote": "Readiness stage = share of asset budget by TRL band. Demo data replicating reference layout."
+    },
+    {
+      "slide_type": "kpi_dashboard",
+      "title": "Between 2019-2025, interventions benefitted 10.6 Mn SSPs directly and 37.7 Mn digitally",
+      "icon_stats": [
+        {
+          "kind": "icon_stat_row",
+          "icon": "👥",
+          "stat": "**35%**",
+          "text": "of direct beneficiaries are women"
+        },
+        {
+          "kind": "icon_stat_row",
+          "icon": "💰",
+          "stat": "**$550**",
+          "text": "increase in income per SSP per year (2020 to 2024)"
+        },
+        {
+          "kind": "icon_stat_row",
+          "icon": "📈",
+          "stat": "**15-100%**",
+          "text": "productivity increase across high value crops"
+        }
+      ],
+      "kpi_strip": {
+        "kind": "kpi_card_strip",
+        "cards": [
+          {
+            "title": "**$2.2B**",
+            "body": "leveraged from govt, private sector and IFIs (2025)"
+          },
+          {
+            "title": "**60+**",
+            "body": "frugal agri innovations for SSPs supported"
+          },
+          {
+            "title": "**150+**",
+            "body": "private companies engaged across value chain"
+          },
+          {
+            "title": "**90%**",
+            "body": "reduction in program delivery costs for govt"
+          }
+        ]
+      },
+      "highlight": {
+        "kind": "highlight_box",
+        "title": "AgDev has deployed **$336M** in India",
+        "body": "'Paid' + 'unpaid' investments marked as India, 2015 to current — across **185 funded investments**, 123 managed by Seattle POs and 62 by India POs."
+      },
+      "footnote": "Demo data replicating reference layout."
+    }
+  ]
+}

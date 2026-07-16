@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DeckEngine</title>
+<style>
+  :root {
+    --navy: #1F3864; --navy-dark: #16294A; --accent: #C55A11;
+    --ink: #2b2b2b; --muted: #6b7280; --bg: #f4f5f7; --card: #ffffff;
+    --grid: #e2e5ea; --positive: #21614B;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { font: 15px/1.5 "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--ink); }
+  header { background: var(--navy); color: #fff; padding: 18px 28px; display: flex; align-items: baseline; gap: 14px; }
+  header h1 { font: 600 22px Georgia, serif; letter-spacing: .3px; }
+  header span { color: #b9c4d8; font-size: 13px; }
+  main { max-width: 1060px; margin: 26px auto; padding: 0 20px; display: grid; gap: 20px; }
+  .card { background: var(--card); border: 1px solid var(--grid); border-radius: 10px; padding: 22px; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 18px; }
+  .tabs button { border: 1px solid var(--grid); background: #fff; padding: 8px 18px; border-radius: 999px; cursor: pointer; font-weight: 600; color: var(--muted); }
+  .tabs button.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+  label { display: block; font-weight: 600; font-size: 13px; margin: 14px 0 6px; color: var(--navy-dark); }
+  textarea, select, input[type=text] { width: 100%; border: 1px solid var(--grid); border-radius: 8px; padding: 10px 12px; font: inherit; background: #fbfcfd; }
+  textarea:focus, select:focus { outline: 2px solid #9db3d8; }
+  textarea.prompt { min-height: 110px; }
+  textarea.mono { font: 12.5px/1.45 Consolas, monospace; min-height: 180px; }
+  .row { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; }
+  .row > div { flex: 1; min-width: 180px; }
+  .actions { margin-top: 18px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .btn { border: 0; border-radius: 8px; padding: 11px 22px; font: 600 15px "Segoe UI"; cursor: pointer; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:disabled { background: #d8c7ba; cursor: default; }
+  .btn-ghost { background: #eef1f5; color: var(--navy-dark); }
+  .hint { font-size: 12.5px; color: var(--muted); }
+  #status { display: none; }
+  .spinner { width: 18px; height: 18px; border: 3px solid #d5dbe6; border-top-color: var(--navy); border-radius: 50%; display: inline-block; vertical-align: -4px; animation: spin 0.9s linear infinite; margin-right: 10px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .warn { background: #fff7ed; border: 1px solid #fdba74; color: #9a3412; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-top: 10px; white-space: pre-wrap; }
+  .err  { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; border-radius: 8px; padding: 10px 14px; font-size: 13.5px; margin-top: 10px; white-space: pre-wrap; }
+  .ok   { color: var(--positive); font-weight: 600; }
+  #previews { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-top: 16px; }
+  #previews img { width: 100%; border: 1px solid var(--grid); border-radius: 6px; box-shadow: 0 1px 4px rgba(20,30,60,.08); cursor: zoom-in; transition: transform .12s; }
+  #previews img:hover { transform: scale(1.02); }
+  #lightbox { position: fixed; inset: 0; background: rgba(15,20,35,.85); display: none; align-items: center; justify-content: center; z-index: 50; cursor: zoom-out; }
+  #lightbox img { max-width: 94vw; max-height: 94vh; border-radius: 6px; }
+  a.download { display: inline-block; background: var(--positive); color: #fff; text-decoration: none; padding: 11px 22px; border-radius: 8px; font-weight: 600; }
+</style>
+</head>
+<body>
+<header><h1>DeckEngine</h1><span>describe it &rarr; consulting-grade, fully editable .pptx</span></header>
+<main>
+  <div class="card">
+    <div class="tabs">
+      <button id="tab-prompt" class="active" onclick="setTab('prompt')">Describe your deck</button>
+      <button id="tab-spec" onclick="setTab('spec')">JSON spec</button>
+    </div>
+
+    <div id="pane-prompt">
+      <label>What type of ppt do you want?</label>
+      <textarea id="prompt" class="prompt" placeholder="e.g. 8-slide impact report on our India agriculture programs — farmer income, climate resilience and cost of cultivation across UP, Bihar and Odisha. End with a KPI dashboard."></textarea>
+      <div class="row">
+        <div>
+          <label for="csvfile">Data (optional CSV — every number in the deck will come from here)</label>
+          <input type="file" id="csvfile" accept=".csv,.txt" title="CSV data file">
+        </div>
+        <div>
+          <label for="theme">Theme</label>
+          <select id="theme" title="Deck theme"><option value="consulting_navy">consulting_navy</option></select>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-primary" id="go" onclick="generate()">Generate deck</button>
+        <span class="hint">An LLM plans &amp; writes the slides — needs OPENAI_API_KEY (or ANTHROPIC_API_KEY) set where the server runs.</span>
+      </div>
+    </div>
+
+    <div id="pane-spec" style="display:none">
+      <label>Deck spec (JSON) — full manual control, no API key needed</label>
+      <textarea id="spec" class="mono" spellcheck="false"></textarea>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="renderSpec()">Render deck</button>
+        <button class="btn btn-ghost" onclick="loadDemo()">Load demo spec</button>
+        <span class="hint">Edit anything — add a column, add table rows — the layout reflows.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="status">
+    <div id="running"><span class="spinner"></span><b id="phase">Working…</b>
+      <div class="hint" id="phasehint" style="margin-top:6px"></div></div>
+    <div id="result" style="display:none">
+      <p class="ok" id="doneline"></p>
+      <div class="actions"><a class="download" id="dl" href="#">Download .pptx</a></div>
+      <div id="warnings"></div>
+      <div id="previews"></div>
+    </div>
+    <div id="error" style="display:none" class="err"></div>
+  </div>
+</main>
+<div id="lightbox" onclick="this.style.display='none'"><img id="lightimg"></div>
+
+<script>
+let csvText = null;
+document.getElementById('csvfile').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) { csvText = null; return; }
+  const r = new FileReader();
+  r.onload = () => csvText = r.result;
+  r.readAsText(f);
+});
+
+function setTab(t) {
+  for (const k of ['prompt','spec']) {
+    document.getElementById('tab-'+k).classList.toggle('active', k===t);
+    document.getElementById('pane-'+k).style.display = k===t ? '' : 'none';
+  }
+}
+
+async function loadDemo() {
+  const res = await fetch('/demo-spec');
+  document.getElementById('spec').value = JSON.stringify(await res.json(), null, 2);
+}
+
+function showRunning(msg, hint) {
+  document.getElementById('status').style.display = '';
+  document.getElementById('running').style.display = '';
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('error').style.display = 'none';
+  document.getElementById('phase').textContent = msg;
+  document.getElementById('phasehint').textContent = hint || '';
+  document.getElementById('status').scrollIntoView({behavior:'smooth'});
+}
+function showError(msg) {
+  document.getElementById('running').style.display = 'none';
+  const e = document.getElementById('error');
+  e.style.display = ''; e.textContent = msg;
+}
+
+async function generate() {
+  const prompt = document.getElementById('prompt').value.trim();
+  if (!prompt) return showAndFocus();
+  showRunning('Planning and writing your slides…',
+              'Claude drafts an outline, then writes each slide spec against the schema. 30–90s for a full deck.');
+  const res = await fetch('/generate', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({prompt, csv_text: csvText, theme: document.getElementById('theme').value})});
+  poll((await res.json()).job_id);
+}
+function showAndFocus(){ document.getElementById('prompt').focus(); }
+
+async function renderSpec() {
+  let spec;
+  try { spec = JSON.parse(document.getElementById('spec').value); }
+  catch (e) { document.getElementById('status').style.display=''; return showError('Spec is not valid JSON: '+e.message); }
+  showRunning('Rendering deck…', 'Deterministic layout — measuring text, placing components.');
+  const res = await fetch('/render', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({spec})});
+  if (!res.ok) return showError(await res.text());
+  poll((await res.json()).job_id);
+}
+
+async function poll(jobId) {
+  const t = setInterval(async () => {
+    const job = await (await fetch('/jobs/'+jobId)).json();
+    if (job.status === 'running') return;
+    clearInterval(t);
+    if (job.status === 'error') return showError(job.error);
+    document.getElementById('running').style.display = 'none';
+    document.getElementById('result').style.display = '';
+    document.getElementById('doneline').textContent =
+      '✓ Deck ready' + (job.previews ? ' — ' + job.previews + ' slides' : '');
+    document.getElementById('dl').href = '/download/'+jobId;
+    const w = document.getElementById('warnings');
+    w.innerHTML = '';
+    if ((job.warnings||[]).length)
+      w.innerHTML = '<div class="warn">Build warnings:\n' + job.warnings.join('\n') + '</div>';
+    const p = document.getElementById('previews');
+    p.innerHTML = '';
+    for (let i = 1; i <= (job.previews||0); i++) {
+      const img = document.createElement('img');
+      img.src = '/previews/'+jobId+'/'+i;
+      img.onclick = () => { document.getElementById('lightimg').src = img.src;
+                            document.getElementById('lightbox').style.display = 'flex'; };
+      p.appendChild(img);
+    }
+  }, 1500);
+}
+</script>
+</body>
+</html>
