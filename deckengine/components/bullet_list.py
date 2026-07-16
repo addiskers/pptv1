@@ -48,6 +48,12 @@ class BulletList(Component):
     def render(self, slide, data: BulletListSpec, bbox: BBox,
                ctx: RenderContext) -> int:
         gap = ctx.theme.spacing(0.35)
+        if ctx.fill_hint and len(data.items) > 1:
+            # flex: distribute items across the zone (capped so it never gets airy)
+            natural = self.measure(data, bbox.w, ctx)
+            surplus = max(0, bbox.h - natural)
+            gap += min(surplus // (len(data.items) - 1),
+                       ctx.theme.spacing(2.2))
         glyph_w = ctx.theme.spacing(1.2)
         glyph_size = ctx.size(data.size_role)
         cursor = bbox.y

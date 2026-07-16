@@ -88,6 +88,17 @@ class ComparisonColumns(Component):
         theme = ctx.theme
         family = ctx.font("body")
 
+        # flex: when given more height than natural, grow tracks evenly
+        # (children stay top-aligned; extra becomes breathing room between rows)
+        track_hs = list(plan.track_hs)
+        extra = max(0, bbox.h - plan.total) if ctx.fill_hint else 0
+        if extra > 0 and track_hs:
+            per = min(extra // len(track_hs),
+                      round(max(track_hs) * 0.5))
+            track_hs = [h + per for h in track_hs]
+        total = (plan.header_h + plan.gap + sum(track_hs)
+                 + plan.track_gap * (len(track_hs) - 1))
+
         # header bands
         for col, off, w in zip(data.columns, plan.col_offsets, plan.col_widths):
             band = BBox(bbox.x + off, bbox.y, w, plan.header_h)
@@ -101,7 +112,7 @@ class ComparisonColumns(Component):
 
         # row tracks — same y and same height for cell i in every column
         y = bbox.y + plan.header_h + plan.gap
-        for i, track_h in enumerate(plan.track_hs):
+        for i, track_h in enumerate(track_hs):
             if data.row_labels and i < len(data.row_labels):
                 self._render_rail_label(slide, data.row_labels[i],
                                         BBox(bbox.x, y, plan.rail_w, track_h), ctx)
@@ -119,10 +130,10 @@ class ComparisonColumns(Component):
                 left_edge = bbox.x + plan.col_offsets[j] + plan.col_widths[j]
                 right_edge = bbox.x + plan.col_offsets[j + 1]
                 add_vline(slide, (left_edge + right_edge) // 2, bbox.y,
-                          plan.total, theme, role="ink_muted", weight_pt=0.75,
+                          total, theme, role="ink_muted", weight_pt=0.75,
                           dash="dash")
 
-        return plan.total
+        return total
 
     # -- left rail ------------------------------------------------------------
 

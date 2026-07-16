@@ -107,6 +107,10 @@ class DataTable(Component):
             ctx.report.warn(
                 f"data_table: needs {total_h} EMU but bbox has {bbox.h}; "
                 "split at row_offsets() upstream")
+        elif ctx.fill_hint and bbox.h > total_h and total_rows:
+            # flex: given extra height, relax row pitch (capped) to fill the zone
+            row_h += min((bbox.h - total_h) // total_rows, round(row_h * 0.6))
+            total_h = header_h + total_rows * row_h
 
         xs = [bbox.x]
         for w in col_ws:

@@ -31,9 +31,10 @@ class NColumnComparison(SlideAssembler):
                 text=spec.footnote, size_role="micro", color_role="ink_muted"),
                 gap_before=0.5))
         comparison = [item("comparison_columns", ComparisonColumnsSpec(
-            columns=spec.columns, row_labels=spec.row_labels), gap_before=0.8)]
+            columns=spec.columns, row_labels=spec.row_labels), gap_before=0.8,
+            flex=1.0)]
         if bottom:
-            bplan = stacker_plan(bottom, z["body"], ctx)
+            bplan = stacker_plan(bottom, z["body"], ctx, expand=False)
             band_bb, top_bb = z["body"].take_bottom(bplan.total)
             stack_into(slide, top_bb, ctx, comparison)
             stacker_render(slide, bplan, band_bb, ctx)
@@ -53,9 +54,11 @@ class KpiDashboard(SlideAssembler):
             items.append(item("icon_stat_row", ist,
                               gap_before=0.8 if i == 0 else 0.6))
         if spec.kpi_strip:
-            items.append(item("kpi_card_strip", spec.kpi_strip, gap_before=1.2))
+            items.append(item("kpi_card_strip", spec.kpi_strip, gap_before=1.2,
+                              flex=1.0))
         if spec.highlight:
-            items.append(item("highlight_box", spec.highlight, gap_before=1.2))
+            items.append(item("highlight_box", spec.highlight, gap_before=1.2,
+                              flex=0.6))
         if spec.footnote:
             items.append(item("text_block", TextBlockSpec(
                 text=spec.footnote, size_role="micro", color_role="ink_muted"),
@@ -87,7 +90,8 @@ class DataDeepDive(SlideAssembler):
         main_items = []
         if spec.legend:
             main_items.append(item("legend_row", spec.legend, gap_before=0.6))
-        main_items.append(item("data_table", spec.table, gap_before=0.8))
+        main_items.append(item("data_table", spec.table, gap_before=0.8,
+                               flex=1.0))
         if spec.footnote:
             main_items.append(item("text_block", TextBlockSpec(
                 text=spec.footnote, size_role="micro", color_role="ink_muted"),

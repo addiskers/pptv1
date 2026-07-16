@@ -65,6 +65,9 @@ class HighlightBox(Component):
         if body is not None and body.truncated:
             ctx.report.truncated(f"highlight_box body: {data.body[:40]!r}")
         total = self._height(title, body, ctx)
+        if ctx.fill_hint and bbox.h > total:
+            # flex: grow the panel (capped); text stays top-padded
+            total = min(bbox.h, round(total * 1.5))
 
         panel = bbox.with_height(total)
         add_shape(slide, panel, ctx.theme, fill_role=data.fill_role)

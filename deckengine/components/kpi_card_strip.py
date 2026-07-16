@@ -69,6 +69,9 @@ class KpiCardStrip(Component):
         if card_h > bbox.h:
             ctx.report.warn(
                 f"kpi_card_strip: card height {card_h} exceeds bbox height {bbox.h}")
+        elif ctx.fill_hint and bbox.h > card_h:
+            # flex: taller cards (text stays middle-anchored), capped growth
+            card_h = min(bbox.h, round(card_h * 1.5))
         gap = ctx.theme.spacing(0.5)
         gap_pt = to_pt(ctx.theme.spacing(0.3))
         family = ctx.font("body")

@@ -1,0 +1,532 @@
+{
+  "schema_version": 1,
+  "theme": "consulting_navy",
+  "meta": {
+    "title": "A 7-slide consulting deck: market entry strategy for a new OEM entering the India electric two-wheeler market. Slide plan: 1) title slide, 2) executiv",
+    "date": null,
+    "footer_org": null,
+    "confidentiality": null
+  },
+  "slides": [
+    {
+      "slide_type": "title",
+      "title": "India’s electric two-wheeler market offers a credible entry window for a new OEM with a focused segment-first strategy",
+      "subtitle": "Market entry strategy for a new OEM in India electric two-wheelers",
+      "date": "illustrative data",
+      "org": "illustrative data"
+    },
+    {
+      "slide_type": "exec_summary",
+      "title": "India’s electric two-wheeler market is attractive for entry if the OEM targets commuter scale first, differentiates on trust and distribution, and funds an 18-month launch",
+      "sections": [
+        {
+          "heading": "Market",
+          "body": "Large, fast-growing market with demand concentrated in commuter scooters at **illustrative 60%** of volume; premium remains influential for brand pull, while B2B fleet supports early utilization and data learning."
+        },
+        {
+          "heading": "Competition",
+          "body": "The field is active but still fragmented across Ola Electric, TVS iQube, Ather, Bajaj Chetak, and Hero Vida; incumbents bring reach and trust, while EV natives lead on software, speed, and EV-first positioning."
+        },
+        {
+          "heading": "Entry thesis",
+          "body": "Enter with a commuter-led portfolio, build credibility through quality and service, use selective premium variants for brand lift, and add fleet partnerships to accelerate volumes, utilization, and product feedback loops."
+        },
+        {
+          "heading": "Ask",
+          "body": "Approve an **illustrative 18-month** entry program covering product localization, dealer and service build-out, charging and ecosystem partnerships, and a phased launch with clear KPI gates before national scale-up."
+        }
+      ],
+      "footnote": "illustrative data"
+    },
+    {
+      "slide_type": "section_divider",
+      "number": "3",
+      "title": "India’s e-two-wheeler market is attractive, but winning requires segment focus and a clear right-to-win",
+      "subtitle": "Market attractiveness, segment structure, and entry pockets for a new OEM; illustrative data"
+    },
+    {
+      "slide_type": "n_column_comparison",
+      "title": "The commuter segment offers the best beachhead with the largest scale, solid growth, and a price point accessible to a new OEM",
+      "subtitle": "Illustrative comparison of India electric two-wheeler segments across size, growth, price point, positioning, and leading players",
+      "columns": [
+        {
+          "header": "Commuter",
+          "cells": [
+            {
+              "kind": "stat_row",
+              "stats": [
+                {
+                  "label": "Market size",
+                  "value": "1.2M units",
+                  "underline": true
+                },
+                {
+                  "label": "Growth",
+                  "value": "35%",
+                  "underline": true
+                },
+                {
+                  "label": "Price point",
+                  "value": "₹90k–₹120k",
+                  "underline": true
+                }
+              ]
+            },
+            {
+              "kind": "text_block",
+              "text": "Best entry wedge for scale: high-volume urban and semi-urban riders prioritize affordability, range adequacy, and low running cost.",
+              "size_role": "body",
+              "font_role": "body",
+              "align": "left",
+              "color_role": "ink",
+              "max_lines": 4
+            },
+            {
+              "kind": "mini_table",
+              "headers": [
+                "Top players",
+                "Share"
+              ],
+              "rows": [
+                [
+                  "Ola Electric",
+                  "28%"
+                ],
+                [
+                  "TVS iQube",
+                  "18%"
+                ],
+                [
+                  "Bajaj Chetak",
+                  "14%"
+                ]
+              ],
+              "col_fracs": null,
+              "align": "left"
+            }
+          ]
+        },
+        {
+          "header": "Premium",
+          "cells": [
+            {
+              "kind": "stat_row",
+              "stats": [
+                {
+                  "label": "Market size",
+                  "value": "0.3M units",
+                  "underline": true
+                },
+                {
+                  "label": "Growth",
+                  "value": "45%",
+                  "underline": true
+                },
+                {
+                  "label": "Price point",
+                  "value": "₹130k–₹180k",
+                  "underline": true
+                }
+              ]
+            },
+            {
+              "kind": "text_block",
+              "text": "Differentiated but narrower pool: buyers value performance, design, software, and brand; stronger product expectations raise entry risk.",
+              "size_role": "body",
+              "font_role": "body",
+              "align": "left",
+              "color_role": "ink",
+              "max_lines": 4
+            },
+            {
+              "kind": "mini_table",
+              "headers": [
+                "Top players",
+                "Share"
+              ],
+              "rows": [
+                [
+                  "Ather",
+                  "22%"
+                ],
+                [
+                  "Ola Electric",
+                  "20%"
+                ],
+                [
+                  "Hero Vida",
+                  "12%"
+                ]
+              ],
+              "col_fracs": null,
+              "align": "left"
+            }
+          ]
+        },
+        {
+          "header": "B2B-fleet",
+          "cells": [
+            {
+              "kind": "stat_row",
+              "stats": [
+                {
+                  "label": "Market size",
+                  "value": "0.2M units",
+                  "underline": true
+                },
+                {
+                  "label": "Growth",
+                  "value": "30%",
+                  "underline": true
+                },
+                {
+                  "label": "Price point",
+                  "value": "₹80k–₹110k",
+                  "underline": true
+                }
+              ]
+            },
+            {
+              "kind": "text_block",
+              "text": "Attractive for contracted demand and utilization, but economics depend on fleet partnerships, service uptime, and financing capability.",
+              "size_role": "body",
+              "font_role": "body",
+              "align": "left",
+              "color_role": "ink",
+              "max_lines": 4
+            },
+            {
+              "kind": "mini_table",
+              "headers": [
+                "Top players",
+                "Share"
+              ],
+              "rows": [
+                [
+                  "Ola Electric",
+                  "10%"
+                ],
+                [
+                  "TVS iQube",
+                  "8%"
+                ],
+                [
+                  "Ather",
+                  "6%"
+                ]
+              ],
+              "col_fracs": null,
+              "align": "left"
+            }
+          ]
+        }
+      ],
+      "row_labels": null,
+      "summary_band": {
+        "kind": "callout_band",
+        "label": "Best beachhead",
+        "icon": null,
+        "segments": [
+          "**Commuter = largest pool**",
+          "**35% growth** supports entry timing",
+          "Accessible **₹90k–₹120k** pricing aligns with mass adoption",
+          "Competition is real, but scale and value positioning favor a focused launch"
+        ]
+      },
+      "footnote": "illustrative data"
+    },
+    {
+      "slide_type": "data_deep_dive",
+      "title": "EV natives lead growth while legacy OEMs retain scale, leaving whitespace between premium retail and fleet-focused value play",
+      "subtitle": "Illustrative benchmark of four competitor groups across revenue, units, market share, and growth in the India electric two-wheeler market",
+      "legend": {
+        "kind": "legend_row",
+        "items": [
+          {
+            "code": "Rev",
+            "label": "Revenue"
+          },
+          {
+            "code": "U",
+            "label": "Units"
+          },
+          {
+            "code": "Shr",
+            "label": "Market share"
+          },
+          {
+            "code": "Gr",
+            "label": "Growth"
+          }
+        ]
+      },
+      "table": {
+        "kind": "data_table",
+        "columns": [
+          {
+            "label": "Group",
+            "frac": 0.24,
+            "cell_kind": "text",
+            "align": "left"
+          },
+          {
+            "label": "Player",
+            "frac": 0.22,
+            "cell_kind": "text",
+            "align": "left"
+          },
+          {
+            "label": "Revenue",
+            "frac": 0.16,
+            "cell_kind": "number",
+            "align": "right"
+          },
+          {
+            "label": "Units",
+            "frac": 0.14,
+            "cell_kind": "number",
+            "align": "right"
+          },
+          {
+            "label": "Share",
+            "frac": 0.12,
+            "cell_kind": "heatmap",
+            "align": "right"
+          },
+          {
+            "label": "Growth",
+            "frac": 0.12,
+            "cell_kind": "heatmap",
+            "align": "right"
+          }
+        ],
+        "groups": [
+          {
+            "label": "Legacy OEMs",
+            "rows": [
+              [
+                "Legacy OEMs",
+                "TVS iQube",
+                "₹4,000 crore",
+                "220,000",
+                "18%",
+                "35%"
+              ],
+              [
+                "Legacy OEMs",
+                "Bajaj Chetak",
+                "₹3,200 crore",
+                "180,000",
+                "15%",
+                "28%"
+              ],
+              [
+                "Legacy OEMs",
+                "Hero Vida",
+                "₹1,200 crore",
+                "70,000",
+                "6%",
+                "40%"
+              ]
+            ]
+          },
+          {
+            "label": "EV natives",
+            "rows": [
+              [
+                "EV natives",
+                "Ola Electric",
+                "₹6,500 crore",
+                "350,000",
+                "28%",
+                "55%"
+              ],
+              [
+                "EV natives",
+                "Ather",
+                "₹2,800 crore",
+                "140,000",
+                "11%",
+                "45%"
+              ],
+              [
+                "EV natives",
+                "Pure EV",
+                "₹900 crore",
+                "60,000",
+                "5%",
+                "22%"
+              ]
+            ]
+          },
+          {
+            "label": "Scooter specialists",
+            "rows": [
+              [
+                "Scooter specialists",
+                "Okinawa",
+                "₹1,500 crore",
+                "90,000",
+                "7%",
+                "12%"
+              ],
+              [
+                "Scooter specialists",
+                "Ampere",
+                "₹1,300 crore",
+                "85,000",
+                "7%",
+                "18%"
+              ],
+              [
+                "Scooter specialists",
+                "Bounce",
+                "₹500 crore",
+                "30,000",
+                "2%",
+                "10%"
+              ]
+            ]
+          },
+          {
+            "label": "Fleet players",
+            "rows": [
+              [
+                "Fleet players",
+                "Yulu",
+                "₹700 crore",
+                "40,000",
+                "3%",
+                "30%"
+              ],
+              [
+                "Fleet players",
+                "Zypp Electric",
+                "₹600 crore",
+                "35,000",
+                "3%",
+                "32%"
+              ],
+              [
+                "Fleet players",
+                "Mooving",
+                "₹300 crore",
+                "20,000",
+                "1%",
+                "25%"
+              ]
+            ]
+          }
+        ],
+        "heatmap_lo": 0.0,
+        "heatmap_hi": 100.0,
+        "header_fill_role": "primary",
+        "zebra": true
+      },
+      "insights_heading": "Key insights",
+      "insights": [
+        {
+          "text": "**Legacy OEMs** combine meaningful scale with slower growth than **EV natives**, indicating incumbents are defending share rather than defining the category.",
+          "level": 0
+        },
+        {
+          "text": "**Ola Electric** sets the pace on both **₹6,500 crore** revenue and **55%** growth, but concentration among a few leaders leaves room for a differentiated entrant.",
+          "level": 0
+        },
+        {
+          "text": "**Fleet players** remain small at **1%–3%** share but sustain **25%–32%** growth, suggesting an adjacent entry wedge below mainstream consumer retail.",
+          "level": 0
+        }
+      ],
+      "footnote": "illustrative data"
+    },
+    {
+      "slide_type": "kpi_dashboard",
+      "title": "Phased India entry can build a **₹500 Cr** business at **15%** share in the target niche while limiting early-market risk",
+      "icon_stats": [
+        {
+          "kind": "icon_stat_row",
+          "icon": "📈",
+          "stat": "**₹500 Cr**",
+          "text": "Illustrative revenue potential by Year 5 in the target niche under a phased entry model."
+        },
+        {
+          "kind": "icon_stat_row",
+          "icon": "🏍️",
+          "stat": "**50,000** units",
+          "text": "Illustrative annual volume at scale, anchored on focused launch economics rather than all-segment entry."
+        },
+        {
+          "kind": "icon_stat_row",
+          "icon": "🎯",
+          "stat": "**15%** share",
+          "text": "Illustrative target niche share, concentrated in the most attractive entry segment before broader expansion."
+        },
+        {
+          "kind": "icon_stat_row",
+          "icon": "🗺️",
+          "stat": "**18 months**",
+          "text": "Phased market entry timeline from launch preparation to scale-up, with gates to manage execution risk."
+        }
+      ],
+      "kpi_strip": {
+        "kind": "kpi_card_strip",
+        "cards": [
+          {
+            "title": "Phase 1 launch",
+            "body": "Enter **1** priority segment with **3** launch cities to validate product-market fit and channel economics."
+          },
+          {
+            "title": "Phase 2 expansion",
+            "body": "Expand to **10** cities after milestone gates are met on demand, service readiness, and partner performance."
+          },
+          {
+            "title": "Portfolio focus",
+            "body": "Lead with **1** core platform, then add **2** adjacencies after initial scale and brand proof points."
+          },
+          {
+            "title": "Capital discipline",
+            "body": "Use **18 months** of phased milestones to sequence investment and reduce exposure versus a national Day 1 rollout."
+          }
+        ],
+        "fill_role": "primary_dark"
+      },
+      "highlight": {
+        "kind": "highlight_box",
+        "title": "Recommendation: pursue a phased India entry starting with **1** attractive niche, prove economics in **3** cities, and scale selectively over **18 months**",
+        "body": "Prioritize a focused beachhead over broad national entry: build share in the target niche, use milestone gates before city expansion, and preserve flexibility for later moves into **2** adjacent segments.",
+        "fill_role": "surface_alt",
+        "accent_bar": true
+      },
+      "footnote": "illustrative data"
+    },
+    {
+      "slide_type": "bullet_content",
+      "title": "An **18-month** phased plan can validate demand, build channel capability, and launch at controlled scale with limited risk",
+      "subtitle": "Five sequenced workstreams move from market test to scaled launch while preserving flexibility",
+      "bullets": [
+        {
+          "text": "**Months 0–3:** Confirm target segment, refine value proposition, and test willingness to pay in **3** priority cities",
+          "level": 0
+        },
+        {
+          "text": "**Months 3–6:** Finalize product-market fit, homologation plan, and pilot economics; lock initial supplier and service-partner shortlist",
+          "level": 0
+        },
+        {
+          "text": "**Months 6–9:** Build channel capability through **10** pilot dealers, technician training, and digital lead-generation setup",
+          "level": 0
+        },
+        {
+          "text": "**Months 9–12:** Launch controlled commercial pilot with **1,000** units, tight KPI tracking, and rapid product/service iteration",
+          "level": 0
+        },
+        {
+          "text": "**Months 12–18:** Scale into **25** cities with expanded channel coverage, working-capital controls, and go/no-go review for broader rollout",
+          "level": 0
+        }
+      ],
+      "footnote": "illustrative data"
+    }
+  ]
+}

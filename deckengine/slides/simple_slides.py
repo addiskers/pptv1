@@ -86,7 +86,7 @@ class BulletContent(SlideAssembler):
             item("section_header", SectionHeaderSpec(
                 title=spec.title, subtitle=spec.subtitle))])
         stack_into(slide, z["body"].inset(top=ctx.theme.spacing(1)), ctx, [
-            item("bullet_list", BulletListSpec(items=spec.bullets))])
+            item("bullet_list", BulletListSpec(items=spec.bullets), flex=1.0)])
 
 
 @register_slide("exec_summary")

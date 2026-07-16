@@ -25,6 +25,7 @@ class BuildReport:
     warnings: list[str] = field(default_factory=list)
     truncations: list[str] = field(default_factory=list)
     splits: list[str] = field(default_factory=list)
+    fills: list[float] = field(default_factory=list)  # body-zone fill ratios
 
     def warn(self, msg: str) -> None:
         self.warnings.append(msg)
@@ -41,6 +42,8 @@ class RenderContext:
     measurer: TextMeasurer
     report: BuildReport
     dev_assert: bool = True  # fail loudly on contract violations in dev
+    fill_hint: bool = False  # set by the stacker around flexed renders ONLY:
+    #                          components may stretch to bbox.h when True
 
     def font(self, role: str) -> str:
         return self.theme.font_display if role == "display" else self.theme.font_body

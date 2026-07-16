@@ -1,0 +1,20 @@
+{
+  "ev_market_entry.spec": {
+    "slides": 7,
+    "warnings": 0,
+    "truncations": 0,
+    "overflows": 0,
+    "min_fill": 0.308,
+    "mean_fill": 0.689,
+    "zones_below_floor": 1
+  },
+  "agdev_demo": {
+    "slides": 6,
+    "warnings": 0,
+    "truncations": 0,
+    "overflows": 0,
+    "min_fill": 0.538,
+    "mean_fill": 0.73,
+    "zones_below_floor": 1
+  }
+}
