@@ -216,7 +216,7 @@ class NativeChartSpec(BaseModel):
         description="Category name to emphasize in accent color (the one data "
                     "point that proves the slide title), or null")
     annotation: PlainStr | None = Field(
-        max_length=80,
+        max_length=160,
         description="One short callout stating what the chart proves, or null")
     value_suffix: PlainStr = Field(default="", max_length=8)  # e.g. "%", " Mn"
 

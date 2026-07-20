@@ -1,0 +1,346 @@
+{
+  "schema_version": 1,
+  "theme": "skyquest_brand",
+  "meta": {
+    "title": "India Quick Commerce — Market Entry Strategy",
+    "date": "19 July 2026",
+    "footer_org": "SkyQuest × DeckEngine",
+    "confidentiality": "ILLUSTRATIVE — demonstration deck"
+  },
+  "slides": [
+    {
+      "slide_type": "title",
+      "title": "India Quick Commerce: Winning the Next $12B of Retail",
+      "subtitle": "Market assessment, unit economics and an 18-month entry play for a new operator",
+      "date": "19 July 2026",
+      "org": "SkyQuest Market Intelligence"
+    },
+    {
+      "slide_type": "exec_summary",
+      "title": "Quick commerce will triple by 2028 — but the entry window closes within 18 months",
+      "sections": [
+        {"heading": "Market", "body": "GMV grew **8x in three years** to a $5.5B run-rate and is still accelerating: dark-store density passed the convenience tipping point in every metro, and **28M monthly buyers** now default to 10-minute delivery for top-up baskets."},
+        {"heading": "Competition", "body": "The top three players hold **88% share**, but their playbooks have diverged — only **Blinkit** is contribution-positive at scale, and tier-2 expansion is burning cash across the board, leaving a flank open."},
+        {"heading": "Economics", "body": "Unit economics flip positive only where order density exceeds **1,100 orders/store/day**. Dense metros pay back a dark store in **14 months**; tier-2 stores may never pay back at current basket sizes."},
+        {"heading": "Recommendation", "body": "Enter **partner-led**, not greenfield: anchor on an existing retail network, focus on **3 metros**, and buy share where economics already work. The ask is **$150M** for a targeted **12% share** position by 2029."}
+      ]
+    },
+    {
+      "slide_type": "section_divider",
+      "number": "1",
+      "title": "The market",
+      "subtitle": "Size, momentum and where the demand actually sits"
+    },
+    {
+      "slide_type": "chart_slide",
+      "title": "GMV grew 8x in three years — and momentum is accelerating, not plateauing",
+      "subtitle": "Quick-commerce GMV run-rate, $B (illustrative)",
+      "chart": {
+        "kind": "native_chart",
+        "chart_type": "line",
+        "categories": ["2021", "2022", "2023", "2024", "2025", "2026E"],
+        "series": [
+          {"name": "GMV run-rate ($B)", "values": [0.7, 1.1, 2.4, 3.9, 5.5, 7.6]},
+          {"name": "Monthly buyers (M)", "values": [6, 9, 14, 20, 28, 36]}
+        ],
+        "sort": "none",
+        "highlight": null,
+        "annotation": "The post-2023 inflection follows dark-store density crossing one store per 2 km in metros — convenience became the default, not the exception"
+      },
+      "insights_heading": "Why it matters",
+      "insights": [
+        {"text": "Growth is **demand-led**, not discount-led: buyers grew faster than GMV only in year one."},
+        {"text": "2026E implies **38% growth** on a $5.5B base — this is no longer a niche."},
+        {"text": "Every month of delay cedes **~2 metros** of first-mover store density."}
+      ],
+      "footnote": "Illustrative data for demonstration."
+    },
+    {
+      "slide_type": "chart_slide",
+      "title": "Groceries and fresh drive 72% of GMV — fresh remains the loyalty wedge",
+      "subtitle": "GMV mix by category, % (illustrative)",
+      "chart": {
+        "kind": "native_chart",
+        "chart_type": "donut",
+        "categories": ["Groceries & staples", "Fresh & dairy", "Snacks & FMCG", "Pharma & care", "Electronics & other"],
+        "series": [{"name": "Share", "values": [45, 27, 14, 8, 6]}],
+        "sort": "desc",
+        "highlight": "Fresh & dairy",
+        "annotation": "Fresh has the highest order frequency and the weakest incumbent execution — it is the wedge category for a new entrant",
+        "value_suffix": "%"
+      },
+      "insights_heading": "Category logic",
+      "insights": [
+        {"text": "**Fresh & dairy** orders repeat 4.1x/month — double any other category."},
+        {"text": "Electronics inflates AOV but adds no habit; **frequency builds moats**, baskets follow."},
+        {"text": "Incumbent fresh NPS trails groceries by **18 points** — an open goal."}
+      ],
+      "footnote": "Illustrative data for demonstration."
+    },
+    {
+      "slide_type": "n_column_comparison",
+      "title": "Three playbooks have emerged — and only one is contribution-positive at scale",
+      "row_labels": ["SCALE", "POSITIONING", "UNIT ECONOMICS"],
+      "columns": [
+        {
+          "header": "BLINKIT",
+          "cells": [
+            {"kind": "stat_row", "stats": [
+              {"label": "GMV share", "value": "38%"},
+              {"label": "Dark stores", "value": "640"},
+              {"label": "AOV", "value": "₹635"}]},
+            {"kind": "text_block", "text": "**Premium convenience**: widest catalog, electronics and gourmet mix lift baskets; wins the office-hours and top-up occasions in metros.", "align": "center", "size_role": "small"},
+            {"kind": "mini_table", "headers": ["Metric", "Value", "Rank"],
+             "rows": [["Contribution / order", "+₹14", "#1"], ["Burn / order", "₹6", "#1"], ["Store payback", "14 mo", "#1"]]}
+          ]
+        },
+        {
+          "header": "ZEPTO",
+          "cells": [
+            {"kind": "stat_row", "stats": [
+              {"label": "GMV share", "value": "29%"},
+              {"label": "Dark stores", "value": "550"},
+              {"label": "AOV", "value": "₹528"}]},
+            {"kind": "text_block", "text": "**Speed absolutist**: youngest user base, highest order frequency, aggressive city launches — growth bought with the steepest burn of the three.", "align": "center", "size_role": "small"},
+            {"kind": "mini_table", "headers": ["Metric", "Value", "Rank"],
+             "rows": [["Contribution / order", "-₹8", "#3"], ["Burn / order", "₹21", "#3"], ["Store payback", "26 mo", "#3"]]}
+          ]
+        },
+        {
+          "header": "INSTAMART",
+          "cells": [
+            {"kind": "stat_row", "stats": [
+              {"label": "GMV share", "value": "21%"},
+              {"label": "Dark stores", "value": "480"},
+              {"label": "AOV", "value": "₹590"}]},
+            {"kind": "text_block", "text": "**Ecosystem player**: rides Swiggy's user base and delivery fleet; capital-efficient expansion but splits management focus across food and grocery.", "align": "center", "size_role": "small"},
+            {"kind": "mini_table", "headers": ["Metric", "Value", "Rank"],
+             "rows": [["Contribution / order", "+₹2", "#2"], ["Burn / order", "₹11", "#2"], ["Store payback", "19 mo", "#2"]]}
+          ]
+        }
+      ],
+      "summary_band": {
+        "kind": "callout_band",
+        "label": "MARKET AT A GLANCE",
+        "icon": "🛒",
+        "segments": [
+          "**$5.5B** GMV run-rate across **60+** live cities",
+          "**28M** monthly transacting users, growing 40% YoY",
+          "Top-3 players hold **88%** of GMV",
+          "**Fresh & dairy** is the least-well-served wedge"
+        ]
+      },
+      "footnote": "Illustrative data for demonstration. Ranks within the top-3 set."
+    },
+    {
+      "slide_type": "section_divider",
+      "number": "2",
+      "title": "The economics",
+      "subtitle": "Where the model makes money — and where it structurally cannot"
+    },
+    {
+      "slide_type": "data_deep_dive",
+      "title": "Economics flip positive only in dense metros — tier-2 is a structural cash burn",
+      "subtitle": "Dark-store unit economics by city tier (illustrative)",
+      "table": {
+        "kind": "data_table",
+        "columns": [
+          {"label": "City tier", "frac": 0.14},
+          {"label": "City", "frac": 0.18},
+          {"label": "Orders / store / day", "frac": 0.16, "cell_kind": "number", "align": "right"},
+          {"label": "AOV ₹", "frac": 0.12, "cell_kind": "number", "align": "right"},
+          {"label": "Contribution margin", "frac": 0.16, "cell_kind": "heatmap", "align": "center"},
+          {"label": "Payback (months)", "frac": 0.14, "cell_kind": "number", "align": "right"},
+          {"label": "Profitable today", "frac": 0.1, "cell_kind": "dot", "align": "center"}
+        ],
+        "heatmap_lo": -8,
+        "heatmap_hi": 8,
+        "groups": [
+          {"label": "Metro", "rows": [
+            ["Mumbai", "1,450", "648", "7%", "13", "yes"],
+            ["Delhi NCR", "1,380", "612", "6%", "14", "yes"],
+            ["Bengaluru", "1,290", "634", "5%", "15", "yes"],
+            ["Hyderabad", "1,150", "588", "3%", "17", "yes"]
+          ]},
+          {"label": "Tier-1", "rows": [
+            ["Pune", "980", "545", "1%", "21", "yes"],
+            ["Ahmedabad", "870", "512", "-1%", "26", ""],
+            ["Jaipur", "760", "489", "-3%", "31", ""]
+          ]},
+          {"label": "Tier-2", "rows": [
+            ["Indore", "540", "452", "-5%", "44", ""],
+            ["Coimbatore", "470", "438", "-6%", "52", ""],
+            ["Lucknow", "430", "425", "-7%", "58", ""]
+          ]}
+        ]
+      },
+      "insights_heading": "What the table says",
+      "insights": [
+        {"text": "The breakeven line sits at **~1,100 orders/store/day** — only metros clear it."},
+        {"text": "Tier-2 AOV is **30% below** metro with identical delivery cost — the math cannot close at today's baskets."},
+        {"text": "Entry implication: **concentrate, don't spread** — density in 3 metros beats presence in 15 cities."}
+      ],
+      "footnote": "Illustrative data for demonstration. Contribution margin after delivery, wastage and store opex."
+    },
+    {
+      "slide_type": "chart_slide",
+      "title": "Blinkit's ₹635 AOV leads by 20% — and mix, not pricing, explains the gap",
+      "subtitle": "Average order value by player, ₹ (illustrative)",
+      "chart": {
+        "kind": "native_chart",
+        "chart_type": "bar",
+        "categories": ["Blinkit", "Instamart", "Zepto", "BBNow", "Flipkart Minutes"],
+        "series": [{"name": "AOV ₹", "values": [635, 590, 528, 480, 445]}],
+        "sort": "desc",
+        "highlight": "Blinkit",
+        "annotation": "Electronics and gourmet SKUs add ₹90+ to Blinkit baskets at identical grocery prices — assortment is the lever, and it is copyable"
+      },
+      "insights_heading": "So what",
+      "insights": [
+        {"text": "Every **₹50 of AOV** cuts store payback by roughly 3 months."},
+        {"text": "The AOV lever is **assortment architecture**, not discounting — capital-light to replicate."}
+      ],
+      "footnote": "Illustrative data for demonstration."
+    },
+    {
+      "slide_type": "section_divider",
+      "number": "3",
+      "title": "The play",
+      "subtitle": "How a new operator enters, sequences capital and wins a defensible position"
+    },
+    {
+      "slide_type": "framework_slide",
+      "title": "A partner-led entry beats greenfield on speed and capital — by roughly 2x on both",
+      "subtitle": "Entry pathway and the four moves that de-risk it",
+      "pathway": {
+        "kind": "chevron_pathway",
+        "steps": ["Anchor partner", "2-metro pilot", "Densify", "Own-label fresh", "Scale to #3"],
+        "highlight_index": 1
+      },
+      "blocks": [
+        {"kind": "numbered_block", "number": "1A", "title": "Anchor on existing retail, don't build from zero",
+         "body": "A partner's stores, licenses and supplier terms compress launch from 12 months to 5 and cut store capex roughly in half versus greenfield dark stores."},
+        {"kind": "numbered_block", "number": "1B", "title": "Pilot where the math already works",
+         "body": "Launch only in two metros above the 1,100 orders/day density line. Kill gate at month 8: contribution per order must be positive before city three."},
+        {"kind": "numbered_block", "number": "2", "title": "Win fresh before anything else",
+         "body": "Fresh & dairy is the highest-frequency, worst-served category. Cold-chain investment builds a moat incumbents must re-engineer stores to match."},
+        {"kind": "numbered_block", "number": "3", "title": "Copy the AOV lever immediately",
+         "body": "Assortment architecture (electronics, gourmet, own-label) lifts baskets without discounting — targeting ₹600+ AOV by month 12."}
+      ],
+      "footnote": "Illustrative strategy for demonstration."
+    },
+    {
+      "slide_type": "strategy_overview",
+      "title": "Five initiatives sequence the entry — weighted toward supply-side moats",
+      "subtitle": "[[accent]]Capital phasing is directional: 60% of the $150M lands in the first 12 months, concentrated on the dark-store network and cold chain that competitors cannot quickly match.[[/]]",
+      "legend": {
+        "kind": "legend_row",
+        "items": [
+          {"code": "OPS", "label": "Operations & supply"},
+          {"code": "MKT", "label": "Demand & brand"},
+          {"code": "TEC", "label": "Technology"},
+          {"code": "FIN", "label": "Financing"},
+          {"code": "REG", "label": "Regulatory"}
+        ]
+      },
+      "left_heading": "Entry principles",
+      "principles": [
+        {"text": "**Density before breadth** — no city three until cities one and two clear contribution breakeven"},
+        {"text": "Own the **fresh cold chain**; rent everything that isn't a moat"},
+        {"text": "Buy **AOV with assortment**, never with discounts"},
+        {"text": "Partner capital first, **own capex last**"},
+        {"text": "Every initiative carries a **kill gate** — no zombie spend"}
+      ],
+      "table_heading": "Initiative portfolio and capital phasing",
+      "table": {
+        "kind": "data_table",
+        "columns": [
+          {"label": "Workstream", "frac": 0.16},
+          {"label": "Initiative", "frac": 0.34},
+          {"label": "", "frac": 0.09, "cell_kind": "badge", "align": "center"},
+          {"label": "$M", "frac": 0.09, "cell_kind": "number", "align": "right"},
+          {"label": "0-6 mo", "frac": 0.11, "cell_kind": "heatmap", "align": "center"},
+          {"label": "6-12 mo", "frac": 0.11, "cell_kind": "heatmap", "align": "center"},
+          {"label": "12-24 mo", "frac": 0.1, "cell_kind": "heatmap", "align": "center"}
+        ],
+        "groups": [
+          {"label": "Supply moat", "rows": [
+            ["Dark-store partner network", "OPS", "45", "60%", "30%", "10%"],
+            ["Cold chain & fresh sourcing", "OPS", "30", "40%", "40%", "20%"],
+            ["Own-label fresh brand", "MKT", "20", "0%", "40%", "60%"]
+          ]},
+          {"label": "Demand", "rows": [
+            ["City-launch playbook & media", "MKT", "25", "50%", "35%", "15%"],
+            ["App, data & personalization", "TEC", "15", "45%", "35%", "20%"]
+          ]},
+          {"label": "Enablers", "rows": [
+            ["Working-capital facility", "FIN", "10", "30%", "40%", "30%"],
+            ["Licenses & compliance", "REG", "5", "70%", "20%", "10%"]
+          ]}
+        ]
+      },
+      "sidebar_heading": "What winning looks like",
+      "goals": [
+        "**#3 position** by GMV within 24 months of launch",
+        "Contribution-positive in **every live metro** by month 18",
+        "**$1.4B** enterprise value at the 2029 mark"
+      ],
+      "cobenefits_heading": "Side bets",
+      "cobenefits": [
+        "Own-label **margin upside**",
+        "Retail-media **revenue line**"
+      ],
+      "footnote": "Illustrative strategy for demonstration. Heatmap = share of initiative capital deployed in each horizon."
+    },
+    {
+      "slide_type": "timeline_slide",
+      "title": "18 months from term sheet to three profitable metros — with kill gates, not hope",
+      "subtitle": "Execution roadmap and decision points",
+      "timeline": {
+        "kind": "timeline_row",
+        "milestones": [
+          {"label": "Partner term sheet", "date": "Q3 26", "done": true},
+          {"label": "Metro 1-2 launch", "date": "Q4 26", "done": false},
+          {"label": "Kill gate: unit economics", "date": "Q2 27", "done": false},
+          {"label": "Metro 3 + own-label", "date": "Q3 27", "done": false},
+          {"label": "Contribution breakeven", "date": "Q4 27", "done": false},
+          {"label": "Series-B / scale call", "date": "Q1 28", "done": false}
+        ]
+      },
+      "phases": [
+        {"kind": "numbered_block", "number": "1", "title": "Mobilize (mo 0-4)",
+         "body": "Close partner terms, convert 20 stores, stand up cold chain in metro one."},
+        {"kind": "numbered_block", "number": "2", "title": "Prove (mo 5-12)",
+         "body": "Hit 1,100 orders/store/day and positive contribution in both pilot metros."},
+        {"kind": "numbered_block", "number": "3", "title": "Scale (mo 13-18)",
+         "body": "Metro three, own-label fresh at 15% of baskets, prep the scale round."}
+      ],
+      "footnote": "Illustrative roadmap for demonstration."
+    },
+    {
+      "slide_type": "kpi_dashboard",
+      "title": "The ask: $150M buys a 12% share position worth $1.4B by 2029",
+      "icon_stats": [
+        {"kind": "icon_stat_row", "icon": "money", "stat": "**$150M**", "text": "total capital ask — 60% deployed in the first 12 months, gated by unit economics"},
+        {"kind": "icon_stat_row", "icon": "target", "stat": "**12%**", "text": "targeted GMV share by 2029 — the defensible #3 position behind two funded leaders"},
+        {"kind": "icon_stat_row", "icon": "growth", "stat": "**$1.4B**", "text": "implied enterprise value at 2029 on sector-median revenue multiples"},
+        {"kind": "icon_stat_row", "icon": "clock", "stat": "**18 mo**", "text": "to contribution breakeven across all live metros — or the kill gate returns the capital"}
+      ],
+      "kpi_strip": {
+        "kind": "kpi_card_strip",
+        "cards": [
+          {"title": "**3 metros**", "body": "live by month 12, all above the density breakeven line"},
+          {"title": "**60 stores**", "body": "partner-converted dark stores at half greenfield capex"},
+          {"title": "**₹600+**", "body": "AOV by month 12 via assortment architecture"},
+          {"title": "**4.1x**", "body": "monthly fresh repeat rate — the loyalty engine"}
+        ]
+      },
+      "highlight": {
+        "kind": "highlight_box",
+        "title": "Recommendation: enter now, partner-led, fresh-first",
+        "body": "The market triples by 2028 with or without a new entrant. What closes in 18 months is the ability to enter **cheaply** — every quarter of delay adds dark-store density that must be bought back at greenfield prices. Move on the partner term sheet this quarter."
+      },
+      "footnote": "Illustrative figures for demonstration."
+    }
+  ]
+}
