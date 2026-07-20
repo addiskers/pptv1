@@ -35,7 +35,16 @@ def build_deck(spec: DeckSpec, out_path: str | Path) -> BuildReport:
     prs.slide_height = Emu(SLIDE_H_16_9)
     blank = prs.slide_layouts[6]
 
-    for i, slide_spec in enumerate(spec.slides, start=1):
+    # pre-pass: split any deep-dive slide whose table exceeds one page
+    from ..layout.pagination import paginate_deep_dive
+    expanded = []
+    for s in spec.slides:
+        if s.slide_type == "data_deep_dive":
+            expanded.extend(paginate_deep_dive(s, ctx))
+        else:
+            expanded.append(s)
+
+    for i, slide_spec in enumerate(expanded, start=1):
         slide = prs.slides.add_slide(blank)
         try:
             slide_base.get_assembler(slide_spec.slide_type).assemble(
@@ -49,7 +58,7 @@ def build_deck(spec: DeckSpec, out_path: str | Path) -> BuildReport:
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     prs.save(str(out_path))
-    log.info("wrote %s (%d slides, %d warnings)", out_path, len(spec.slides),
+    log.info("wrote %s (%d slides, %d warnings)", out_path, len(expanded),
              len(report.warnings))
     return report
 

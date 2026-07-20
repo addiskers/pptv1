@@ -87,10 +87,17 @@ class IconStatRow(Component):
         circle, rest = row.take_left(lay.row_h)
         s = add_shape(slide, circle, theme, shape="oval",
                       fill_role="primary_dark")
-        tf = make_text_frame(s, align="center", anchor="middle")
-        write_spans_paragraph(tf, [Span(data.icon, color_role="inverse_ink")],
-                              ctx.size("h2"), theme, family=ctx.font("body"),
-                              align="center")
+        from ..core.icons import ICON_NAMES
+        if data.icon in ICON_NAMES:
+            # themed monochrome PNG icon (kills the emoji tell)
+            from ..core.pptx_shapes import add_icon
+            add_icon(slide, circle.inset(round(lay.row_h * 0.24)), data.icon,
+                     theme, color_role="inverse_ink")
+        else:
+            tf = make_text_frame(s, align="center", anchor="middle")
+            write_spans_paragraph(tf, [Span(data.icon, color_role="inverse_ink")],
+                                  ctx.size("h2"), theme, family=ctx.font("body"),
+                                  align="center")
 
         # big stat, vertically centered in the row
         _, rest = rest.take_left(lay.gap)

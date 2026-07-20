@@ -113,6 +113,20 @@ def generate_outline(prompt: str, facts: FactTable | None) -> Outline:
         "emit_outline", Outline.model_json_schema(), p))
 
 
+_FEW_SHOTS_DIR = __import__("pathlib").Path(__file__).parent / "few_shots"
+
+
+def _few_shot(archetype: str) -> str:
+    """A curated gold spec of this archetype, injected as an exemplar —
+    moves density and structure more than any critique pass."""
+    p = _FEW_SHOTS_DIR / f"{archetype}.json"
+    if not p.is_file():
+        return ""
+    return ("\n\nEXAMPLE of an excellent spec of this type (match its density "
+            "and structure, NOT its topic or numbers):\n" +
+            p.read_text(encoding="utf-8"))
+
+
 def generate_slide(archetype: str, intent: str, prompt: str,
                    facts: FactTable | None,
                    prior_slides: list[str] | None = None) -> BaseModel:
@@ -126,7 +140,7 @@ def generate_slide(archetype: str, intent: str, prompt: str,
                  "\n".join(f"- {t}" for t in prior_slides))
     base_prompt = (
         f"Deck request:\n{prompt}\n\n"
-        f"{facts.prompt_block() if facts else ''}{prior}\n\n"
+        f"{facts.prompt_block() if facts else ''}{prior}{_few_shot(archetype)}\n\n"
         f"Write the spec for ONE slide of type '{archetype}'. Slide intent: {intent}")
     attempt_prompt = base_prompt
     slide = None

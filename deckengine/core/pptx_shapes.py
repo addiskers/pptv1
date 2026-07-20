@@ -72,6 +72,17 @@ def add_vline(slide, x: int, y: int, h: int, theme: Theme, *,
     return ln
 
 
+def add_icon(slide, bbox: BBox, name: str, theme: Theme, *,
+             color_role: str = "inverse_ink") -> None:
+    """Place a themed monochrome icon centered in bbox (square, fit to min side)."""
+    from .icons import get_icon
+    side = min(bbox.w, bbox.h)
+    path = get_icon(name, theme.color(color_role), px=128)
+    slide.shapes.add_picture(str(path), Emu(bbox.x + (bbox.w - side) // 2),
+                             Emu(bbox.y + (bbox.h - side) // 2),
+                             Emu(side), Emu(side))
+
+
 def _set_dash(line_format, dash: str) -> None:
     # python-pptx has no dash API on LineFormat in all versions; write prstDash.
     ln = line_format._get_or_add_ln()

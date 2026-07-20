@@ -92,7 +92,9 @@ class DataTableSpec(BaseModel):
 
 class IconStatRowSpec(BaseModel):
     kind: Literal["icon_stat_row"] = "icon_stat_row"
-    icon: str = Field(max_length=12, description="a single emoji")
+    icon: str = Field(max_length=12, description=(
+        "one of: person, people, money, growth, chart, leaf, building, "
+        "target, globe, bulb, shield, clock"))
     stat: RichStr = Field(max_length=40)
     text: RichStr = Field(max_length=300)
 
@@ -149,6 +151,52 @@ class HighlightBoxSpec(BaseModel):
     accent_bar: bool = True
 
 
+class DonutStatSpec(BaseModel):
+    kind: Literal["donut_stat"] = "donut_stat"
+    value_pct: float = Field(ge=0, le=100)  # filled share of the ring
+    center_text: PlainStr = Field(max_length=8)   # e.g. "50%"
+    label: RichStr = Field(max_length=80)         # caption under/beside the ring
+
+
+class ProgressPillSpec(BaseModel):
+    kind: Literal["progress_pill"] = "progress_pill"
+    label: RichStr = Field(max_length=60)
+    value_pct: float = Field(ge=0, le=100)
+    display: PlainStr = Field(max_length=16)      # text on/next to the bar, e.g. "312M"
+    target_display: PlainStr | None = Field(default=None, max_length=16)
+
+
+class MilestoneSpec(BaseModel):
+    label: PlainStr = Field(max_length=40)
+    date: PlainStr = Field(max_length=16)
+    done: bool = False
+
+
+class TimelineRowSpec(BaseModel):
+    kind: Literal["timeline_row"] = "timeline_row"
+    milestones: list[MilestoneSpec] = Field(min_length=2, max_length=8)
+
+
+class ChevronPathwaySpec(BaseModel):
+    kind: Literal["chevron_pathway"] = "chevron_pathway"
+    steps: list[PlainStr] = Field(min_length=2, max_length=6)
+    highlight_index: int | None = None  # accent-filled step
+
+
+class NumberedBlockSpec(BaseModel):
+    kind: Literal["numbered_block"] = "numbered_block"
+    number: PlainStr = Field(max_length=3)        # "1", "1A", "2B"
+    title: RichStr = Field(max_length=120)
+    body: RichStr | None = Field(default=None, max_length=400)
+
+
+class TwoToneHeaderSpec(BaseModel):
+    kind: Literal["two_tone_header"] = "two_tone_header"
+    left: RichStr = Field(max_length=60)
+    right: RichStr = Field(max_length=120)
+    left_frac: float = Field(default=0.35, gt=0.1, lt=0.9)
+
+
 # --- comparison_columns: recursive children -----------------------------
 
 ComparisonCell = Union[StatRowSpec, TextBlockSpec, MiniTableSpec]
@@ -171,5 +219,6 @@ ComponentSpec = Union[
     TextBlockSpec, StatRowSpec, BadgeChipSpec, SectionHeaderSpec, MiniTableSpec,
     DataTableSpec, IconStatRowSpec, KpiCardStripSpec, CalloutBandSpec,
     BulletListSpec, FootnoteStripSpec, LegendRowSpec, HighlightBoxSpec,
-    ComparisonColumnsSpec,
+    ComparisonColumnsSpec, DonutStatSpec, ProgressPillSpec, TimelineRowSpec,
+    ChevronPathwaySpec, NumberedBlockSpec, TwoToneHeaderSpec,
 ]
