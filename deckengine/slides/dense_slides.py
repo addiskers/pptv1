@@ -50,9 +50,13 @@ class KpiDashboard(SlideAssembler):
             item("section_header", SectionHeaderSpec(title=spec.title,
                                                      rule=False))])
         items = []
-        for i, ist in enumerate(spec.icon_stats):
-            items.append(item("icon_stat_row", ist,
-                              gap_before=0.8 if i == 0 else 0.6))
+        # banded icon tiles read more like a hand-built rail than stacked rows
+        if spec.icon_stats:
+            from ..schema.components import IconTileRowSpec, IconTileSpec
+            tiles = [IconTileSpec(icon=s.icon, stat=s.stat, text=s.text)
+                     for s in spec.icon_stats]
+            items.append(item("icon_tile_row", IconTileRowSpec(tiles=tiles),
+                              gap_before=0.8, flex=1.0))
         if spec.kpi_strip:
             items.append(item("kpi_card_strip", spec.kpi_strip, gap_before=1.2,
                               flex=1.0))

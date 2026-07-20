@@ -70,7 +70,7 @@ class HighlightBox(Component):
             total = min(bbox.h, round(total * 1.5))
 
         panel = bbox.with_height(total)
-        add_shape(slide, panel, ctx.theme, fill_role=data.fill_role)
+        add_shape(slide, panel, ctx.theme, fill_role=data.fill_role, shadow=True)
         if data.accent_bar:
             add_shape(slide, BBox(panel.x, panel.y, ctx.theme.spacing(0.35),
                                   panel.h), ctx.theme, fill_role="accent")

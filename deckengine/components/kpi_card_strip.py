@@ -78,7 +78,7 @@ class KpiCardStrip(Component):
         cols = bbox.cols(len(data.cards), gap=gap)
         for (title_fit, body_fit), col in zip(fits, cols):
             card = add_shape(slide, col.with_height(card_h), ctx.theme,
-                             shape="rect", fill_role=data.fill_role)
+                             shape="rect", fill_role=data.fill_role, shadow=True)
             tf = make_text_frame(card, align="center", anchor="middle")
             write_fit_result(tf, title_fit, ctx.theme, family=family,
                              align="center", default_color_role=_TEXT_ROLE)

@@ -17,6 +17,9 @@ SHAPES = {
     "chevron": MSO_SHAPE.CHEVRON,
     "right_arrow": MSO_SHAPE.RIGHT_ARROW,
     "down_arrow": MSO_SHAPE.DOWN_ARROW,
+    "right_brace": MSO_SHAPE.RIGHT_BRACE,
+    "left_brace": MSO_SHAPE.LEFT_BRACE,
+    "notched_arrow": MSO_SHAPE.NOTCHED_RIGHT_ARROW,
 }
 
 
