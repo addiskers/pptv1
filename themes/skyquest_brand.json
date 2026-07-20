@@ -1,0 +1,31 @@
+{
+  "color_bg": "FFFFFF",
+  "color_surface": "F3F5F9",
+  "color_surface_alt": "E7EBF3",
+  "color_ink": "333B49",
+  "color_ink_muted": "7A8494",
+  "color_primary": "0F4C81",
+  "color_primary_dark": "0A3560",
+  "color_accent": "E8843C",
+  "color_positive": "1E7A55",
+  "color_negative": "C0392B",
+  "color_grid": "C5CDD9",
+  "color_inverse_ink": "FFFFFF",
+  "badge_palette": {
+    "MKT": "0F4C81",
+    "TEC": "5C6BC0",
+    "FIN": "1E7A55",
+    "OPS": "E8843C",
+    "REG": "C0392B",
+    "ESG": "7CB342"
+  },
+  "heatmap_scale": ["FFFFFF", "DDE8F2", "B7CFE6", "8AB2D6", "5590C2", "0F4C81"],
+  "font_display": "Georgia",
+  "font_body": "Segoe UI",
+  "size_title": 20.0,
+  "size_h2": 14.0,
+  "size_stat": 13.5,
+  "size_body": 10.0,
+  "size_small": 9.0,
+  "size_micro": 7.5
+}
