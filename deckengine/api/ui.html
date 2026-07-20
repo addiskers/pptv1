@@ -89,6 +89,17 @@
   <div class="card" id="status">
     <div id="running"><span class="spinner"></span><b id="phase">Working…</b>
       <div class="hint" id="phasehint" style="margin-top:6px"></div></div>
+    <div id="outline-gate" style="display:none">
+      <p style="font-weight:700;color:var(--navy-dark);margin-bottom:4px">Approve the storyline before slides are written</p>
+      <p class="hint" style="margin-bottom:12px">Read the claims top to bottom — they should argue like a story. Edit anything, then approve. This 30-second check is where deck quality is decided.</p>
+      <label>Governing thought (the deck's one-sentence answer)</label>
+      <textarea id="gov" class="prompt" style="min-height:54px"></textarea>
+      <div id="claims"></div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="approveOutline()">Approve &amp; build slides</button>
+        <span class="hint">Slides take 60–90s after approval.</span>
+      </div>
+    </div>
     <div id="result" style="display:none">
       <p class="ok" id="doneline"></p>
       <div class="actions"><a class="download" id="dl" href="#">Download .pptx</a></div>
@@ -140,8 +151,8 @@ function showError(msg) {
 async function generate() {
   const prompt = document.getElementById('prompt').value.trim();
   if (!prompt) return showAndFocus();
-  showRunning('Planning and writing your slides…',
-              'Claude drafts an outline, then writes each slide spec against the schema. 30–90s for a full deck.');
+  showRunning('Planning the storyline…',
+              'Stage 1 drafts the claim chain — you approve it before any slide is written. ~20s.');
   const res = await fetch('/generate', {method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({prompt, csv_text: csvText, theme: document.getElementById('theme').value})});
   poll((await res.json()).job_id);
@@ -159,12 +170,48 @@ async function renderSpec() {
   poll((await res.json()).job_id);
 }
 
+let currentJob = null;
+
+function showOutlineGate(job) {
+  document.getElementById('running').style.display = 'none';
+  document.getElementById('outline-gate').style.display = '';
+  document.getElementById('gov').value = job.outline.governing_thought;
+  const box = document.getElementById('claims');
+  box.innerHTML = '';
+  job.outline.slides.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.innerHTML = '<label>Slide ' + (i + 1) + ' — <span style="color:var(--muted)">' +
+      s.slide_type + '</span></label>' +
+      '<input type="text" class="claim" data-type="' + s.slide_type +
+      '" title="slide claim">';
+    box.appendChild(row);
+    row.querySelector('input').value = s.claim;
+  });
+}
+
+async function approveOutline() {
+  const outline = {
+    governing_thought: document.getElementById('gov').value,
+    slides: [...document.querySelectorAll('#claims .claim')].map(el => (
+      {slide_type: el.dataset.type, claim: el.value}))
+  };
+  document.getElementById('outline-gate').style.display = 'none';
+  showRunning('Writing and rendering the slides…',
+              'Each approved claim becomes a slide title backed by evidence.');
+  await fetch('/jobs/' + currentJob + '/approve', {method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({outline})});
+  poll(currentJob);
+}
+
 async function poll(jobId) {
+  currentJob = jobId;
   const t = setInterval(async () => {
     const job = await (await fetch('/jobs/'+jobId)).json();
     if (job.status === 'running') return;
     clearInterval(t);
     if (job.status === 'error') return showError(job.error);
+    if (job.status === 'awaiting_approval') return showOutlineGate(job);
     document.getElementById('running').style.display = 'none';
     document.getElementById('result').style.display = '';
     document.getElementById('doneline').textContent =

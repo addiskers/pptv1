@@ -179,21 +179,26 @@ def generate_slide(archetype: str, intent: str, prompt: str,
 
 def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
                        theme: str = "consulting_navy",
-                       meta: DeckMeta | None = None) -> DeckSpec:
+                       meta: DeckMeta | None = None,
+                       outline: Outline | None = None) -> DeckSpec:
+    """outline: pass a (human-approved/edited) claim chain to skip stage 1."""
     log.info("spec generation via %s (%s)", provider(), model_id())
     facts = FactTable.from_csv(csv_text) if csv_text else None
-    outline = generate_outline(prompt, facts)
+    if outline is None:
+        outline = generate_outline(prompt, facts)
     log.info("outline: %s", [o.slide_type for o in outline.slides])
+    deck_context = (f"{prompt}\n\nDeck governing thought: "
+                    f"{outline.governing_thought}")
     slides = []
     prior: list[str] = []
     for item in outline.slides:
         if item.slide_type not in _ARCHETYPES:
             log.warning("skipping unknown archetype %r", item.slide_type)
             continue
-        slide = generate_slide(item.slide_type, item.intent, prompt, facts,
-                               prior_slides=prior)
+        slide = generate_slide(item.slide_type, item.claim, deck_context,
+                               facts, prior_slides=prior)
         slides.append(slide)
-        title = getattr(slide, "title", None) or item.intent
+        title = getattr(slide, "title", None) or item.claim
         prior.append(f"[{item.slide_type}] {title}")
     if not slides:
         raise RuntimeError("model produced no usable slides")

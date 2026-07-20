@@ -55,6 +55,11 @@ class GenerateFromPrompt(BaseModel):
     prompt: str
     csv_text: str | None = None
     theme: str = "consulting_navy"
+    auto_approve: bool = False  # True: skip the outline gate (CLI behavior)
+
+
+class ApproveOutline(BaseModel):
+    outline: dict  # (possibly edited) claim chain from /jobs/{id}
 
 
 @app.post("/render")
@@ -71,12 +76,32 @@ def render_spec(req: GenerateFromSpec, background: BackgroundTasks,
 @app.post("/generate")
 def generate(req: GenerateFromPrompt, background: BackgroundTasks,
              x_api_key: str | None = Header(default=None)) -> dict:
-    """LLM path: prompt (+ optional CSV) -> spec -> pptx. Requires ANTHROPIC_API_KEY."""
+    """LLM path. Default flow: stage 1 produces a claim-chain outline for HUMAN
+    APPROVAL (the highest-leverage 30 seconds in the pipeline); POST
+    /jobs/{id}/approve continues to slides. auto_approve=True skips the gate."""
     _check_key(x_api_key)
     job_id = uuid.uuid4().hex[:12]
-    _JOBS[job_id] = {"status": "running"}
-    background.add_task(_run_generate, job_id, req)
+    _JOBS[job_id] = {"status": "running", "request": req.model_dump()}
+    if req.auto_approve:
+        background.add_task(_run_generate, job_id, req, None)
+    else:
+        background.add_task(_run_outline, job_id, req)
     return {"job_id": job_id}
+
+
+@app.post("/jobs/{job_id}/approve")
+def approve(job_id: str, req: ApproveOutline, background: BackgroundTasks,
+            x_api_key: str | None = Header(default=None)) -> dict:
+    _check_key(x_api_key)
+    job = _JOBS.get(job_id)
+    if not job or job.get("status") != "awaiting_approval":
+        raise HTTPException(409, "job is not awaiting approval")
+    from ..llm.story import Outline
+    outline = Outline.model_validate(req.outline)
+    gen_req = GenerateFromPrompt.model_validate(job["request"])
+    _JOBS[job_id] = {"status": "running", "request": job["request"]}
+    background.add_task(_run_generate, job_id, gen_req, outline)
+    return {"job_id": job_id, "status": "running"}
 
 
 @app.get("/jobs/{job_id}")
@@ -127,11 +152,23 @@ def _run_render(job_id: str, spec: DeckSpec) -> None:
         _JOBS[job_id] = {"status": "error", "error": str(e)}
 
 
-def _run_generate(job_id: str, req: GenerateFromPrompt) -> None:
+def _run_outline(job_id: str, req: GenerateFromPrompt) -> None:
+    try:
+        from ..llm.facts import FactTable
+        from ..llm.spec_generator import generate_outline
+        facts = FactTable.from_csv(req.csv_text) if req.csv_text else None
+        outline = generate_outline(req.prompt, facts)
+        _JOBS[job_id].update(status="awaiting_approval",
+                             outline=outline.model_dump())
+    except Exception as e:  # noqa: BLE001
+        _JOBS[job_id] = {"status": "error", "error": str(e)}
+
+
+def _run_generate(job_id: str, req: GenerateFromPrompt, outline) -> None:
     try:
         from ..llm.spec_generator import generate_deck_spec
         spec = generate_deck_spec(req.prompt, csv_text=req.csv_text,
-                                  theme=req.theme)
+                                  theme=req.theme, outline=outline)
         _run_render(job_id, spec)
     except Exception as e:  # noqa: BLE001
         _JOBS[job_id] = {"status": "error", "error": str(e)}
