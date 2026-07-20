@@ -44,8 +44,11 @@ def build_deck(spec: DeckSpec, out_path: str | Path) -> BuildReport:
         else:
             expanded.append(s)
 
+    from pptx.dml.color import RGBColor
     for i, slide_spec in enumerate(expanded, start=1):
         slide = prs.slides.add_slide(blank)
+        slide.background.fill.solid()
+        slide.background.fill.fore_color.rgb = RGBColor.from_string(theme.color_bg)
         try:
             slide_base.get_assembler(slide_spec.slide_type).assemble(
                 slide, slide_spec, ctx)
