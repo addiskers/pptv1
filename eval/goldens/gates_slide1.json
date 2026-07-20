@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "theme": "consulting_navy",
+  "meta": {"title": "Golden: Gates slide 1 (strategy overview)", "date": "October 2025", "footer_org": "©DeckEngine Golden"},
+  "slides": [
+    {
+      "slide_type": "strategy_overview",
+      "title": "Strategy Overview: *The World's Leading Agricultural Innovation Accelerator*",
+      "subtitle": "[[accent]]Our comparative advantage lies in accelerating demand-driven, inclusive innovations that improve farmer productivity and income. We focus on the innovation to impact pathway for high-impact priority products — bridging R&D and Delivery with Offtake and Value Addition investments.[[/]]",
+      "legend": {
+        "kind": "legend_row",
+        "items": [
+          {"code": "CRO", "label": "Crops R&D (24%)"},
+          {"code": "LIV", "label": "Livestock (19%)"},
+          {"code": "ADS", "label": "Ag Delivery Systems (30%)"},
+          {"code": "A&E", "label": "Adaptive & Equitable Food Systems (9%)"},
+          {"code": "PAC", "label": "Policy, Advocacy, Comms (4%)"},
+          {"code": "DIR", "label": "Director's Office (14%)"}
+        ]
+      },
+      "left_heading": "Our Strategic Innovation Principles",
+      "principles": [
+        {"text": "Focus on high-impact priorities addressing farmers' persistent **production challenges**"},
+        {"text": "Prioritize solutions that align with **local needs, market signals, and climate risks**"},
+        {"text": "Make ambitious, **high-risk early-stage investments** others can't or won't pursue"},
+        {"text": "Partner with private R&D and delivery actors to ensure **sustainable scale**"},
+        {"text": "Design for **inclusion** — access and uptake across gender and production scales"}
+      ],
+      "table_heading": "Priority Products Within Our Innovation Pipeline",
+      "table": {
+        "kind": "data_table",
+        "columns": [
+          {"label": "Priority Product Areas", "frac": 0.18, "cell_kind": "text"},
+          {"label": "High Impact Priority Assets (66%)", "frac": 0.36, "cell_kind": "text"},
+          {"label": "", "frac": 0.08, "cell_kind": "badge", "align": "center"},
+          {"label": "$M", "frac": 0.08, "cell_kind": "number", "align": "right"},
+          {"label": "Discovery TRL 1-4", "frac": 0.1, "cell_kind": "heatmap", "align": "center"},
+          {"label": "Develop. TRL 5-6", "frac": 0.1, "cell_kind": "heatmap", "align": "center"},
+          {"label": "Delivery TRL 7-9", "frac": 0.1, "cell_kind": "heatmap", "align": "center"}
+        ],
+        "groups": [
+          {"label": "Animal Breeds", "rows": [
+            ["Adoption of Cross-Bred Cows", "LIV", "96", "40%", "30%", "30%"],
+            ["Aquaculture", "LIV", "32", "10%", "30%", "60%"],
+            ["Offtake Solutions for Ruminant Meats", "LIV", "50", "N/A", "N/A", "N/A"]
+          ]},
+          {"label": "Animal Health", "rows": [
+            ["Alternative Feed and Fodder Innovations", "LIV", "66", "50%", "40%", "10%"],
+            ["FMD Control in India and East Africa", "LIV", "43", "25%", "60%", "15%"],
+            ["Solutions for Bovine TB, Ticks and Tryps", "LIV", "60", "50%", "40%", "10%"]
+          ]},
+          {"label": "Data & Advisory", "rows": [
+            ["AI Advisory", "ADS", "85", "15%", "10%", "75%"],
+            ["Better Weather", "CRO", "60", "70%", "30%", "0%"],
+            ["Crops Measurement and Evaluation", "CRO", "70", "65%", "35%", "0%"]
+          ]},
+          {"label": "Finance & Risk", "rows": [
+            ["Carbon Crediting for Adaptation", "A&E", "55", "0%", "70%", "30%"],
+            ["Collateralizing Agriculture", "ADS", "30", "0%", "100%", "0%"],
+            ["Scaling Index Insurance for SSP Resilience", "ADS", "20", "0%", "50%", "50%"]
+          ]},
+          {"label": "Seeds", "rows": [
+            ["Biotech Commercialization (TELA)", "CRO", "75", "0%", "10%", "90%"],
+            ["Hybrid Cereals Gen 1", "CRO", "150", "40%", "60%", "0%"],
+            ["Non-cereal Breakthrough Varieties Gen 1", "CRO", "115", "0%", "85%", "15%"],
+            ["Other Biotech Products (PBR cowpea, VIRCA)", "ADS", "55", "0%", "10%", "90%"]
+          ]}
+        ]
+      },
+      "sidebar_heading": "Key Goals in Target Geographies",
+      "goals": [
+        "**Equitable uptake of innovations** by the target market",
+        "Increased and more resilient **production and productivity** of target commodities",
+        "**Equitable economic benefits**"
+      ],
+      "cobenefits_heading": "Co-Benefits",
+      "cobenefits": [
+        "Increased consumption of **a healthy diet**",
+        "Reduced **GHG emissions**"
+      ],
+      "footnote": "Includes $200M Strategic Response Fund (2026-29) to be allocated towards Big Bets and other HIPs. Total budget toward R&D remains approximately 50%."
+    }
+  ]
+}

@@ -147,10 +147,10 @@ def render(slide, stack: StackPlan, bbox: BBox, ctx: RenderContext) -> int:
 
 
 def stack_into(slide, bbox: BBox, ctx: RenderContext,
-               items: list[StackItem]) -> int:
+               items: list[StackItem], record_fill: bool = True) -> int:
     """Plan + render in one call; records the zone fill ratio for eval."""
     p = plan(items, bbox, ctx)
-    if bbox.h > inch(2.0) and bbox.w > inch(5.0):
+    if record_fill and bbox.h > inch(2.0) and bbox.w > inch(5.0):
         # main body zones only — not title/footer strips or sidebars
         ctx.report.fills.append(round(p.fill_ratio, 3))
     return render(slide, p, bbox, ctx)

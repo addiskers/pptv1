@@ -8,13 +8,17 @@ from pydantic import BaseModel, Field
 from .components import (
     BulletItemSpec,
     CalloutBandSpec,
+    ChevronPathwaySpec,
     ComparisonColumnSpec,
     DataTableSpec,
     HighlightBoxSpec,
     IconStatRowSpec,
     KpiCardStripSpec,
     LegendRowSpec,
+    NativeChartSpec,
+    NumberedBlockSpec,
     RichStr,
+    TimelineRowSpec,
 )
 
 
@@ -83,9 +87,57 @@ class DataDeepDiveSpec(BaseModel):
     footnote: str | None = Field(default=None, max_length=300)
 
 
+class ChartSlideSpec(BaseModel):
+    slide_type: Literal["chart_slide"] = "chart_slide"
+    title: RichStr = Field(max_length=220)
+    subtitle: RichStr | None = Field(default=None, max_length=400)
+    chart: NativeChartSpec
+    insights_heading: RichStr | None = Field(default=None, max_length=60)
+    insights: list[BulletItemSpec] = Field(default_factory=list, max_length=6)
+    footnote: str | None = Field(default=None, max_length=300)
+
+
+class FrameworkSlideSpec(BaseModel):
+    slide_type: Literal["framework_slide"] = "framework_slide"
+    title: RichStr = Field(max_length=220)
+    subtitle: RichStr | None = Field(default=None, max_length=400)
+    pathway: ChevronPathwaySpec | None = None
+    blocks: list[NumberedBlockSpec] = Field(min_length=1, max_length=6)
+    footnote: str | None = Field(default=None, max_length=300)
+
+
+class TimelineSlideSpec(BaseModel):
+    slide_type: Literal["timeline_slide"] = "timeline_slide"
+    title: RichStr = Field(max_length=220)
+    subtitle: RichStr | None = Field(default=None, max_length=400)
+    timeline: TimelineRowSpec
+    phases: list[NumberedBlockSpec] = Field(default_factory=list, max_length=4)
+    footnote: str | None = Field(default=None, max_length=300)
+
+
+class StrategyOverviewSpec(BaseModel):
+    """The Gates slide-1 pattern: principles rail + dense pipeline table +
+    goals sidebar."""
+    slide_type: Literal["strategy_overview"] = "strategy_overview"
+    title: RichStr = Field(max_length=220)
+    subtitle: RichStr | None = Field(default=None, max_length=500)
+    legend: LegendRowSpec | None = None
+    left_heading: RichStr = Field(max_length=80)
+    principles: list[BulletItemSpec] = Field(min_length=2, max_length=8)
+    table_heading: RichStr | None = Field(default=None, max_length=120)
+    table: DataTableSpec
+    sidebar_heading: RichStr = Field(max_length=60)
+    goals: list[RichStr] = Field(min_length=2, max_length=4)
+    cobenefits_heading: RichStr | None = Field(default=None, max_length=40)
+    cobenefits: list[RichStr] = Field(default_factory=list, max_length=3)
+    footnote: str | None = Field(default=None, max_length=400)
+
+
 SlideSpec = Annotated[
     Union[TitleSlideSpec, SectionDividerSpec, BulletContentSpec, ExecSummarySpec,
-          NColumnComparisonSpec, KpiDashboardSpec, DataDeepDiveSpec],
+          NColumnComparisonSpec, KpiDashboardSpec, DataDeepDiveSpec,
+          ChartSlideSpec, FrameworkSlideSpec, TimelineSlideSpec,
+          StrategyOverviewSpec],
     Field(discriminator="slide_type"),
 ]
 

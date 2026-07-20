@@ -197,6 +197,30 @@ class TwoToneHeaderSpec(BaseModel):
     left_frac: float = Field(default=0.35, gt=0.1, lt=0.9)
 
 
+class ChartSeriesSpec(BaseModel):
+    name: PlainStr = Field(max_length=40)
+    values: list[float] = Field(min_length=1, max_length=24)
+
+
+class NativeChartSpec(BaseModel):
+    """A chart must ARGUE, not just plot: sort, highlight and annotation are
+    required decisions (explicitly 'none' if deliberately unused)."""
+    kind: Literal["native_chart"] = "native_chart"
+    chart_type: Literal["bar", "stacked_bar", "line", "donut"]
+    categories: list[PlainStr] = Field(min_length=1, max_length=24)
+    series: list[ChartSeriesSpec] = Field(min_length=1, max_length=6)
+    sort: Literal["desc", "asc", "none"] = Field(
+        description="Sort categories by first series so the shape supports the "
+                    "claim; 'none' only for time series / inherent order")
+    highlight: PlainStr | None = Field(
+        description="Category name to emphasize in accent color (the one data "
+                    "point that proves the slide title), or null")
+    annotation: PlainStr | None = Field(
+        max_length=80,
+        description="One short callout stating what the chart proves, or null")
+    value_suffix: PlainStr = Field(default="", max_length=8)  # e.g. "%", " Mn"
+
+
 # --- comparison_columns: recursive children -----------------------------
 
 ComparisonCell = Union[StatRowSpec, TextBlockSpec, MiniTableSpec]
@@ -220,5 +244,5 @@ ComponentSpec = Union[
     DataTableSpec, IconStatRowSpec, KpiCardStripSpec, CalloutBandSpec,
     BulletListSpec, FootnoteStripSpec, LegendRowSpec, HighlightBoxSpec,
     ComparisonColumnsSpec, DonutStatSpec, ProgressPillSpec, TimelineRowSpec,
-    ChevronPathwaySpec, NumberedBlockSpec, TwoToneHeaderSpec,
+    ChevronPathwaySpec, NumberedBlockSpec, TwoToneHeaderSpec, NativeChartSpec,
 ]

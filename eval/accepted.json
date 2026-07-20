@@ -1,4 +1,31 @@
 {
+  "gates_slide1": {
+    "slides": 1,
+    "warnings": 0,
+    "truncations": 0,
+    "overflows": 0,
+    "min_fill": 1.0,
+    "mean_fill": 1.0,
+    "zones_below_floor": 0
+  },
+  "gates_slide2": {
+    "slides": 1,
+    "warnings": 0,
+    "truncations": 0,
+    "overflows": 0,
+    "min_fill": 0.814,
+    "mean_fill": 0.814,
+    "zones_below_floor": 0
+  },
+  "gates_slide3": {
+    "slides": 1,
+    "warnings": 0,
+    "truncations": 0,
+    "overflows": 0,
+    "min_fill": 0.809,
+    "mean_fill": 0.809,
+    "zones_below_floor": 0
+  },
   "ev_market_entry.spec": {
     "slides": 7,
     "warnings": 0,
