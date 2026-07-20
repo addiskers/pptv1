@@ -224,11 +224,33 @@ async function poll(jobId) {
     const p = document.getElementById('previews');
     p.innerHTML = '';
     for (let i = 1; i <= (job.previews||0); i++) {
+      const wrap = document.createElement('div');
+      wrap.style.position = 'relative';
       const img = document.createElement('img');
-      img.src = '/previews/'+jobId+'/'+i;
+      img.src = '/previews/'+jobId+'/'+i+'?v='+Date.now();
       img.onclick = () => { document.getElementById('lightimg').src = img.src;
                             document.getElementById('lightbox').style.display = 'flex'; };
-      p.appendChild(img);
+      const btn = document.createElement('button');
+      btn.textContent = '↻ rework';
+      btn.title = 'Regenerate just this slide with an instruction';
+      btn.style.cssText = 'position:absolute;top:8px;right:8px;border:0;' +
+        'border-radius:6px;padding:4px 10px;font:600 12px "Segoe UI";' +
+        'background:rgba(31,56,100,.85);color:#fff;cursor:pointer';
+      btn.onclick = async (e) => {
+        e.stopPropagation();
+        const instruction = window.prompt(
+          'How should slide ' + i + ' change?
+(e.g. "make the title sharper", "use a bar chart", "cut to 4 bullets")');
+        if (!instruction) return;
+        showRunning('Reworking slide ' + i + '…',
+                    'One slide is regenerated; the rest of the deck is untouched. The whole deck re-renders in seconds.');
+        await fetch('/decks/' + jobId + '/slides/' + i, {method: 'PATCH',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({instruction})});
+        poll(jobId);
+      };
+      wrap.appendChild(img); wrap.appendChild(btn);
+      p.appendChild(wrap);
     }
   }, 1500);
 }
