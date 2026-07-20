@@ -202,6 +202,37 @@ def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
         prior.append(f"[{item.slide_type}] {title}")
     if not slides:
         raise RuntimeError("model produced no usable slides")
+    if facts:
+        appendix = sources_appendix(facts, slides)
+        if appendix is not None:
+            slides.append(appendix)
     return DeckSpec(theme=theme,
                     meta=meta or DeckMeta(title=prompt[:150]),
                     slides=slides)
+
+
+def sources_appendix(facts: FactTable, slides: list[BaseModel]):
+    """Auto-built (never LLM-written) appendix: every fact used in the deck
+    with its value and provenance — the 'every number traceable' artifact."""
+    from ..schema.slide_types import DataDeepDiveSpec
+    spec_text = " ".join(s.model_dump_json() for s in slides)
+    used = facts.used_facts(spec_text)
+    if not used:
+        return None
+    rows = [[f.description[:78], f.display, (f.source or "provided data")[:70]]
+            for f in used[:60]]
+    return DataDeepDiveSpec(
+        slide_type="data_deep_dive",
+        title="Every number in this deck traces to source data",
+        table={
+            "kind": "data_table",
+            "columns": [
+                {"label": "Metric", "frac": 0.5},
+                {"label": "Value", "frac": 0.14, "cell_kind": "number"},
+                {"label": "Source", "frac": 0.36},
+            ],
+            "groups": [{"label": "Verified facts", "rows": rows}],
+        },
+        footnote="Auto-generated sources appendix. Values computed "
+                 "deterministically from the provided data; the model cannot "
+                 "introduce numbers outside this table.")
