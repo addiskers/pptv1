@@ -99,6 +99,18 @@ class IconStatRowSpec(BaseModel):
     text: RichStr = Field(max_length=300)
 
 
+class IconTileSpec(BaseModel):
+    icon: str = Field(max_length=12)  # icon name (see IconStatRowSpec vocab)
+    stat: RichStr = Field(max_length=40)
+    text: RichStr = Field(max_length=200)
+
+
+class IconTileRowSpec(BaseModel):
+    kind: Literal["icon_tile_row"] = "icon_tile_row"
+    tiles: list[IconTileSpec] = Field(min_length=1, max_length=6)
+    banded: bool = True
+
+
 class KpiCardSpec(BaseModel):
     title: RichStr = Field(max_length=60)
     body: RichStr = Field(max_length=240)
@@ -245,4 +257,5 @@ ComponentSpec = Union[
     BulletListSpec, FootnoteStripSpec, LegendRowSpec, HighlightBoxSpec,
     ComparisonColumnsSpec, DonutStatSpec, ProgressPillSpec, TimelineRowSpec,
     ChevronPathwaySpec, NumberedBlockSpec, TwoToneHeaderSpec, NativeChartSpec,
+    IconTileRowSpec,
 ]

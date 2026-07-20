@@ -29,6 +29,7 @@ class Theme:
     color_negative: str
     color_grid: str
     color_inverse_ink: str
+    color_highlight: str = "F2D024"  # pill behind emphasised numbers (yellow)
     badge_palette: dict[str, str] = field(default_factory=dict)
     heatmap_scale: list[str] = field(default_factory=list)  # low -> high
 

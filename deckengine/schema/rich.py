@@ -1,4 +1,7 @@
-"""Rich text in specs is markdown-lite: **bold**, *italic*, [[role]]colored[[/]].
+"""Rich text in specs is markdown-lite:
+  **bold**, *italic*, [[role]]colored[[/]],
+  [[hl]]highlighted[[/]]  -> coloured pill behind the run (consulting emphasis),
+  ^1  or  ^{12}           -> superscript footnote reference.
 
 LLMs write these reliably; the engine parses them into styled Spans once, at the
 schema boundary, so measurement and rendering always agree on styling.
@@ -12,7 +15,8 @@ from ..core.fit_text import Span
 _TOKEN = re.compile(
     r"(\*\*(?P<bold>.+?)\*\*)"
     r"|(\*(?P<italic>[^*\s](?:[^*]*?[^*\s])?)\*)"
-    r"|(\[\[(?P<role>[a-z_&A-Z]+)\]\](?P<colored>.+?)\[\[/\]\])",
+    r"|(\[\[(?P<role>[a-z_&A-Z]+)\]\](?P<colored>.+?)\[\[/\]\])"
+    r"|(\^(?P<sup>\d+|\{[^}]+\}))",
     re.DOTALL,
 )
 
@@ -27,8 +31,17 @@ def parse_rich(text: str, *, base_color_role: str | None = None) -> list[Span]:
             spans.append(Span(m.group("bold"), bold=True, color_role=base_color_role))
         elif m.group("italic") is not None:
             spans.append(Span(m.group("italic"), italic=True, color_role=base_color_role))
+        elif m.group("sup") is not None:
+            ref = m.group("sup").strip("{}")
+            spans.append(Span(ref, superscript=True, color_role=base_color_role))
         else:
-            spans.append(Span(m.group("colored"), color_role=m.group("role")))
+            role = m.group("role")
+            if role == "hl":  # highlight pill, not a text colour
+                spans.append(Span(m.group("colored"), bold=True,
+                                  highlight_role="highlight",
+                                  color_role=base_color_role))
+            else:
+                spans.append(Span(m.group("colored"), color_role=role))
         pos = m.end()
     if pos < len(text):
         spans.append(Span(text[pos:], color_role=base_color_role))

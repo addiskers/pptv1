@@ -26,6 +26,8 @@ WRAP_SAFETY = 0.96  # wrap against 96% of writable width; PowerPoint must never 
 ELLIPSIS = "…"
 
 
+SUPERSCRIPT_SCALE = 0.65
+
 @dataclass(frozen=True)
 class Span:
     text: str
@@ -34,9 +36,12 @@ class Span:
     size_pt: float | None = None      # None -> use the fitted base size
     font: str | None = None           # None -> caller's font family
     color_role: str | None = None     # resolved at render time from Theme
+    highlight_role: str | None = None  # theme role of a pill behind the run
+    superscript: bool = False          # raised, smaller (footnote refs)
 
     def sized(self, base: float) -> float:
-        return self.size_pt if self.size_pt is not None else base
+        s = self.size_pt if self.size_pt is not None else base
+        return s * SUPERSCRIPT_SCALE if self.superscript else s
 
 
 @dataclass

@@ -28,6 +28,9 @@ class TitleSlideSpec(BaseModel):
     subtitle: RichStr | None = Field(default=None, max_length=300)
     date: str | None = Field(default=None, max_length=40)
     org: str | None = Field(default=None, max_length=80)
+    # full-bleed dark canvas with an oversized org wordmark bleeding off the
+    # bottom edge, like a real cover slide (vs plain text on white)
+    wordmark: str | None = Field(default=None, max_length=40)
 
 
 class SectionDividerSpec(BaseModel):
@@ -35,6 +38,9 @@ class SectionDividerSpec(BaseModel):
     number: str | None = Field(default=None, max_length=4)
     title: RichStr = Field(max_length=140)
     subtitle: RichStr | None = Field(default=None, max_length=300)
+    # "bleed": solid full-slide accent-colour panel (reference divider style);
+    # "bar": the current left-bar style
+    style: Literal["bleed", "bar"] = "bleed"
 
 
 class BulletContentSpec(BaseModel):

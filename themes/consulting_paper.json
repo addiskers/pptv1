@@ -25,7 +25,14 @@
     "PAC": "E53935",
     "DIR": "616161"
   },
-  "heatmap_scale": ["F7F6F1", "DCE4EC", "B8C8D8", "8CA6BC", "5C7E9C", "35586F"],
+  "heatmap_scale": [
+    "F7F6F1",
+    "DCE4EC",
+    "B8C8D8",
+    "8CA6BC",
+    "5C7E9C",
+    "35586F"
+  ],
   "font_display": "Georgia",
   "font_body": "Segoe UI",
   "size_title": 21.0,
@@ -33,5 +40,6 @@
   "size_stat": 15.0,
   "size_body": 11.0,
   "size_small": 10.0,
-  "size_micro": 8.5
+  "size_micro": 8.5,
+  "color_highlight": "E9C61F"
 }

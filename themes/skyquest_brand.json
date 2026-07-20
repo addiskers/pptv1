@@ -19,7 +19,14 @@
     "REG": "C0392B",
     "ESG": "7CB342"
   },
-  "heatmap_scale": ["FFFFFF", "DDE8F2", "B7CFE6", "8AB2D6", "5590C2", "0F4C81"],
+  "heatmap_scale": [
+    "FFFFFF",
+    "DDE8F2",
+    "B7CFE6",
+    "8AB2D6",
+    "5590C2",
+    "0F4C81"
+  ],
   "font_display": "Georgia",
   "font_body": "Segoe UI",
   "size_title": 20.0,
@@ -27,5 +34,6 @@
   "size_stat": 13.5,
   "size_body": 10.0,
   "size_small": 9.0,
-  "size_micro": 7.5
+  "size_micro": 7.5,
+  "color_highlight": "F2C230"
 }

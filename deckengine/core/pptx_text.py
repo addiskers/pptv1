@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from pptx.dml.color import RGBColor
 from pptx.enum.text import MSO_ANCHOR, MSO_AUTO_SIZE, PP_ALIGN
+from pptx.oxml.ns import qn
 from pptx.util import Emu, Pt
 
 from .bbox import BBox
@@ -73,6 +74,31 @@ def write_spans_paragraph(tf, spans: list[Span], size_pt: float, theme: Theme, *
     _write_spans(p, spans, size_pt, theme, family, default_color_role)
 
 
+# CT_TextCharacterProperties child order: ln, (fill group), effectLst/Dag,
+# highlight, uLn*, uFill*, latin, ea, cs, ... — highlight must precede latin.
+_AFTER_HIGHLIGHT = ("a:uLnTx", "a:uLn", "a:uFillTx", "a:uFill", "a:latin",
+                    "a:ea", "a:cs", "a:sym", "a:hlinkClick", "a:hlinkMouseOver",
+                    "a:rtl", "a:extLst")
+
+
+def _set_highlight(rpr, hex_color: str) -> None:
+    for old in rpr.findall(qn("a:highlight")):
+        rpr.remove(old)
+    hl = rpr.makeelement(qn("a:highlight"), {})
+    clr = hl.makeelement(qn("a:srgbClr"), {"val": hex_color})
+    hl.append(clr)
+    anchor = None
+    for tag in _AFTER_HIGHLIGHT:
+        found = rpr.find(qn(tag))
+        if found is not None:
+            anchor = found
+            break
+    if anchor is not None:
+        anchor.addprevious(hl)
+    else:
+        rpr.append(hl)
+
+
 def _write_spans(p, spans: list[Span], base_size: float, theme: Theme,
                  family: str, default_color_role: str) -> None:
     for span in spans:
@@ -85,3 +111,10 @@ def _write_spans(p, spans: list[Span], base_size: float, theme: Theme,
         f.name = span.font or family
         f.color.rgb = RGBColor.from_string(
             theme.color(span.color_role or default_color_role))
+        if span.superscript or span.highlight_role:
+            rpr = r._r.get_or_add_rPr()
+            if span.superscript:
+                # baseline in thousandths of a percent (30% raise)
+                rpr.set("baseline", "30000")
+            if span.highlight_role:
+                _set_highlight(rpr, theme.color(span.highlight_role))

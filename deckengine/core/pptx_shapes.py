@@ -23,7 +23,8 @@ SHAPES = {
 def add_shape(slide, bbox: BBox, theme: Theme, *, shape: str = "rect",
               fill_role: str | None = None, fill_hex: str | None = None,
               line_role: str | None = None, line_w_pt: float = 0.75,
-              line_dash: str | None = None, corner_radius: float | None = None):
+              line_dash: str | None = None, corner_radius: float | None = None,
+              shadow: bool = False):
     s = slide.shapes.add_shape(SHAPES[shape], Emu(bbox.x), Emu(bbox.y),
                                Emu(bbox.w), Emu(bbox.h))
     if fill_hex is not None:
@@ -47,6 +48,9 @@ def add_shape(slide, bbox: BBox, theme: Theme, *, shape: str = "rect",
         except (IndexError, ValueError):
             pass
     s.shadow.inherit = False
+    if shadow:
+        from ..render.xml_utils import add_soft_shadow
+        add_soft_shadow(s)
     return s
 
 

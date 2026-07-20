@@ -19,63 +19,106 @@ from .base import SlideAssembler, register_slide
 
 @register_slide("title")
 class TitleSlide(SlideAssembler):
+    """Full-bleed dark cover: oversized serif title in cream, an accent
+    wordmark bleeding off the bottom edge — a real cover, not text on white."""
+
     def assemble(self, slide, spec: TitleSlideSpec, ctx: RenderContext) -> None:
-        band = BBox(0, SLIDE.h // 3, SLIDE.w, inch(0.06))
-        add_shape(slide, band, ctx.theme, fill_role="accent")
-        area = SLIDE.inset(left=inch(1.0), right=inch(1.0))
-        title_bb = BBox(area.x, SLIDE.h // 3 + inch(0.35), area.w, inch(1.6))
+        add_shape(slide, SLIDE, ctx.theme, fill_role="primary_dark")
+
+        if spec.date:
+            db = add_text_box(slide, BBox(SLIDE.w - inch(3.2), inch(0.35),
+                                          inch(2.8), inch(0.3)), align="right")
+            write_spans_paragraph(db.text_frame, [Span(spec.date)],
+                                  ctx.size("small"), ctx.theme,
+                                  family=ctx.font("body"), align="right",
+                                  default_color_role="inverse_ink")
+
+        area = SLIDE.inset(left=inch(1.1), right=inch(1.1))
+        title_bb = BBox(area.x, inch(1.5), area.w, inch(2.2))
         fit = fit_text(parse_rich(spec.title), title_bb, ctx.font("display"),
-                       max_size=30, min_size=20, measurer=ctx.measurer)
+                       max_size=40, min_size=26, measurer=ctx.measurer)
         box = add_text_box(slide, title_bb.with_height(fit.height_emu))
-        write_fit_result(box.text_frame, fit, ctx.theme, family=ctx.font("display"),
-                         default_color_role="primary")
-        y = title_bb.y + fit.height_emu + ctx.theme.spacing(1.5)
+        write_fit_result(box.text_frame, fit, ctx.theme,
+                         family=ctx.font("display"),
+                         default_color_role="inverse_ink")
+        y = title_bb.y + fit.height_emu + ctx.theme.spacing(1.2)
         if spec.subtitle:
             sub_bb = BBox(area.x, y, area.w, inch(0.9))
             sfit = fit_text(parse_rich(spec.subtitle), sub_bb, ctx.font("body"),
-                            max_size=ctx.size("h2"), min_size=10,
+                            max_size=ctx.size("h2"), min_size=11,
                             measurer=ctx.measurer)
             sbox = add_text_box(slide, sub_bb.with_height(sfit.height_emu))
             write_fit_result(sbox.text_frame, sfit, ctx.theme,
                              family=ctx.font("body"),
-                             default_color_role="ink_muted")
-        meta_bits = " | ".join(b for b in (spec.date, spec.org) if b)
-        if meta_bits:
-            mb = add_text_box(slide, BBox(area.x, SLIDE.h - inch(0.9), area.w,
-                                          inch(0.3)))
-            write_spans_paragraph(mb.text_frame, [Span(meta_bits)],
+                             default_color_role="inverse_ink")
+
+        if spec.org:
+            ob = add_text_box(slide, BBox(area.x, SLIDE.h - inch(2.5), area.w,
+                                          inch(0.6)))
+            write_spans_paragraph(ob.text_frame, [Span(spec.org)],
                                   ctx.size("small"), ctx.theme,
                                   family=ctx.font("body"),
-                                  default_color_role="ink_muted")
+                                  default_color_role="inverse_ink")
+
+        # oversized wordmark bleeding off the bottom edge (the human touch)
+        if spec.wordmark:
+            wm = add_text_box(slide, BBox(inch(0.3), SLIDE.h - inch(1.45),
+                                          SLIDE.w - inch(0.6), inch(1.6)),
+                              anchor="bottom")
+            write_spans_paragraph(wm.text_frame,
+                                  [Span(spec.wordmark, bold=True)], 66, ctx.theme,
+                                  family=ctx.font("display"),
+                                  default_color_role="accent")
 
 
 @register_slide("section_divider")
 class SectionDivider(SlideAssembler):
+    """Bold full-bleed colour-block divider (reference style), or a left-bar
+    variant when spec.style == 'bar'."""
+
     def assemble(self, slide, spec: SectionDividerSpec, ctx: RenderContext) -> None:
-        add_shape(slide, BBox(0, 0, inch(0.18), SLIDE.h), ctx.theme,
-                  fill_role="primary")
-        area = SLIDE.inset(left=inch(1.0), right=inch(1.2))
-        y = SLIDE.h // 3
+        bleed = spec.style == "bleed"
+        if bleed:
+            add_shape(slide, SLIDE, ctx.theme, fill_role="accent")
+            title_role = "inverse_ink"
+            num_role = "inverse_ink"
+            sub_role = "inverse_ink"
+            align = "center"
+            area = SLIDE.inset(left=inch(1.5), right=inch(1.5))
+        else:
+            add_shape(slide, BBox(0, 0, inch(0.18), SLIDE.h), ctx.theme,
+                      fill_role="primary")
+            title_role = "primary"
+            num_role = "accent"
+            sub_role = "ink_muted"
+            align = "left"
+            area = SLIDE.inset(left=inch(1.0), right=inch(1.2))
+
+        y = SLIDE.h // 3 if not bleed else inch(2.7)
         if spec.number:
-            nb = add_text_box(slide, BBox(area.x, y - inch(0.9), area.w, inch(0.8)))
+            nb = add_text_box(slide, BBox(area.x, y - inch(0.95), area.w,
+                                          inch(0.85)), align=align)
             write_spans_paragraph(nb.text_frame, [Span(spec.number, bold=True)],
                                   40, ctx.theme, family=ctx.font("display"),
-                                  default_color_role="accent")
+                                  align=align, default_color_role=num_role)
         tb = BBox(area.x, y, area.w, inch(1.4))
         fit = fit_text(parse_rich(spec.title), tb, ctx.font("display"),
-                       max_size=26, min_size=18, measurer=ctx.measurer)
-        box = add_text_box(slide, tb.with_height(fit.height_emu))
+                       max_size=30, min_size=20, measurer=ctx.measurer)
+        box = add_text_box(slide, tb.with_height(fit.height_emu), align=align)
         write_fit_result(box.text_frame, fit, ctx.theme,
-                         family=ctx.font("display"), default_color_role="primary")
+                         family=ctx.font("display"), align=align,
+                         default_color_role=title_role)
         if spec.subtitle:
             sb = BBox(area.x, tb.y + fit.height_emu + ctx.theme.spacing(1),
                       area.w, inch(0.8))
             sfit = fit_text(parse_rich(spec.subtitle), sb, ctx.font("body"),
                             max_size=ctx.size("h2"), min_size=10,
                             measurer=ctx.measurer)
-            sbox = add_text_box(slide, sb.with_height(sfit.height_emu))
+            sbox = add_text_box(slide, sb.with_height(sfit.height_emu),
+                                align=align)
             write_fit_result(sbox.text_frame, sfit, ctx.theme,
-                             family=ctx.font("body"), default_color_role="ink_muted")
+                             family=ctx.font("body"), align=align,
+                             default_color_role=sub_role)
 
 
 @register_slide("bullet_content")
