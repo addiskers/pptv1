@@ -3,7 +3,9 @@ from __future__ import annotations
 
 from typing import Annotated, Literal, Union
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+from .layout_tree import LayoutChild, check_tree
 
 from .components import (
     ArrowCalloutSpec,
@@ -146,11 +148,30 @@ class StrategyOverviewSpec(BaseModel):
     footnote: str | None = Field(default=None, max_length=400)
 
 
+class CustomLayoutSpec(BaseModel):
+    """Escape hatch when no standard mold fits the claim: compose the body
+    as a rows/cols/panel tree with any component as a leaf. Use standard
+    archetypes first — this is for bespoke compositions (panel matrices,
+    hero stat + proof stack, grid + summary band)."""
+    slide_type: Literal["custom_layout"] = "custom_layout"
+    title: RichStr = Field(max_length=220)
+    subtitle: RichStr | None = Field(default=None, max_length=400)
+    root: LayoutChild
+    footnote: str | None = Field(default=None, max_length=300)
+
+    @model_validator(mode="after")
+    def _tree_rails(self):
+        problems = check_tree(self.root)
+        if problems:
+            raise ValueError("; ".join(problems))
+        return self
+
+
 SlideSpec = Annotated[
     Union[TitleSlideSpec, SectionDividerSpec, BulletContentSpec, ExecSummarySpec,
           NColumnComparisonSpec, KpiDashboardSpec, DataDeepDiveSpec,
           ChartSlideSpec, FrameworkSlideSpec, TimelineSlideSpec,
-          StrategyOverviewSpec],
+          StrategyOverviewSpec, CustomLayoutSpec],
     Field(discriminator="slide_type"),
 ]
 

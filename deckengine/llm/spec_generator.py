@@ -108,8 +108,11 @@ def generate_outline(prompt: str, facts: FactTable | None) -> Outline:
          "claim — the full-sentence assertion that slide proves (it becomes "
          "the slide title; never a label). Read in sequence, the claims must "
          "prove the governing thought. Vary the archetypes — never more than "
-         "two consecutive slides of the same slide_type. Open with a title "
-         "slide; close with an exec_summary or kpi_dashboard when it fits.")
+         "two consecutive slides of the same slide_type. Prefer standard "
+         "archetypes; pick custom_layout ONLY when a claim needs a bespoke "
+         "composition no standard mold fits (panel matrix, hero stat + proof "
+         "stack, grid + summary band). Open with a title slide; close with "
+         "an exec_summary or kpi_dashboard when it fits.")
     outline = Outline.model_validate(_structured_call("emit_outline", schema, p))
     problems = check_outline(outline)
     review = REVIEW_PROMPT
