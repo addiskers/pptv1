@@ -134,14 +134,19 @@ _FEW_SHOTS_DIR = __import__("pathlib").Path(__file__).parent / "few_shots"
 
 
 def _few_shot(archetype: str) -> str:
-    """A curated gold spec of this archetype, injected as an exemplar —
-    moves density and structure more than any critique pass."""
-    p = _FEW_SHOTS_DIR / f"{archetype}.json"
-    if not p.is_file():
+    """Curated gold specs of this archetype, injected as exemplars —
+    move density and structure more than any critique pass. An archetype may
+    ship several ({name}.json, {name}_2.json, ...) to show distinct shapes."""
+    paths = [p for p in (_FEW_SHOTS_DIR / f"{archetype}.json",
+                         _FEW_SHOTS_DIR / f"{archetype}_2.json")
+             if p.is_file()]
+    if not paths:
         return ""
-    return ("\n\nEXAMPLE of an excellent spec of this type (match its density "
-            "and structure, NOT its topic or numbers):\n" +
-            p.read_text(encoding="utf-8"))
+    return "".join(
+        f"\n\nEXAMPLE {i} of an excellent spec of this type (match its "
+        "density and structure, NOT its topic or numbers):\n"
+        + p.read_text(encoding="utf-8")
+        for i, p in enumerate(paths, start=1))
 
 
 def generate_slide(archetype: str, intent: str, prompt: str,

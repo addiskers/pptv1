@@ -117,6 +117,24 @@ def test_rows_fracs_natural_without_fill_hint():
     assert abs(measured - consumed) <= pt(1)
 
 
+def test_rows_pin_last_anchors_bottom():
+    ctx = make_ctx()
+    comp = get_component("rows")
+    data = RowsNode(pin_last=True, children=[text("body content"), stats()])
+    bbox = BBox(0, inch(1), inch(8), inch(4))
+    nat_last = get_component("stat_row").measure(stats(), bbox.w, ctx)
+    _, slide = blank_slide()
+    ctx.fill_hint = True
+    try:
+        consumed = comp.render(slide, data, bbox, ctx)
+    finally:
+        ctx.fill_hint = False
+    assert consumed == bbox.h
+    # some shape from the pinned child starts at the anchored offset
+    pin_y = bbox.bottom - nat_last
+    assert any(abs(s.top - pin_y) <= inch(0.06) for s in slide.shapes)
+
+
 def test_cols_frac_widths():
     ctx = make_ctx()
     comp = get_component("cols")

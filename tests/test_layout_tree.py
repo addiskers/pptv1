@@ -22,8 +22,21 @@ def test_valid_tree_passes():
                 children=[leaf("c"), leaf("d"), leaf("e")])),
         ]))
     depth, leaves = tree_stats(spec.root)
-    assert depth == 4  # rows -> panel -> cols -> leaf
+    assert depth == 3  # rows -> cols -> leaf; panel is depth-transparent
     assert leaves == 5
+
+
+def test_panel_matrix_within_depth_rail():
+    # the canonical 2x2 matrix: rows -> cols -> panel -> rows -> leaves
+    def quadrant(head):
+        return PanelNode(fill_role="surface", child=RowsNode(children=[
+            leaf(head), leaf("supporting point")]))
+    matrix = RowsNode(children=[
+        ColsNode(children=[quadrant("Q1"), quadrant("Q2")]),
+        ColsNode(children=[quadrant("Q3"), quadrant("Q4")]),
+    ])
+    assert tree_stats(matrix) == (4, 8)
+    assert check_tree(matrix) == []
 
 
 def test_leaf_root_rejected():

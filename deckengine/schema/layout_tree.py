@@ -41,11 +41,14 @@ def _check_fracs(fracs: list[float] | None, n_children: int) -> None:
 
 class RowsNode(BaseModel):
     """Vertical split. fracs give each child a height share of the assigned
-    zone (bespoke fill mode); without fracs children stack at natural height."""
+    zone (bespoke fill mode); without fracs children stack at natural height.
+    pin_last anchors the final child to the zone bottom when there is
+    surplus (owner bands, source rows) — the hand-built gesture."""
     kind: Literal["rows"] = "rows"
     children: list[LayoutChild] = Field(min_length=2, max_length=6)
     fracs: list[float] | None = None
     gap: float = Field(default=0.8, ge=0, le=4)  # spacing multiples
+    pin_last: bool = False
 
     @model_validator(mode="after")
     def _fracs_sane(self):
@@ -93,10 +96,11 @@ _NODE_TYPES = (RowsNode, ColsNode, PanelNode)
 
 
 def tree_stats(node) -> tuple[int, int]:
-    """(depth, leaf_count) — leaves are ordinary component specs."""
+    """(depth, leaf_count) — leaves are ordinary component specs. panel is
+    decoration, not a split: it does not consume a depth level (otherwise the
+    canonical 2x2 matrix-of-panels would be illegal)."""
     if isinstance(node, PanelNode):
-        d, n = tree_stats(node.child)
-        return d + 1, n
+        return tree_stats(node.child)
     if isinstance(node, (RowsNode, ColsNode)):
         stats = [tree_stats(c) for c in node.children]
         return 1 + max(d for d, _ in stats), sum(n for _, n in stats)

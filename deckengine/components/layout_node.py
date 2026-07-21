@@ -47,24 +47,34 @@ class Rows(Component):
         natural = [get_component(c.kind).measure(c, bbox.w, ctx)
                    for c in data.children]
         total_nat = sum(natural) + g * (len(natural) - 1)
-        fill = ctx.fill_hint and data.fracs is not None and bbox.h > total_nat
+        surplus = bbox.h - total_nat
+        fill = ctx.fill_hint and data.fracs is not None and surplus > 0
+        pin = (ctx.fill_hint and not fill and data.pin_last
+               and surplus > 0 and len(natural) > 1)
         if fill:
             avail = bbox.h - g * (len(natural) - 1)
             heights = [round(avail * f) for f in data.fracs]
         else:
             heights = natural
+            if ctx.fill_hint and not pin and surplus > 0 and len(natural) > 1:
+                # no fracs: breathe like the stacker — gaps may double
+                g += min(surplus // (len(natural) - 1), g)
         y = bbox.y
-        for child, h, nat in zip(data.children, heights, natural):
+        last = len(data.children) - 1
+        for i, (child, h, nat) in enumerate(zip(data.children, heights,
+                                                natural)):
             if h < nat:
                 ctx.report.warn(
                     f"rows: child '{child.kind}' natural {nat} exceeds its "
                     f"frac cell {h}; content may overflow")
+            if pin and i == last:
+                y = bbox.bottom - nat  # anchored to the zone bottom
             cell = BBox(bbox.x, y, bbox.w, h)
             with _child_fill(ctx, fill and h > nat):
                 consumed = get_component(child.kind).render(slide, child,
                                                             cell, ctx)
             y += (h if fill else consumed) + g
-        return bbox.h if fill else y - g - bbox.y
+        return bbox.h if (fill or pin) else y - g - bbox.y
 
 
 @register("cols")
