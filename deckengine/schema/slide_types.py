@@ -6,6 +6,8 @@ from typing import Annotated, Literal, Union
 from pydantic import BaseModel, Field
 
 from .components import (
+    ArrowCalloutSpec,
+    BraceGroupSpec,
     BulletItemSpec,
     CalloutBandSpec,
     ChevronPathwaySpec,
@@ -76,8 +78,13 @@ class NColumnComparisonSpec(BaseModel):
 class KpiDashboardSpec(BaseModel):
     slide_type: Literal["kpi_dashboard"] = "kpi_dashboard"
     title: RichStr = Field(max_length=220)
+    # data table (or stats) braced to its takeaway — reference slide 4's
+    # state table grouped by a bracket to the icon-stat rail
+    brace_group: BraceGroupSpec | None = None
     icon_stats: list[IconStatRowSpec] = Field(default_factory=list, max_length=6)
     kpi_strip: KpiCardStripSpec | None = None
+    # bottom band: lead box + arrow head + oversized trailing stats
+    callout: ArrowCalloutSpec | None = None
     highlight: HighlightBoxSpec | None = None
     footnote: str | None = Field(default=None, max_length=300)
 

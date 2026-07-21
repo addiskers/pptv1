@@ -43,7 +43,8 @@ class ProgressPill(Component):
 
     def _label_fit(self, data: ProgressPillSpec, width: int,
                    ctx: RenderContext) -> FitResult:
-        return fit_text(parse_rich(data.label, base_color_role="ink"),
+        ink = "inverse_ink" if data.inverse else "ink"
+        return fit_text(parse_rich(data.label, base_color_role=ink),
                         BBox(0, 0, max(1, width), _PROBE_H), ctx.font("body"),
                         max_size=ctx.size("small"), min_size=_MIN_LABEL_PT,
                         measurer=ctx.measurer)
@@ -60,6 +61,7 @@ class ProgressPill(Component):
         theme = ctx.theme
         family = ctx.font("body")
         size_micro = ctx.size("micro")
+        ink = "inverse_ink" if data.inverse else "ink"
         label_fit = self._label_fit(data, bbox.w, ctx)
         gap = theme.spacing(_GAP_MULT)
         track_h = self._track_h(ctx)
@@ -70,7 +72,7 @@ class ProgressPill(Component):
         lbox = add_text_box(slide, BBox(bbox.x, bbox.y, bbox.w,
                                         label_fit.height_emu))
         write_fit_result(lbox.text_frame, label_fit, theme, family=family,
-                         default_color_role="ink")
+                         default_color_role=ink)
 
         # track + fill segment
         track_y = bbox.y + label_fit.height_emu + gap
@@ -98,6 +100,7 @@ class ProgressPill(Component):
                 size_micro, theme, family=family, align="center",
                 line_spacing_pt=line_pt, default_color_role="inverse_ink")
         elif disp_w <= out_w:
+            # rides ON the light track — dark ink regardless of data.inverse
             dbox = add_text_box(slide, BBox(out_x, track_y, out_w, track_h),
                                 anchor="middle")
             write_spans_paragraph(
@@ -126,6 +129,7 @@ class ProgressPill(Component):
                     > track.right - tgt_w):
                 ctx.report.warn(
                     "progress_pill: target_display overlaps the display text")
+            # also ON the track — keep muted dark ink even on inverse cards
             tbox = add_text_box(slide, track, align="right", anchor="middle")
             write_spans_paragraph(
                 tbox.text_frame,

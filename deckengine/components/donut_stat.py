@@ -78,19 +78,20 @@ class DonutStat(Component):
 
     def _layout(self, data: DonutStatSpec, width: int,
                 ctx: RenderContext) -> _Layout:
+        ink = "inverse_ink" if data.inverse else "ink"
         d = min(round(width * _RING_W_FRAC), _RING_MAX_D)
         gap = ctx.theme.spacing(_GAP_MULT)
         pad = ctx.theme.spacing(_PAD_MULT)
         side_w = width - d - gap
         side = side_w >= _SIDE_MIN_W
         label_w = side_w if side else width
-        label_fit = fit_text(parse_rich(data.label, base_color_role="ink"),
+        label_fit = fit_text(parse_rich(data.label, base_color_role=ink),
                              BBox(0, 0, max(1, label_w), _PROBE_H),
                              ctx.font("body"), max_size=ctx.size("small"),
                              min_size=_MIN_LABEL_PT, measurer=ctx.measurer)
         hole_w = round(d * _HOLE_FRAC)
         center_fit = fit_text([Span(data.center_text, bold=True,
-                                    color_role="ink")],
+                                    color_role=ink)],
                               BBox(0, 0, max(1, hole_w), d), ctx.font("body"),
                               max_size=ctx.size("stat"),
                               min_size=_MIN_CENTER_PT, max_lines=1,
@@ -138,15 +139,17 @@ class DonutStat(Component):
         hole_d = round(lay.d * _HOLE_FRAC)
         hole = BBox(ring.x + (lay.d - hole_d) // 2,
                     ring.y + (lay.d - hole_d) // 2, hole_d, hole_d)
-        add_shape(slide, hole, theme, shape="oval", fill_role="bg")
+        add_shape(slide, hole, theme, shape="oval",
+                  fill_role=data.hole_fill_role)
 
         # center stat over the hole
+        ink = "inverse_ink" if data.inverse else "ink"
         if lay.center_fit.truncated:
             ctx.report.truncated(f"donut_stat center: {data.center_text!r}")
         cbox = add_text_box(slide, ring, align="center", anchor="middle")
         write_fit_result(cbox.text_frame, lay.center_fit, theme,
                          family=ctx.font("body"), align="center",
-                         default_color_role="ink")
+                         default_color_role=ink)
 
         # label
         if lay.label_fit.truncated:
@@ -155,7 +158,7 @@ class DonutStat(Component):
                             anchor=label_anchor)
         write_fit_result(lbox.text_frame, lay.label_fit, theme,
                          family=ctx.font("body"), align=label_align,
-                         default_color_role="ink")
+                         default_color_role=ink)
 
         if lay.height > bbox.h:
             ctx.report.warn("donut_stat: content taller than provided bbox")

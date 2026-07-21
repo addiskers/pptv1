@@ -111,9 +111,31 @@ class IconTileRowSpec(BaseModel):
     banded: bool = True
 
 
+class DonutStatSpec(BaseModel):
+    kind: Literal["donut_stat"] = "donut_stat"
+    value_pct: float = Field(ge=0, le=100)  # filled share of the ring
+    center_text: PlainStr = Field(max_length=8)   # e.g. "50%"
+    label: RichStr = Field(max_length=80)         # caption under/beside the ring
+    # container knobs (set by kpi_card_strip on dark tiles; leave defaults)
+    inverse: bool = False           # text in inverse_ink for dark surfaces
+    hole_fill_role: str = "bg"      # hole matches the surface it sits on
+
+
+class ProgressPillSpec(BaseModel):
+    kind: Literal["progress_pill"] = "progress_pill"
+    label: RichStr = Field(max_length=60)
+    value_pct: float = Field(ge=0, le=100)
+    display: PlainStr = Field(max_length=16)      # text on/next to the bar, e.g. "312M"
+    target_display: PlainStr | None = Field(default=None, max_length=16)
+    inverse: bool = False  # container knob: text in inverse_ink for dark surfaces
+
+
 class KpiCardSpec(BaseModel):
     title: RichStr = Field(max_length=60)
-    body: RichStr = Field(max_length=240)
+    body: RichStr | None = Field(default=None, max_length=240)
+    # micro-viz combo tile: a card can hold a small viz instead of body text
+    # (the reference FMD tile — progress bar / donut inside a dark stat card)
+    viz: Union[ProgressPillSpec, DonutStatSpec] | None = None
 
 
 class KpiCardStripSpec(BaseModel):
@@ -161,21 +183,6 @@ class HighlightBoxSpec(BaseModel):
     body: RichStr | None = Field(default=None, max_length=600)
     fill_role: str = "surface_alt"
     accent_bar: bool = True
-
-
-class DonutStatSpec(BaseModel):
-    kind: Literal["donut_stat"] = "donut_stat"
-    value_pct: float = Field(ge=0, le=100)  # filled share of the ring
-    center_text: PlainStr = Field(max_length=8)   # e.g. "50%"
-    label: RichStr = Field(max_length=80)         # caption under/beside the ring
-
-
-class ProgressPillSpec(BaseModel):
-    kind: Literal["progress_pill"] = "progress_pill"
-    label: RichStr = Field(max_length=60)
-    value_pct: float = Field(ge=0, le=100)
-    display: PlainStr = Field(max_length=16)      # text on/next to the bar, e.g. "312M"
-    target_display: PlainStr | None = Field(default=None, max_length=16)
 
 
 class MilestoneSpec(BaseModel):
@@ -251,11 +258,35 @@ class ComparisonColumnsSpec(BaseModel):
     dashed_separators: bool = True
 
 
+class ArrowStatSpec(BaseModel):
+    value: PlainStr = Field(max_length=16)        # oversized number, e.g. "185"
+    label: RichStr = Field(max_length=100)
+
+
+class ArrowCalloutSpec(BaseModel):
+    """Lead box + arrow head pointing at big trailing stats (the reference
+    deck's beige '$336M deployed' band)."""
+    kind: Literal["arrow_callout"] = "arrow_callout"
+    title: RichStr = Field(max_length=200)
+    sub: RichStr | None = Field(default=None, max_length=300)
+    stats: list[ArrowStatSpec] = Field(default_factory=list, max_length=4)
+    fill_role: str = "surface_alt"
+
+
+class BraceGroupSpec(BaseModel):
+    """Stacked content grouped by a right brace to a single takeaway — the
+    hand-built 'this table means THIS' gesture machines never make."""
+    kind: Literal["brace_group"] = "brace_group"
+    content: list[ComparisonCell] = Field(min_length=1, max_length=4)
+    takeaway: RichStr = Field(max_length=200)
+    takeaway_frac: float = Field(default=0.30, gt=0.15, lt=0.5)
+
+
 ComponentSpec = Union[
     TextBlockSpec, StatRowSpec, BadgeChipSpec, SectionHeaderSpec, MiniTableSpec,
     DataTableSpec, IconStatRowSpec, KpiCardStripSpec, CalloutBandSpec,
     BulletListSpec, FootnoteStripSpec, LegendRowSpec, HighlightBoxSpec,
     ComparisonColumnsSpec, DonutStatSpec, ProgressPillSpec, TimelineRowSpec,
     ChevronPathwaySpec, NumberedBlockSpec, TwoToneHeaderSpec, NativeChartSpec,
-    IconTileRowSpec,
+    IconTileRowSpec, ArrowCalloutSpec, BraceGroupSpec,
 ]

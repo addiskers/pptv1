@@ -65,6 +65,10 @@ _VERB_HINTS = {
 # archetypes whose titles are legitimately labels
 TITLE_EXEMPT = {"title", "section_divider"}
 
+# >_MAX_RUN consecutive slides of one archetype reads machine-stamped — the
+# title-subtitle-3-bullets rhythm reviewers call out instantly
+_MAX_RUN = 2
+
 
 def title_is_takeaway(title: str) -> bool:
     """True if the title reads as a claim (verb, number, or full sentence) —
@@ -97,6 +101,26 @@ def check_outline(outline: Outline) -> list[str]:
                     f"slide {i + 1} heavily overlaps slide {j + 1} "
                     f"({overlap:.0%} shared words)")
         seen.append(s.claim)
+    problems.extend(_archetype_monotony(outline))
+    return problems
+
+
+def _archetype_monotony(outline: Outline) -> list[str]:
+    """Anti-generic rule: flag runs of >_MAX_RUN consecutive same-archetype
+    slides so the review pass varies the structure."""
+    problems = []
+    run_start = 0
+    types = [s.slide_type for s in outline.slides]
+    for i in range(1, len(types) + 1):
+        if i == len(types) or types[i] != types[run_start]:
+            run_len = i - run_start
+            if run_len > _MAX_RUN and types[run_start] not in TITLE_EXEMPT:
+                problems.append(
+                    f"slides {run_start + 1}-{i} are {run_len} consecutive "
+                    f"'{types[run_start]}' slides — vary the archetype "
+                    "(chart_slide, n_column_comparison, framework_slide, "
+                    "kpi_dashboard...) or merge slides")
+            run_start = i
     return problems
 
 

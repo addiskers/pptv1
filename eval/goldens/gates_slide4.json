@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "theme": "consulting_paper",
+  "meta": {
+    "title": "AgDev India impact dashboard (reference slide 4 replica)",
+    "date": "20 July 2026",
+    "footer_org": "Gates Foundation"
+  },
+  "slides": [
+    {
+      "slide_type": "kpi_dashboard",
+      "title": "Between **2019-2025**, interventions benefitted [[hl]]10.6 Mn[[/]] SSPs directly and [[hl]]37.7 Mn[[/]] digitally",
+      "brace_group": {
+        "kind": "brace_group",
+        "content": [
+          {
+            "kind": "mini_table",
+            "headers": ["State", "Direct", "Digital"],
+            "rows": [
+              ["Bihar", "7.0 Mn", "18.5 Mn"],
+              ["UP", "1.1 Mn", "1.2 Mn"],
+              ["Odisha", "2.0 Mn", "7.6 Mn"],
+              ["Federal/Others", "0.4 Mn", "10.5 Mn"],
+              ["Total", "10.6 Mn", "37.7 Mn"]
+            ],
+            "align": "center"
+          }
+        ],
+        "takeaway": "**10.6 Mn** SSPs benefitted directly — **37.7 Mn** reached digitally",
+        "takeaway_frac": 0.32
+      },
+      "icon_stats": [
+        {"kind": "icon_stat_row", "icon": "people", "stat": "**35%**", "text": "of direct beneficiaries are women"},
+        {"kind": "icon_stat_row", "icon": "growth", "stat": "**15-100%**", "text": "productivity increase across high value crops^1"},
+        {"kind": "icon_stat_row", "icon": "building", "stat": "**$2.2B**", "text": "leveraged from govt and private sector (2025)"}
+      ],
+      "kpi_strip": {
+        "kind": "kpi_card_strip",
+        "cards": [
+          {"title": "**60+**", "body": "frugal agri innovations supported"},
+          {"title": "**150+**", "body": "private companies across the value chain"},
+          {"title": "**90%**", "body": "reduction in program delivery costs"},
+          {"title": "FMD doses administered", "viz": {"kind": "progress_pill", "label": "2025 → 2030", "value_pct": 52, "display": "312 M", "target_display": "600 M"}},
+          {"title": "Immunisation coverage", "viz": {"kind": "donut_stat", "value_pct": 50, "center_text": "50%", "label": "of livestock covered"}}
+        ]
+      },
+      "callout": {
+        "kind": "arrow_callout",
+        "title": "AgDev has deployed [[hl]]$336M[[/]] in India",
+        "sub": "'Paid' + 'Unpaid' investments with geography marked 'India', 2015 to current",
+        "stats": [
+          {"value": "185", "label": "AgDev funded investments"},
+          {"value": "123", "label": "Managed by Seattle POs"},
+          {"value": "62", "label": "Managed by India POs"}
+        ]
+      },
+      "footnote": "^1 Includes AI, DPI and non-AI digital work. High value crops only."
+    }
+  ]
+}

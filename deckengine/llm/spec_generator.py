@@ -21,6 +21,7 @@ from pydantic import BaseModel, ValidationError
 
 from ..schema.slide_types import DeckMeta, DeckSpec, SlideSpec
 from .facts import FactTable, verify_spec_numbers
+from .story import REVIEW_PROMPT, Outline, check_outline
 
 log = logging.getLogger("deckengine")
 
@@ -93,24 +94,37 @@ def _structured_call(name: str, schema: dict, prompt: str,
     raise RuntimeError("model returned no tool_use block")
 
 
-class OutlineItem(BaseModel):
-    slide_type: str
-    intent: str
-
-
-class Outline(BaseModel):
-    slides: list[OutlineItem]
-
-
 def generate_outline(prompt: str, facts: FactTable | None) -> Outline:
+    """Stage 1: claim-chain outline (story.Outline), then ONE holistic review
+    pass with the deterministic check_outline problems riding along. The
+    revised outline is kept only if it doesn't score worse."""
     archetype_list = ", ".join(_ARCHETYPES)
+    schema = Outline.model_json_schema()
     p = (f"Plan a slide deck for this request:\n\n{prompt}\n\n"
          f"Available slide_type values: {archetype_list}.\n"
          f"{facts.prompt_block() if facts else ''}\n"
-         "Emit an outline: one entry per slide with slide_type and a one-line intent. "
-         "Open with a title slide, close with an exec_summary or kpi_dashboard when it fits.")
-    return Outline.model_validate(_structured_call(
-        "emit_outline", Outline.model_json_schema(), p))
+         "Emit the outline as a CLAIM CHAIN: a one-sentence governing_thought "
+         "(the deck's answer), plus one entry per slide with slide_type and "
+         "claim — the full-sentence assertion that slide proves (it becomes "
+         "the slide title; never a label). Read in sequence, the claims must "
+         "prove the governing thought. Vary the archetypes — never more than "
+         "two consecutive slides of the same slide_type. Open with a title "
+         "slide; close with an exec_summary or kpi_dashboard when it fits.")
+    outline = Outline.model_validate(_structured_call("emit_outline", schema, p))
+    problems = check_outline(outline)
+    review = REVIEW_PROMPT
+    if problems:
+        review += ("\n\nDeterministic checks flagged these problems — fix "
+                   "all of them:\n" + "\n".join(f"- {x}" for x in problems))
+    review += "\n\nOUTLINE:\n" + outline.model_dump_json(indent=2)
+    try:
+        revised = Outline.model_validate(
+            _structured_call("emit_outline", schema, review))
+        if len(check_outline(revised)) <= len(problems):
+            outline = revised
+    except (ValidationError, RuntimeError) as e:  # review is best-effort
+        log.warning("outline review pass failed, keeping original: %s", e)
+    return outline
 
 
 _FEW_SHOTS_DIR = __import__("pathlib").Path(__file__).parent / "few_shots"
