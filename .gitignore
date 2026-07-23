@@ -4,3 +4,7 @@ examples/out/
 *.egg-info/
 .pytest_cache/
 eval/baselines/*.pptx
+# derived image caches — regenerated on demand
+assets/icons/cache/
+assets/cache_faded/
+assets/cache_crop/

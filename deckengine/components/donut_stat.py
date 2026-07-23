@@ -47,12 +47,17 @@ _PROBE_H = inch(11)      # generous probe: fit decides its own natural height
 
 def _add_pie(slide, bbox: BBox, theme: Theme, *, fill_role: str,
              start_deg: float, end_deg: float):
-    """Themed pie wedge. Fill/line resolve through theme roles only."""
+    """Themed pie wedge. Fill/line resolve through theme roles only.
+
+    Angles are normalized into [0, 360): the PIE preset geometry pins its
+    adjustments to that range ("pin 0 $0 21599999"), so a raw -90 start is
+    silently clamped to 0 — the wedge starts at 3 o'clock and a negative
+    end degenerates to a full circle (caught by the Q3 harvey-ball probe)."""
     # raw shape: PIE not in core.pptx_shapes (its SHAPES dict is frozen)
     s = slide.shapes.add_shape(MSO_SHAPE.PIE, Emu(bbox.x), Emu(bbox.y),
                                Emu(bbox.w), Emu(bbox.h))
-    s.adjustments[0] = start_deg * _ADJ_PER_DEG
-    s.adjustments[1] = end_deg * _ADJ_PER_DEG
+    s.adjustments[0] = (start_deg % 360.0) * _ADJ_PER_DEG
+    s.adjustments[1] = (end_deg % 360.0) * _ADJ_PER_DEG
     s.fill.solid()
     s.fill.fore_color.rgb = RGBColor.from_string(theme.color(fill_role))
     s.line.fill.background()

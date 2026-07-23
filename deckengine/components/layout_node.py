@@ -56,9 +56,11 @@ class Rows(Component):
             heights = [round(avail * f) for f in data.fracs]
         else:
             heights = natural
-            if ctx.fill_hint and not pin and surplus > 0 and len(natural) > 1:
+            if ctx.fill_hint and surplus > 0 and len(natural) > 1:
                 # no fracs: breathe like the stacker — gaps may double
-                g += min(surplus // (len(natural) - 1), g)
+                # (when pinning, keep one base gap clear of the pinned child)
+                lead = max(0, surplus - g) if pin else surplus
+                g += min(lead // (len(natural) - 1), g)
         y = bbox.y
         last = len(data.children) - 1
         for i, (child, h, nat) in enumerate(zip(data.children, heights,

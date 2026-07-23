@@ -9,6 +9,8 @@
   "slides": [
     {
       "slide_type": "custom_layout",
+      "bg_image": "map_region.png",
+      "bg_image_opacity": 0.06,
       "title": "In **2024-25**, our interventions resulted in the following farm and farmer outcomes:",
       "root": {
         "kind": "rows",

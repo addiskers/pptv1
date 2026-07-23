@@ -26,6 +26,14 @@ from .components import (
 )
 
 
+class BgImage(BaseModel):
+    """Mixin: faint watermark painted across the body band before content
+    (the reference deck's state maps behind columns). Missing assets warn
+    and skip — never block a render."""
+    bg_image: str | None = Field(default=None, max_length=260)
+    bg_image_opacity: float = Field(default=0.12, gt=0.02, le=0.5)
+
+
 class TitleSlideSpec(BaseModel):
     slide_type: Literal["title"] = "title"
     title: RichStr = Field(max_length=160)
@@ -47,7 +55,7 @@ class SectionDividerSpec(BaseModel):
     style: Literal["bleed", "bar"] = "bleed"
 
 
-class BulletContentSpec(BaseModel):
+class BulletContentSpec(BgImage):
     slide_type: Literal["bullet_content"] = "bullet_content"
     title: RichStr = Field(max_length=220)
     subtitle: RichStr | None = Field(default=None, max_length=400)
@@ -60,14 +68,14 @@ class ExecSectionSpec(BaseModel):
     body: RichStr = Field(max_length=600)
 
 
-class ExecSummarySpec(BaseModel):
+class ExecSummarySpec(BgImage):
     slide_type: Literal["exec_summary"] = "exec_summary"
     title: RichStr = Field(max_length=220)
     sections: list[ExecSectionSpec] = Field(min_length=2, max_length=6)
     footnote: str | None = Field(default=None, max_length=300)
 
 
-class NColumnComparisonSpec(BaseModel):
+class NColumnComparisonSpec(BgImage):
     slide_type: Literal["n_column_comparison"] = "n_column_comparison"
     title: RichStr = Field(max_length=220)
     subtitle: RichStr | None = Field(default=None, max_length=400)
@@ -77,7 +85,7 @@ class NColumnComparisonSpec(BaseModel):
     footnote: str | None = Field(default=None, max_length=300)
 
 
-class KpiDashboardSpec(BaseModel):
+class KpiDashboardSpec(BgImage):
     slide_type: Literal["kpi_dashboard"] = "kpi_dashboard"
     title: RichStr = Field(max_length=220)
     # data table (or stats) braced to its takeaway — reference slide 4's
@@ -91,7 +99,7 @@ class KpiDashboardSpec(BaseModel):
     footnote: str | None = Field(default=None, max_length=300)
 
 
-class DataDeepDiveSpec(BaseModel):
+class DataDeepDiveSpec(BgImage):
     slide_type: Literal["data_deep_dive"] = "data_deep_dive"
     title: RichStr = Field(max_length=220)
     subtitle: RichStr | None = Field(default=None, max_length=400)
@@ -102,7 +110,7 @@ class DataDeepDiveSpec(BaseModel):
     footnote: str | None = Field(default=None, max_length=300)
 
 
-class ChartSlideSpec(BaseModel):
+class ChartSlideSpec(BgImage):
     slide_type: Literal["chart_slide"] = "chart_slide"
     title: RichStr = Field(max_length=220)
     subtitle: RichStr | None = Field(default=None, max_length=400)
@@ -112,7 +120,7 @@ class ChartSlideSpec(BaseModel):
     footnote: str | None = Field(default=None, max_length=300)
 
 
-class FrameworkSlideSpec(BaseModel):
+class FrameworkSlideSpec(BgImage):
     slide_type: Literal["framework_slide"] = "framework_slide"
     title: RichStr = Field(max_length=220)
     subtitle: RichStr | None = Field(default=None, max_length=400)
@@ -121,7 +129,7 @@ class FrameworkSlideSpec(BaseModel):
     footnote: str | None = Field(default=None, max_length=300)
 
 
-class TimelineSlideSpec(BaseModel):
+class TimelineSlideSpec(BgImage):
     slide_type: Literal["timeline_slide"] = "timeline_slide"
     title: RichStr = Field(max_length=220)
     subtitle: RichStr | None = Field(default=None, max_length=400)
@@ -130,7 +138,7 @@ class TimelineSlideSpec(BaseModel):
     footnote: str | None = Field(default=None, max_length=300)
 
 
-class StrategyOverviewSpec(BaseModel):
+class StrategyOverviewSpec(BgImage):
     """The Gates slide-1 pattern: principles rail + dense pipeline table +
     goals sidebar."""
     slide_type: Literal["strategy_overview"] = "strategy_overview"
@@ -148,7 +156,7 @@ class StrategyOverviewSpec(BaseModel):
     footnote: str | None = Field(default=None, max_length=400)
 
 
-class CustomLayoutSpec(BaseModel):
+class CustomLayoutSpec(BgImage):
     """Escape hatch when no standard mold fits the claim: compose the body
     as a rows/cols/panel tree with any component as a leaf. Use standard
     archetypes first — this is for bespoke compositions (panel matrices,

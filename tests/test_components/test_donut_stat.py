@@ -75,11 +75,10 @@ def test_ring_geometry_and_stacked_fills():
 
 
 def test_pie_adjustment_xml_angles():
-    """Empirical contract: OOXML pie angles are 60000ths of a degree.
-
-    python-pptx normalizes raw adjustment values by /100000, so the component
-    must write degrees * 0.6 — verify the RAW XML holds exactly
-    start = -90 deg and end = -90 + value_pct * 3.6 deg.
+    """Empirical contract: OOXML pie angles are 60000ths of a degree AND the
+    preset pins adjustments to [0, 21599999] — negative values are clamped
+    to 0 by PowerPoint (full-circle bug). The component must write degrees
+    normalized into [0, 360): start = 270, end = (270 + pct * 3.6) mod 360.
     """
     ctx = make_ctx()
     _, slide = blank_slide()
@@ -90,8 +89,10 @@ def test_pie_adjustment_xml_angles():
     av_lst = pie._element.spPr.find(qn("a:prstGeom")).find(qn("a:avLst"))
     raw = {gd.get("name"): int(gd.get("fmla").split()[1])
            for gd in av_lst.findall(qn("a:gd"))}
-    assert raw["adj1"] == round(-90 * 60000)                 # -5400000
-    assert raw["adj2"] == round((-90 + 40 * 3.6) * 60000)    # 3240000
+    assert raw["adj1"] == round(270 * 60000)                      # 16200000
+    assert raw["adj2"] == round(((270 + 40 * 3.6) % 360) * 60000)  # 3240000
+    assert 0 <= raw["adj1"] <= 21599999
+    assert 0 <= raw["adj2"] <= 21599999
 
 
 def test_full_value_renders_solid_primary_oval_not_pie():
@@ -129,3 +130,33 @@ def test_center_text_bold_ink_and_label_present():
     assert center[0].font.bold
     assert str(center[0].font.color.rgb) == ctx.theme.color("ink")
     assert any("Vaccination" in r.text for r in runs)
+
+
+# --- pie angle normalization (regression: PIE pins adjustments to [0, 360)) ---
+
+def test_pie_angles_normalized_into_pin_range():
+    """25% must be a top-right quarter: start 270deg, end 0deg — never a
+    negative adjustment (the preset pins those to 0 => full-circle bug)."""
+    ctx = make_ctx()
+    comp = DonutStat()
+    data = DonutStatSpec(value_pct=25, center_text="25%", label="quarter")
+    _, slide = blank_slide()
+    comp.render(slide, data, BBox(0, 0, inch(3), inch(2)), ctx)
+    pies = _autoshapes(slide, MSO_SHAPE.PIE)
+    assert len(pies) == 1
+    start, end = pies[0].adjustments[0], pies[0].adjustments[1]
+    assert start >= 0 and end >= 0
+    assert abs(start - 270 * 0.6) < 0.01   # 12 o'clock, normalized
+    assert abs(end - 0.0) < 0.01           # 3 o'clock
+
+
+def test_pie_half_sweeps_right_half():
+    ctx = make_ctx()
+    comp = DonutStat()
+    data = DonutStatSpec(value_pct=50, center_text="50%", label="half")
+    _, slide = blank_slide()
+    comp.render(slide, data, BBox(0, 0, inch(3), inch(2)), ctx)
+    pies = _autoshapes(slide, MSO_SHAPE.PIE)
+    start, end = pies[0].adjustments[0], pies[0].adjustments[1]
+    assert abs(start - 162.0) < 0.01       # 270 deg
+    assert abs(end - 54.0) < 0.01          # 90 deg (6 o'clock)

@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "theme": "consulting_paper",
+  "meta": {
+    "title": "Q3 visual vocabulary showcase (imagery, funnel, 2x2, harvey balls)",
+    "date": "21 July 2026",
+    "footer_org": "DeckEngine"
+  },
+  "slides": [
+    {
+      "slide_type": "custom_layout",
+      "title": "Advisory-led plots outyield controls in **every district** — scale gate in December",
+      "root": {
+        "kind": "cols",
+        "gap": 0.8,
+        "fracs": [0.46, 0.54],
+        "children": [
+          {"kind": "image_block", "src": "hero_field.png", "height_in": 4.8, "fit": "cover", "caption": "Demonstration plots, kharif season (illustrative image)"},
+          {"kind": "rows", "gap": 0.6, "pin_last": true, "children": [
+            {"kind": "text_block", "text": "**Yield gains are agronomy, not spend**", "size_role": "h2", "color_role": "primary"},
+            {"kind": "bullet_list", "size_role": "small", "items": [
+              {"text": "Yield delta **+18%** median across 240 demonstration plots"},
+              {"text": "Input cost held flat — the gain is practice change, not inputs"},
+              {"text": "Farmer-reported satisfaction at **86%**, best in program history"}
+            ]},
+            {"kind": "stat_row", "stats": [
+              {"label": "Plots", "value": "240"},
+              {"label": "Districts", "value": "12"},
+              {"label": "Yield delta", "value": "+18%"}
+            ]},
+            {"kind": "callout_band", "segments": ["Scale decision gate: **December portfolio review**"]}
+          ]}
+        ]
+      },
+      "footnote": "Illustrative data; image is a generated placeholder asset."
+    },
+    {
+      "slide_type": "custom_layout",
+      "title": "The pipeline converts **1 in 5** pilots to statewide scale — partner quality decides",
+      "root": {
+        "kind": "rows",
+        "gap": 1.0,
+        "fracs": [0.74, 0.26],
+        "children": [
+          {"kind": "funnel", "stages": [
+            {"label": "Innovations screened", "value": "115"},
+            {"label": "Field pilots", "value": "48"},
+            {"label": "Multi-district trials", "value": "19"},
+            {"label": "Statewide scale", "value": "9"}
+          ]},
+          {"kind": "panel", "fill_role": "surface", "border_role": "grid", "inset": 0.8, "child": {
+            "kind": "rows", "gap": 0.5, "children": [
+              {"kind": "text_block", "text": "**Partner readiness score** — drives conversion odds at every stage", "size_role": "small"},
+              {"kind": "harvey_balls", "items": [
+                {"label": "State capacity", "score": 3},
+                {"label": "Funding fit", "score": 4},
+                {"label": "Data systems", "score": 2},
+                {"label": "Market access", "score": 3}
+              ]}
+            ]
+          }}
+        ]
+      },
+      "footnote": "Conversion rates from the 2019-2025 portfolio; scores from the partner diligence rubric."
+    },
+    {
+      "slide_type": "custom_layout",
+      "bg_image": "map_region.png",
+      "bg_image_opacity": 0.08,
+      "title": "Prioritise scale-ready, high-impact interventions — **advisory and seeds lead**",
+      "root": {
+        "kind": "rows",
+        "gap": 0.8,
+        "children": [
+          {"kind": "matrix_2x2",
+            "x_label": "Scale readiness →",
+            "y_label": "Farmer impact →",
+            "highlight": 1,
+            "quadrants": [
+              {"title": "Invest to unblock", "items": ["Livestock vaccination cold chain", "Irrigation credit products"]},
+              {"title": "Scale now", "items": ["AI advisory in local languages", "Certified seed multiplication", "Direct-benefit input transfers"]},
+              {"title": "Park for later", "items": ["Traceability pilots without buyer pull"]},
+              {"title": "Systematise", "items": ["Soil testing subscriptions", "FPO digital bookkeeping"]}
+            ]},
+          {"kind": "callout_band", "segments": ["Top-right quadrant gets **70% of FY27 deployment**", "Bottom-left is parked, not cancelled"]}
+        ]
+      },
+      "footnote": "Quadrant placement from the intervention scoring model, June 2026 run."
+    }
+  ]
+}

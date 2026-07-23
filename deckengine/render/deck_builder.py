@@ -49,6 +49,9 @@ def build_deck(spec: DeckSpec, out_path: str | Path) -> BuildReport:
         slide = prs.slides.add_slide(blank)
         slide.background.fill.solid()
         slide.background.fill.fore_color.rgb = RGBColor.from_string(theme.color_bg)
+        if getattr(slide_spec, "bg_image", None):
+            _paint_bg_image(slide, slide_spec.bg_image,
+                            slide_spec.bg_image_opacity, report)
         try:
             slide_base.get_assembler(slide_spec.slide_type).assemble(
                 slide, slide_spec, ctx)
@@ -64,6 +67,27 @@ def build_deck(spec: DeckSpec, out_path: str | Path) -> BuildReport:
     log.info("wrote %s (%d slides, %d warnings)", out_path, len(expanded),
              len(report.warnings))
     return report
+
+
+def _paint_bg_image(slide, src: str, opacity: float,
+                    report: BuildReport) -> None:
+    """Faint watermark, aspect-contained and centered in the body band,
+    painted BEFORE content so everything renders above it."""
+    from ..core.assets import faded_copy, image_size, resolve_asset
+    path = resolve_asset(src)
+    if path is None:
+        report.warn(f"bg_image {src!r} not found under assets/; skipped")
+        return
+    faded = faded_copy(path, opacity)
+    band = BBox(inch(0.45), inch(1.4), SLIDE_W_16_9 - inch(0.9),
+                SLIDE_H_16_9 - inch(2.0))
+    iw, ih = image_size(faded)
+    scale = min(band.w / iw, band.h / ih)
+    w, h = round(iw * scale), round(ih * scale)
+    slide.shapes.add_picture(str(faded),
+                             Emu(band.x + (band.w - w) // 2),
+                             Emu(band.y + (band.h - h) // 2),
+                             Emu(w), Emu(h))
 
 
 def _footer(slide, spec: DeckSpec, page: int, ctx: RenderContext) -> None:

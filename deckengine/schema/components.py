@@ -94,7 +94,9 @@ class IconStatRowSpec(BaseModel):
     kind: Literal["icon_stat_row"] = "icon_stat_row"
     icon: str = Field(max_length=12, description=(
         "one of: person, people, money, growth, chart, leaf, building, "
-        "target, globe, bulb, shield, clock"))
+        "target, globe, bulb, shield, clock, gear, handshake, truck, "
+        "factory, document, calendar, warning, check, refresh, scale, "
+        "award, flag, pin, cart, drop, rocket, network, lock"))
     stat: RichStr = Field(max_length=40)
     text: RichStr = Field(max_length=300)
 
@@ -282,11 +284,66 @@ class BraceGroupSpec(BaseModel):
     takeaway_frac: float = Field(default=0.30, gt=0.15, lt=0.5)
 
 
+class ImageBlockSpec(BaseModel):
+    """Embedded image, aspect-fit, measured like any component. A missing
+    asset renders a themed placeholder and warns — never blocks the deck."""
+    kind: Literal["image_block"] = "image_block"
+    src: str = Field(max_length=260, description=(
+        "file name under the repo assets/ (or assets/samples/) folder, "
+        "or an absolute path"))
+    caption: RichStr | None = Field(default=None, max_length=200)
+    height_in: float = Field(default=2.2, ge=0.6, le=6.0)
+    fit: Literal["contain", "cover"] = "contain"
+
+
+class FunnelStageSpec(BaseModel):
+    label: PlainStr = Field(max_length=40)
+    value: PlainStr = Field(max_length=16)
+
+
+class FunnelSpec(BaseModel):
+    """Top-down funnel: centered bands narrowing stage by stage."""
+    kind: Literal["funnel"] = "funnel"
+    stages: list[FunnelStageSpec] = Field(min_length=3, max_length=6)
+    fracs: list[float] | None = Field(default=None, description=(
+        "band width shares of full width, one per stage, each in (0.25, 1]; "
+        "None = linear taper 1.0 -> 0.35"))
+
+
+class QuadrantSpec(BaseModel):
+    title: RichStr = Field(max_length=60)
+    items: list[PlainStr] = Field(min_length=1, max_length=4)
+
+
+class Matrix2x2Spec(BaseModel):
+    """First-class consulting 2x2: labeled axes + four quadrant panels."""
+    kind: Literal["matrix_2x2"] = "matrix_2x2"
+    x_label: PlainStr = Field(max_length=40)
+    y_label: PlainStr = Field(max_length=40)
+    quadrants: list[QuadrantSpec] = Field(
+        min_length=4, max_length=4,
+        description="order: top-left, top-right, bottom-left, bottom-right")
+    highlight: int | None = Field(default=None, ge=0, le=3,
+                                  description="accent-bordered quadrant index")
+
+
+class HarveyItemSpec(BaseModel):
+    label: PlainStr = Field(max_length=60)
+    score: int = Field(ge=0, le=4)  # quarter-fills: 0=empty .. 4=full
+
+
+class HarveyBallsSpec(BaseModel):
+    """Row of harvey-ball ratings — the classic option-scoring vocabulary."""
+    kind: Literal["harvey_balls"] = "harvey_balls"
+    items: list[HarveyItemSpec] = Field(min_length=2, max_length=6)
+
+
 ComponentSpec = Union[
     TextBlockSpec, StatRowSpec, BadgeChipSpec, SectionHeaderSpec, MiniTableSpec,
     DataTableSpec, IconStatRowSpec, KpiCardStripSpec, CalloutBandSpec,
     BulletListSpec, FootnoteStripSpec, LegendRowSpec, HighlightBoxSpec,
     ComparisonColumnsSpec, DonutStatSpec, ProgressPillSpec, TimelineRowSpec,
     ChevronPathwaySpec, NumberedBlockSpec, TwoToneHeaderSpec, NativeChartSpec,
-    IconTileRowSpec, ArrowCalloutSpec, BraceGroupSpec,
+    IconTileRowSpec, ArrowCalloutSpec, BraceGroupSpec, ImageBlockSpec,
+    FunnelSpec, Matrix2x2Spec, HarveyBallsSpec,
 ]
