@@ -312,10 +312,13 @@ def _render_candidate(slide, theme: str, workdir: Path, tag: str) -> dict:
 
 
 def _export_png(pptx: Path) -> Path | None:
-    try:  # Windows + Office only; absence falls back to deterministic pick
-        from ..render.preview import export_pngs_powerpoint
-        pngs = export_pngs_powerpoint(pptx, pptx.parent / (pptx.stem + "_png"),
-                                      width=1280, height=720)
+    try:  # provider seam; absence falls back to the deterministic pick
+        from ..render.preview_provider import get_preview_exporter
+        exporter = get_preview_exporter()
+        if exporter is None:
+            return None
+        pngs = exporter(pptx, pptx.parent / (pptx.stem + "_png"),
+                        width=1280, height=720)
         return pngs[0] if pngs else None
     except Exception as e:  # noqa: BLE001
         log.info("no preview available for judge (%s)", e)

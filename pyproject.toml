@@ -18,6 +18,8 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8"]
 corpus = ["pypdfium2>=4"]
+# Linux/EC2 deploy: soffice preview path rasterizes PDF pages with pypdfium2.
+server = ["pypdfium2>=4"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

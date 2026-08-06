@@ -160,10 +160,12 @@ def _run_render(job_id: str, spec: DeckSpec) -> None:
         out = job_dir / "deck.pptx"
         report = build_deck(spec, out)
         previews = 0
-        try:  # Windows + Office only; absence must not fail the job
-            from ..render.preview import export_pngs_powerpoint
-            previews = len(export_pngs_powerpoint(out, job_dir / "previews",
-                                                  width=1280, height=720))
+        try:  # provider seam (COM on Windows, soffice on Linux); never fails the job
+            from ..render.preview_provider import get_preview_exporter
+            exporter = get_preview_exporter()
+            if exporter is not None:
+                previews = len(exporter(out, job_dir / "previews",
+                                        width=1280, height=720))
         except Exception:  # noqa: BLE001
             pass
         meta = {"status": "done", "path": str(out),
