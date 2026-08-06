@@ -1,0 +1,599 @@
+{
+  "schema_version": 1,
+  "theme": "consulting_paper",
+  "meta": {
+    "title": "Strategy deck (about 6 slides) for a mid-size Indian agri-inputs company deciding whether to enter the drone-spraying services market. Must include: a",
+    "date": null,
+    "footer_org": null,
+    "confidentiality": null
+  },
+  "slides": [
+    {
+      "slide_type": "title",
+      "title": "A phased partner-led entry into drone-spraying services gives the company the fastest path to scale with controlled investment",
+      "subtitle": "Strategy deck for a mid-size Indian agri-inputs company assessing entry into the drone-spraying services market",
+      "date": null,
+      "org": null,
+      "wordmark": null
+    },
+    {
+      "bg_image": null,
+      "bg_image_opacity": 0.12,
+      "slide_type": "strategy_overview",
+      "title": "Drone-spraying services fit the company’s existing channel, advisory model, and farmer relationships closely enough to support a credible adjacent business",
+      "subtitle": "The fit is strongest where current assets already match service delivery needs, letting the company extend from product sales into recurring acreage-based execution.",
+      "legend": null,
+      "left_heading": "Why the adjacency is credible",
+      "principles": [
+        {
+          "text": "Existing **dealer reach** already provides local farmer access, lead generation, and issue resolution for a service sale.",
+          "level": 0
+        },
+        {
+          "text": "Current **crop advisory** capabilities translate directly into spray-planning, dosage guidance, and season-based service triggers.",
+          "level": 0
+        },
+        {
+          "text": "Farmer relationships built through input sales support trust in outsourced field operations and repeat bookings across seasons.",
+          "level": 0
+        },
+        {
+          "text": "A partner-led operating model lets the company add drone capacity without building a full in-house fleet on day one.",
+          "level": 0
+        }
+      ],
+      "table_heading": "Current assets map directly to the capabilities required to sell and deliver drone-spraying services",
+      "table": {
+        "kind": "data_table",
+        "columns": [
+          {
+            "label": "Required capability",
+            "frac": 0.26,
+            "cell_kind": "text",
+            "align": "left"
+          },
+          {
+            "label": "Current company asset",
+            "frac": 0.28,
+            "cell_kind": "text",
+            "align": "left"
+          },
+          {
+            "label": "How the asset helps win",
+            "frac": 0.24,
+            "cell_kind": "text",
+            "align": "left"
+          },
+          {
+            "label": "Implication for entry model",
+            "frac": 0.22,
+            "cell_kind": "text",
+            "align": "left"
+          }
+        ],
+        "groups": [
+          {
+            "label": "Commercial fit",
+            "rows": [
+              [
+                "Farmer lead generation",
+                "Dealer network",
+                "Creates local service demand",
+                "Start with partner-led sales activation"
+              ],
+              [
+                "Trust and conversion",
+                "Field-facing relationships",
+                "Supports first-service adoption",
+                "Bundle service with advisory touchpoints"
+              ],
+              [
+                "Crop-specific demand shaping",
+                "Advisory conversations",
+                "Identifies when spraying is needed",
+                "Prioritise crops with repeat spray windows"
+              ]
+            ]
+          },
+          {
+            "label": "Delivery fit",
+            "rows": [
+              [
+                "Spray recommendation inputs",
+                "Agronomy knowledge",
+                "Improves service relevance",
+                "Use company protocols in partner operations"
+              ],
+              [
+                "Local coordination",
+                "Channel presence",
+                "Simplifies scheduling and follow-up",
+                "Anchor execution through district partners"
+              ],
+              [
+                "Repeat season access",
+                "Existing account base",
+                "Improves rebooking potential",
+                "Build recurring acreage accounts before expansion"
+              ]
+            ]
+          },
+          {
+            "label": "Economic fit",
+            "rows": [
+              [
+                "Low-capital market entry",
+                "Partner ecosystem",
+                "Avoids full fleet ownership at launch",
+                "Phase capex after demand is proven"
+              ],
+              [
+                "Cross-sell support",
+                "Input portfolio",
+                "Raises share of farmer wallet",
+                "Target integrated product-plus-service offers"
+              ],
+              [
+                "Scalable expansion",
+                "Replicable channel model",
+                "Extends market by market",
+                "Roll out in clusters, not nationwide at once"
+              ]
+            ]
+          }
+        ],
+        "heatmap_lo": 0.0,
+        "heatmap_hi": 100.0,
+        "header_fill_role": "primary",
+        "zebra": true
+      },
+      "sidebar_heading": "What this slide proves",
+      "goals": [
+        "The company has a credible right to win because service demand can be sourced through the same farmer access points used today",
+        "The operating model fits a phased launch because delivery capability can be added through partners while commercial ownership stays in-house",
+        "The adjacency is stronger than a cold-start service entry because advisory, relationships, and channel assets already exist"
+      ],
+      "cobenefits_heading": "What it unlocks",
+      "cobenefits": [
+        "Recurring acreage revenue",
+        "Higher farmer stickiness",
+        "Broader share of wallet"
+      ],
+      "footnote": "illustrative data"
+    },
+    {
+      "bg_image": null,
+      "bg_image_opacity": 0.12,
+      "slide_type": "framework_slide",
+      "title": "Channel-led partnerships and pilot clusters should lead entry because they pair **high strategic fit** with **easier execution**",
+      "subtitle": "Illustrative 2x2 prioritisation of entry moves: start with the top-right plays, sequence lower-fit or harder-to-execute moves later.",
+      "pathway": {
+        "kind": "chevron_pathway",
+        "steps": [
+          "Low strategic fit",
+          "High strategic fit",
+          "Harder execution",
+          "Easier execution"
+        ],
+        "highlight_index": 1
+      },
+      "blocks": [
+        {
+          "kind": "numbered_block",
+          "number": "1",
+          "title": "Channel-led partnerships sit in the priority zone",
+          "body": "Position: **high strategic fit**, **easier execution**. Uses the existing distributor base, input-led farmer access, and field activation model."
+        },
+        {
+          "kind": "numbered_block",
+          "number": "2",
+          "title": "Pilot clusters convert early demand into repeatable delivery",
+          "body": "Position: **high strategic fit**, **easier execution**. Concentrates demand, operator supply, training, and proof points in a tight geography."
+        },
+        {
+          "kind": "numbered_block",
+          "number": "3",
+          "title": "Company-owned fleet build-out is harder to execute at entry",
+          "body": "Position: **high strategic fit**, **harder execution**. Requires upfront fleet, operations control, maintenance processes, and local capacity before demand is proven."
+        },
+        {
+          "kind": "numbered_block",
+          "number": "4",
+          "title": "Standalone digital marketplace models should follow, not lead",
+          "body": "Position: **low strategic fit**, **harder execution**. Relies less on the core channel and advisory strengths while needing rapid two-sided network build."
+        }
+      ],
+      "footnote": "illustrative data"
+    },
+    {
+      "bg_image": null,
+      "bg_image_opacity": 0.12,
+      "slide_type": "n_column_comparison",
+      "title": "A partner-led model reaches farmers fastest while avoiding the operating load of a fully owned fleet and the control gaps of a pure marketplace",
+      "subtitle": "Illustrative comparison of three entry models for drone-spraying services",
+      "columns": [
+        {
+          "header": "Partner-led model",
+          "cells": [
+            {
+              "kind": "stat_row",
+              "stats": [
+                {
+                  "label": "Launch timeline",
+                  "value": "3 months",
+                  "underline": true
+                },
+                {
+                  "label": "Capex",
+                  "value": "₹1 crore",
+                  "underline": true
+                },
+                {
+                  "label": "Payback",
+                  "value": "12 months",
+                  "underline": true
+                }
+              ]
+            },
+            {
+              "kind": "text_block",
+              "text": "Launches through **25** channel partners across **8** districts with a central team of **12** people.",
+              "size_role": "small",
+              "font_role": "body",
+              "align": "center",
+              "color_role": "ink",
+              "max_lines": null
+            },
+            {
+              "kind": "text_block",
+              "text": "Company controls farmer sourcing, pricing guardrails, SOPs, and product linkage while partners operate **60** drones.",
+              "size_role": "small",
+              "font_role": "body",
+              "align": "center",
+              "color_role": "ink",
+              "max_lines": null
+            },
+            {
+              "kind": "mini_table",
+              "headers": [
+                "Metric",
+                "Value",
+                "Implication"
+              ],
+              "rows": [
+                [
+                  "Gross margin",
+                  "28%",
+                  "Healthy share without owning fleet"
+                ],
+                [
+                  "Utilisation",
+                  "65%",
+                  "Enough density for predictable throughput"
+                ],
+                [
+                  "NPS",
+                  "62",
+                  "Better farmer experience than marketplace"
+                ]
+              ],
+              "col_fracs": null,
+              "align": "center"
+            }
+          ]
+        },
+        {
+          "header": "Fully owned fleet",
+          "cells": [
+            {
+              "kind": "stat_row",
+              "stats": [
+                {
+                  "label": "Launch timeline",
+                  "value": "9 months",
+                  "underline": true
+                },
+                {
+                  "label": "Capex",
+                  "value": "₹9 crore",
+                  "underline": true
+                },
+                {
+                  "label": "Payback",
+                  "value": "30 months",
+                  "underline": true
+                }
+              ]
+            },
+            {
+              "kind": "text_block",
+              "text": "Requires hiring **85** field and ops staff and standing up maintenance, pilot scheduling, compliance, and spares management in **8** districts.",
+              "size_role": "small",
+              "font_role": "body",
+              "align": "center",
+              "color_role": "ink",
+              "max_lines": null
+            },
+            {
+              "kind": "text_block",
+              "text": "Highest control over service quality and data capture, but the fleet starts with only **45%** utilisation.",
+              "size_role": "small",
+              "font_role": "body",
+              "align": "center",
+              "color_role": "ink",
+              "max_lines": null
+            },
+            {
+              "kind": "mini_table",
+              "headers": [
+                "Metric",
+                "Value",
+                "Implication"
+              ],
+              "rows": [
+                [
+                  "Gross margin",
+                  "34%",
+                  "Best on paper"
+                ],
+                [
+                  "Utilisation",
+                  "45%",
+                  "Fixed-cost burden at launch"
+                ],
+                [
+                  "NPS",
+                  "66",
+                  "Strong experience if operations work"
+                ]
+              ],
+              "col_fracs": null,
+              "align": "center"
+            }
+          ]
+        },
+        {
+          "header": "Pure marketplace",
+          "cells": [
+            {
+              "kind": "stat_row",
+              "stats": [
+                {
+                  "label": "Launch timeline",
+                  "value": "2 months",
+                  "underline": true
+                },
+                {
+                  "label": "Capex",
+                  "value": "₹0.3 crore",
+                  "underline": true
+                },
+                {
+                  "label": "Payback",
+                  "value": "6 months",
+                  "underline": true
+                }
+              ]
+            },
+            {
+              "kind": "text_block",
+              "text": "Fastest to launch with **80** listed operators across **10** districts and a lean team of **6** people.",
+              "size_role": "small",
+              "font_role": "body",
+              "align": "center",
+              "color_role": "ink",
+              "max_lines": null
+            },
+            {
+              "kind": "text_block",
+              "text": "Lowest control on service quality, pricing discipline, and product pull-through; only **35%** of jobs use linked input bundles.",
+              "size_role": "small",
+              "font_role": "body",
+              "align": "center",
+              "color_role": "ink",
+              "max_lines": null
+            },
+            {
+              "kind": "mini_table",
+              "headers": [
+                "Metric",
+                "Value",
+                "Implication"
+              ],
+              "rows": [
+                [
+                  "Gross margin",
+                  "12%",
+                  "Thin take rate"
+                ],
+                [
+                  "Utilisation",
+                  "58%",
+                  "Depends on third-party supply"
+                ],
+                [
+                  "NPS",
+                  "41",
+                  "Inconsistent execution hurts trust"
+                ]
+              ],
+              "col_fracs": null,
+              "align": "center"
+            }
+          ]
+        }
+      ],
+      "row_labels": [
+        "SPEED TO LAUNCH",
+        "UPFRONT INVESTMENT",
+        "OPERATING LOAD",
+        "CHANNEL CONTROL",
+        "UNIT ECONOMICS",
+        "KEY RISKS"
+      ],
+      "summary_band": {
+        "kind": "callout_band",
+        "label": "WHY PARTNER-LED WINS",
+        "icon": "🚁",
+        "segments": [
+          "**3 months** to launch vs **9 months** for a fully owned fleet",
+          "**₹1 crore** capex keeps entry light vs **₹9 crore** for full ownership",
+          "**28%** gross margin is materially stronger than the marketplace at **12%**",
+          "Control stays high enough to link service delivery with input sales across **25** partners and **60** drones"
+        ]
+      },
+      "footnote": "illustrative data"
+    },
+    {
+      "bg_image": null,
+      "bg_image_opacity": 0.12,
+      "slide_type": "timeline_slide",
+      "title": "A **12-month** rollout from pilot districts to scaled clusters lets the company validate unit economics before expanding fleet capacity and coverage",
+      "subtitle": "Illustrative phased path from initial pilots to scaled operating clusters, with each step tied to proof points before the next capacity build",
+      "timeline": {
+        "kind": "timeline_row",
+        "milestones": [
+          {
+            "label": "Pilot design",
+            "date": "Month 1",
+            "done": false
+          },
+          {
+            "label": "Partner onboarding",
+            "date": "Month 2-3",
+            "done": false
+          },
+          {
+            "label": "District pilots",
+            "date": "Month 4-5",
+            "done": false
+          },
+          {
+            "label": "Unit economics gate",
+            "date": "Month 6",
+            "done": false
+          },
+          {
+            "label": "Cluster expansion",
+            "date": "Month 7-9",
+            "done": false
+          },
+          {
+            "label": "Fleet scale-up",
+            "date": "Month 10-11",
+            "done": false
+          },
+          {
+            "label": "Scaled rollout",
+            "date": "Month 12",
+            "done": false
+          }
+        ]
+      },
+      "phases": [
+        {
+          "kind": "numbered_block",
+          "number": "01",
+          "title": "Pilot design locks target crops, districts, partner terms, and service SOPs before field launch",
+          "body": "Define pilot scope for **2** districts, **3** crops, and **1** operating playbook; set commercial terms, lead routing, and spray-quality checks."
+        },
+        {
+          "kind": "numbered_block",
+          "number": "02",
+          "title": "District pilots test demand conversion and delivery reliability before broader capacity commitments",
+          "body": "Run pilots with **4** partners and **8** drones; track leads, booked demos, quoted acreage, completed jobs, and repeat demand by district."
+        },
+        {
+          "kind": "numbered_block",
+          "number": "03",
+          "title": "A mid-year economics gate determines whether expansion follows proven contribution margins and utilisation",
+          "body": "At **Month 6**, review pilot metrics against **3** thresholds: partner productivity, drone utilisation, and signed acreage conversion."
+        },
+        {
+          "kind": "numbered_block",
+          "number": "04",
+          "title": "Scaled clusters expand coverage only after the model works, adding capacity in sequenced waves",
+          "body": "Expand to **6** clusters with **12** partners and **24** drones by **Month 12**, then widen district coverage through the same partner-led playbook."
+        }
+      ],
+      "footnote": "illustrative data"
+    },
+    {
+      "bg_image": null,
+      "bg_image_opacity": 0.12,
+      "slide_type": "chart_slide",
+      "title": "Tight conversion management can turn **1,000** leads into **12,000 acres** of signed demand across the booking funnel",
+      "subtitle": "Illustrative funnel of the drone-spraying service pipeline, showing how disciplined qualification, quoting, and booking translate outreach into contracted acreage.",
+      "chart": {
+        "kind": "native_chart",
+        "chart_type": "bar",
+        "categories": [
+          "Leads",
+          "Qualified farmers",
+          "Field surveys",
+          "Quotes issued",
+          "Bookings",
+          "Signed acreage"
+        ],
+        "series": [
+          {
+            "name": "Pipeline",
+            "values": [
+              1000.0,
+              400.0,
+              220.0,
+              160.0,
+              80.0,
+              12000.0
+            ]
+          }
+        ],
+        "sort": "none",
+        "highlight": "Signed acreage",
+        "annotation": "The pipeline narrows from 1,000 leads to 80 bookings and ends at 12,000 acres of signed demand.",
+        "value_suffix": ""
+      },
+      "insights_heading": "Conversion evidence",
+      "insights": [
+        {
+          "text": "**1,000** leads narrow to **400** qualified farmers, concentrating effort on serviceable demand.",
+          "level": 0
+        },
+        {
+          "text": "The middle funnel converts **220** field surveys into **160** quotes, keeping pre-sales activity tied to real booking intent.",
+          "level": 0
+        },
+        {
+          "text": "**80** bookings produce **12,000 acres** of signed demand, making booked acreage the output that matters.",
+          "level": 0
+        }
+      ],
+      "footnote": "illustrative data"
+    },
+    {
+      "bg_image": null,
+      "bg_image_opacity": 0.12,
+      "slide_type": "exec_summary",
+      "title": "Launching now through phased partnerships converts strategic fit into scalable acreage with faster validation and lower operating load",
+      "sections": [
+        {
+          "heading": "Why now",
+          "body": "The company already has the ingredients to start: existing channel access, advisory relationships, and farmer trust support a credible adjacent service without building a fully owned fleet first."
+        },
+        {
+          "heading": "How to enter",
+          "body": "Lead with channel-led partnerships and pilot clusters. This route combines **high strategic fit** with **easier execution**, reaches farmers fastest, and avoids the operating load of a fully owned fleet and the control gaps of a pure marketplace."
+        },
+        {
+          "heading": "What the first year proves",
+          "body": "A **12-month** rollout from pilot districts to scaled clusters validates unit economics before adding fleet capacity and geographic coverage, turning early pilots into a repeatable expansion model."
+        },
+        {
+          "heading": "What scales",
+          "body": "Disciplined conversion management translates commercial activity into booked demand: **1,000** leads progress through the funnel to **12,000 acres** of signed demand, giving the business a measurable path from pipeline to scale."
+        }
+      ],
+      "footnote": "illustrative data"
+    }
+  ]
+}

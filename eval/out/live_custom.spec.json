@@ -1,0 +1,118 @@
+{
+  "schema_version": 1,
+  "theme": "consulting_paper",
+  "meta": {
+    "title": "live custom_layout",
+    "date": null,
+    "footer_org": null,
+    "confidentiality": null
+  },
+  "slides": [
+    {
+      "bg_image": null,
+      "bg_image_opacity": 0.12,
+      "slide_type": "custom_layout",
+      "title": "Channel-led partnerships and pilot clusters should lead entry because they pair high strategic fit with easier execution",
+      "subtitle": null,
+      "root": {
+        "kind": "rows",
+        "children": [
+          {
+            "kind": "matrix_2x2",
+            "x_label": "Execution ease",
+            "y_label": "Strategic fit",
+            "quadrants": [
+              {
+                "title": "Scale later",
+                "items": [
+                  "Owned fleet",
+                  "High control over service quality",
+                  "Higher capex, ops, and utilisation risk"
+                ]
+              },
+              {
+                "title": "Prioritise now",
+                "items": [
+                  "Channel partnerships",
+                  "Pilot clusters",
+                  "Fast route to demand and field proof"
+                ]
+              },
+              {
+                "title": "Deprioritise",
+                "items": [
+                  "Digital marketplace",
+                  "Low operational burden",
+                  "Weaker control over service delivery"
+                ]
+              },
+              {
+                "title": "Selective build",
+                "items": [
+                  "Use owned fleet only in dense routes",
+                  "Add digital layer after service model works",
+                  "Expand once unit economics are proven"
+                ]
+              }
+            ],
+            "highlight": 1
+          },
+          {
+            "kind": "panel",
+            "child": {
+              "kind": "cols",
+              "children": [
+                {
+                  "kind": "text_block",
+                  "text": "**Lead with 2 moves**: channel partnerships and pilot clusters",
+                  "size_role": "small",
+                  "font_role": "body",
+                  "align": "center",
+                  "color_role": "ink",
+                  "max_lines": null
+                },
+                {
+                  "kind": "text_block",
+                  "text": "Owned fleet fits the strategy but is harder to execute at entry",
+                  "size_role": "small",
+                  "font_role": "body",
+                  "align": "center",
+                  "color_role": "ink",
+                  "max_lines": null
+                },
+                {
+                  "kind": "text_block",
+                  "text": "Digital marketplace is easy to launch but sits lower on strategic fit",
+                  "size_role": "small",
+                  "font_role": "body",
+                  "align": "center",
+                  "color_role": "ink",
+                  "max_lines": null
+                }
+              ],
+              "fracs": [
+                0.34,
+                0.33,
+                0.33
+              ],
+              "gap": 0.6,
+              "align": "middle"
+            },
+            "fill_role": "surface",
+            "border_role": "positive",
+            "rounded": true,
+            "shadow": false,
+            "inset": 0.8
+          }
+        ],
+        "fracs": [
+          0.76,
+          0.24
+        ],
+        "gap": 0.8,
+        "pin_last": false
+      },
+      "footnote": "illustrative data"
+    }
+  ]
+}

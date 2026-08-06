@@ -12,9 +12,13 @@ verify_spec_numbers() gates the result — the LLM never does arithmetic.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import os
+import shutil
+import tempfile
+from pathlib import Path
 from typing import get_args
 
 from pydantic import BaseModel, ValidationError
@@ -22,6 +26,7 @@ from pydantic import BaseModel, ValidationError
 from ..schema.slide_types import DeckMeta, DeckSpec, SlideSpec
 from .facts import FactTable, verify_spec_numbers
 from .story import REVIEW_PROMPT, Outline, check_outline
+from .writing import check_slide_writing
 
 log = logging.getLogger("deckengine")
 
@@ -34,10 +39,11 @@ _ARCHETYPES: dict[str, type[BaseModel]] = {
 
 SYSTEM = """You write slide specs for DeckEngine, a consulting-grade deck engine.
 Hard rules:
-- Titles are full-sentence takeaways ("X raised incomes 5% above state average"), never labels ("Results"). Keep titles under 160 characters.
-- Prefer stats, tables and comparisons over prose (assertion-evidence style).
+- Titles are full-sentence takeaways ("X raised incomes 5% above state average"), never labels ("Results"). Keep titles under 160 characters. A title carries a verb and, when the facts allow, a number.
+- Prefer stats, tables and comparisons over prose (assertion-evidence style): every body element is EVIDENCE for the title claim, not commentary about it.
 - Use ONLY numbers given in the FACTS block, with their display strings verbatim. Never compute, extrapolate or invent a number. If no FACTS block is given, use round illustrative numbers and mark the footnote 'illustrative data'.
-- Rich text markup: **bold** for emphasis on numbers/leads, *italic* sparingly.
+- Rich text markup: **bold** for emphasis on numbers/leads. *Italics* only for defined terms, at most twice per slide — italicising for tone is a machine tell.
+- Writing craft: never hedge (may/might/could/potentially — state it or cut it). No exclamation marks. Never open a line with Additionally/Furthermore/Moreover. Vary sentence rhythm: a short punch, then longer support.
 - Keep text tight: this engine renders at consulting density; long text gets shrunk then truncated.
 - Respect every field constraint in the schema exactly."""
 
@@ -109,10 +115,12 @@ def generate_outline(prompt: str, facts: FactTable | None) -> Outline:
          "the slide title; never a label). Read in sequence, the claims must "
          "prove the governing thought. Vary the archetypes — never more than "
          "two consecutive slides of the same slide_type. Prefer standard "
-         "archetypes; pick custom_layout ONLY when a claim needs a bespoke "
-         "composition no standard mold fits (panel matrix, hero stat + proof "
-         "stack, grid + summary band). Open with a title slide; close with "
-         "an exec_summary or kpi_dashboard when it fits.")
+         "archetypes; pick custom_layout when a claim needs a bespoke "
+         "composition no standard mold fits — and ALWAYS for prioritisation "
+         "2x2s, funnels, option scorecards or image-led slides: the "
+         "matrix_2x2, funnel, harvey_balls and image_block components live "
+         "only inside custom_layout trees. Open with a title slide; close "
+         "with an exec_summary or kpi_dashboard when it fits.")
     outline = Outline.model_validate(_structured_call("emit_outline", schema, p))
     problems = check_outline(outline)
     review = REVIEW_PROMPT
@@ -130,16 +138,24 @@ def generate_outline(prompt: str, facts: FactTable | None) -> Outline:
     return outline
 
 
-_FEW_SHOTS_DIR = __import__("pathlib").Path(__file__).parent / "few_shots"
+_FEW_SHOTS_DIR = Path(__file__).parent / "few_shots"
+WON_DIR = _FEW_SHOTS_DIR / "won"
 
 
 def _few_shot(archetype: str) -> str:
     """Curated gold specs of this archetype, injected as exemplars —
     move density and structure more than any critique pass. An archetype may
-    ship several ({name}.json, {name}_2.json, ...) to show distinct shapes."""
+    ship several ({name}.json, {name}_2.json, ...); the latest judge-picked
+    winner from WON_DIR compounds on top (max 3 exemplars total)."""
     paths = [p for p in (_FEW_SHOTS_DIR / f"{archetype}.json",
                          _FEW_SHOTS_DIR / f"{archetype}_2.json")
              if p.is_file()]
+    if WON_DIR.is_dir():
+        won = sorted(WON_DIR.glob(f"{archetype}_*.json"),
+                     key=lambda p: p.stat().st_mtime)
+        if won:
+            paths.append(won[-1])
+    paths = paths[:3]
     if not paths:
         return ""
     return "".join(
@@ -192,11 +208,138 @@ def generate_slide(archetype: str, intent: str, prompt: str,
                 continue
             if suspects:
                 log.warning("unverified numbers survived repairs: %s", suspects)
+        wproblems = check_slide_writing(slide)
+        if wproblems and attempt < MAX_REPAIRS:
+            attempt_prompt = (base_prompt +
+                              "\n\nWriting problems — fix ALL of them while "
+                              "keeping the same facts and structure:\n" +
+                              "\n".join(f"- {p}" for p in wproblems) +
+                              "\nEmit the full JSON again.")
+            continue
+        if wproblems:
+            log.warning("writing problems survived repairs: %s", wproblems)
         return slide
     if slide is None:
         raise RuntimeError(f"slide {archetype} failed validation after "
                            f"{MAX_REPAIRS + 1} attempts — last errors: {last_error}")
     return slide
+
+
+# --- multi-candidate + judge (Q4) -------------------------------------------
+
+_VARIANT_NUDGE = ("\n\nVariant instruction: take a DIFFERENT structural "
+                  "approach than the obvious one — a different component "
+                  "mix, density or layout shape — while proving the same "
+                  "claim with the same facts.")
+
+
+def candidate_count() -> int:
+    """2-3 candidates per slide by default (quality over cost, approved);
+    DECKENGINE_CANDIDATES=1 is the cheap-mode opt-out."""
+    try:
+        n = int(os.environ.get("DECKENGINE_CANDIDATES", "2"))
+    except ValueError:
+        n = 2
+    return max(1, min(3, n))
+
+
+def _render_candidate(slide, theme: str, workdir: Path, tag: str) -> dict:
+    """Free deterministic score: render the slide alone, read the report.
+    A candidate that cannot render at all loses outright."""
+    from ..render.deck_builder import build_deck
+    out = workdir / f"{tag}.pptx"
+    try:
+        report = build_deck(DeckSpec(theme=theme,
+                                     meta=DeckMeta(title="candidate"),
+                                     slides=[slide]), out)
+    except Exception as e:  # noqa: BLE001 — deterministic loss, not a crash
+        log.warning("candidate %s failed to render: %s", tag, e)
+        return {"defects": 999, "fill": 0.0, "pptx": None}
+    return {"defects": len(report.warnings) + len(report.truncations),
+            "fill": round(min(report.fills) if report.fills else 1.0, 3),
+            "pptx": out}
+
+
+def _export_png(pptx: Path) -> Path | None:
+    try:  # Windows + Office only; absence falls back to deterministic pick
+        from ..render.preview import export_pngs_powerpoint
+        pngs = export_pngs_powerpoint(pptx, pptx.parent / (pptx.stem + "_png"),
+                                      width=1280, height=720)
+        return pngs[0] if pngs else None
+    except Exception as e:  # noqa: BLE001
+        log.info("no preview available for judge (%s)", e)
+        return None
+
+
+def _record_win(archetype: str, slide) -> None:
+    """Judge-picked winners join the gold-spec library — compounding
+    few-shots (the latest win rides in every future stage-2 prompt)."""
+    try:
+        WON_DIR.mkdir(parents=True, exist_ok=True)
+        digest = hashlib.sha1(
+            slide.model_dump_json().encode("utf-8")).hexdigest()[:10]
+        p = WON_DIR / f"{archetype}_{digest}.json"
+        if not p.is_file():
+            p.write_text(slide.model_dump_json(), encoding="utf-8")
+    except OSError as e:
+        log.warning("could not record win: %s", e)
+
+
+def generate_slide_best(archetype: str, claim: str, prompt: str,
+                        facts: FactTable | None,
+                        prior_slides: list[str] | None = None,
+                        theme: str = "consulting_navy") -> BaseModel:
+    """N candidates -> render all -> deterministic score -> ONE pairwise
+    vision-judge call only when the metrics can't separate the finalists."""
+    n = candidate_count()
+    if n == 1:
+        return generate_slide(archetype, claim, prompt, facts,
+                              prior_slides=prior_slides)
+    cands = []
+    for i in range(n):
+        p = prompt if i == 0 else prompt + _VARIANT_NUDGE
+        try:
+            cands.append(generate_slide(archetype, claim, p, facts,
+                                        prior_slides=prior_slides))
+        except RuntimeError as e:
+            log.warning("candidate %d for %s failed: %s", i, archetype, e)
+    if not cands:
+        raise RuntimeError(f"all {n} candidates failed for {archetype}")
+    uniq, seen = [], set()
+    for c in cands:
+        key = c.model_dump_json()
+        if key not in seen:
+            seen.add(key)
+            uniq.append(c)
+    if len(uniq) == 1:
+        return uniq[0]
+
+    workdir = Path(tempfile.mkdtemp(prefix="deckengine_cand_"))
+    try:
+        scored = [(c, _render_candidate(c, theme, workdir, f"cand{i}"))
+                  for i, c in enumerate(uniq)]
+        scored.sort(key=lambda cs: (cs[1]["defects"], -cs[1]["fill"]))
+        best, runner = scored[0], scored[1]
+        clear = (best[1]["defects"] < runner[1]["defects"]
+                 or best[1]["fill"] - runner[1]["fill"] > 0.05)
+        if clear or best[1]["pptx"] is None or runner[1]["pptx"] is None:
+            return best[0]
+        png_a = _export_png(best[1]["pptx"])
+        png_b = _export_png(runner[1]["pptx"])
+        if png_a is None or png_b is None:
+            return best[0]
+        from .judge import pairwise_judge
+        try:
+            winner, reason = pairwise_judge(png_a, png_b, claim)
+        except Exception as e:  # noqa: BLE001 — judge is best-effort
+            log.warning("vision judge failed (%s); deterministic pick", e)
+            return best[0]
+        log.info("vision judge picked %s: %s", winner, reason)
+        chosen = best[0] if winner == "A" else runner[0]
+        _record_win(archetype, chosen)
+        return chosen
+    finally:
+        shutil.rmtree(workdir, ignore_errors=True)
 
 
 def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
@@ -217,8 +360,8 @@ def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
         if item.slide_type not in _ARCHETYPES:
             log.warning("skipping unknown archetype %r", item.slide_type)
             continue
-        slide = generate_slide(item.slide_type, item.claim, deck_context,
-                               facts, prior_slides=prior)
+        slide = generate_slide_best(item.slide_type, item.claim, deck_context,
+                                    facts, prior_slides=prior, theme=theme)
         slides.append(slide)
         title = getattr(slide, "title", None) or item.claim
         prior.append(f"[{item.slide_type}] {title}")
