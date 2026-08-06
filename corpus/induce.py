@@ -363,11 +363,36 @@ def run_induce(work: Path, total_cap: int = 30, estimate: bool = False,
             "failed": len(results) - ok}
 
 
+def _overlay_entry(cl: dict, sc: dict) -> dict:
+    """Corpus-mined tags for one induced exemplar, for the retrieval overlay
+    (few_shots/exemplars_index.json). Only the signals a spec cannot express;
+    exemplar_retrieval derives archetype/chart_type/craft from the spec."""
+    chart = cl.get("chart") if isinstance(cl.get("chart"), dict) else {}
+    return {"claim_context": cl.get("claim_context"),
+            "chart_type": chart.get("chart_type"),
+            "firm_style": cl.get("firm_style"),
+            "anchor": cl.get("anchor"),
+            "det_score": float((sc or {}).get("score") or 0.0),
+            "source_slide_id": cl.get("slide_id")}
+
+
 def apply_approved(work: Path, approved_ids: list[str],
                    few_shots: Path = FEW_SHOTS,
                    goldens: Path = GOLDENS) -> dict:
     """Copy approved neutralized specs into the few-shot + golden libraries.
-    Golden gets a full one-slide DeckSpec; few-shot gets the slide spec."""
+    Golden gets a full one-slide DeckSpec; few-shot gets the slide spec plus
+    an exemplars_index.json overlay entry (firm_style/anchor/quality) so
+    exemplar_retrieval can rank the induced exemplar by its source firm."""
+    classified = _last_wins(_read_jsonl(work / "classified.jsonl"), "slide_id")
+    scores = _last_wins(_read_jsonl(work / "scores.jsonl"), "slide_id")
+    overlay_path = few_shots / "exemplars_index.json"
+    try:
+        overlay = json.loads(overlay_path.read_text(encoding="utf-8")) \
+            if overlay_path.is_file() else {}
+    except ValueError:
+        overlay = {}
+    if not isinstance(overlay, dict):
+        overlay = {}
     applied = 0
     for sid in approved_ids:
         d = work / "induce" / sid.replace(":", "_")
@@ -381,14 +406,21 @@ def apply_approved(work: Path, approved_ids: list[str],
         n = 2
         while (few_shots / f"{archetype}_{n}.json").is_file():
             n += 1
-        (few_shots / f"{archetype}_{n}.json").write_text(
+        fname = f"{archetype}_{n}.json"
+        (few_shots / fname).write_text(
             json.dumps(spec, indent=2), encoding="utf-8")
+        overlay[fname] = _overlay_entry(classified.get(sid, {}),
+                                        scores.get(sid, {}))
         # golden: wrap as a renderable deck for the eval harness
         deck = {"schema_version": 1, "theme": "consulting_paper",
                 "meta": {"title": stem}, "slides": [spec]}
         (goldens / f"{stem}.json").write_text(
             json.dumps(deck, indent=2), encoding="utf-8")
         applied += 1
+    if applied:
+        overlay_path.write_text(
+            json.dumps(overlay, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8")
     return {"applied": applied}
 
 

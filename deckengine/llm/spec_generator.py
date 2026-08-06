@@ -27,6 +27,7 @@ from ..schema.slide_types import DeckMeta, DeckSpec, SlideSpec
 from .facts import FactTable, verify_spec_numbers
 from .format_rules import (check_outline_formats, check_slide_format,
                            decision_table_text)
+from .exemplar_retrieval import select_exemplars
 from .story import REVIEW_PROMPT, Outline, check_outline
 from .style_priors import prior_block
 from .writing import check_slide_writing
@@ -150,27 +151,51 @@ _FEW_SHOTS_DIR = Path(__file__).parent / "few_shots"
 WON_DIR = _FEW_SHOTS_DIR / "won"
 
 
-def _few_shot(archetype: str) -> str:
-    """Curated gold specs of this archetype, injected as exemplars —
-    move density and structure more than any critique pass. An archetype may
-    ship several ({name}.json, {name}_2.json, ...); the latest judge-picked
-    winner from WON_DIR compounds on top (max 3 exemplars total)."""
-    paths = [p for p in (_FEW_SHOTS_DIR / f"{archetype}.json",
-                         _FEW_SHOTS_DIR / f"{archetype}_2.json")
-             if p.is_file()]
+def _fallback_picks(archetype: str, pool: list[Path], k: int) -> list[Path]:
+    """Historical rule for when retrieval is off/empty: {archetype}_2.json
+    then the latest won winner by mtime."""
+    picks: list[Path] = []
+    a2 = _FEW_SHOTS_DIR / f"{archetype}_2.json"
+    if a2.is_file():
+        picks.append(a2)
+    won = sorted((p for p in pool if p.parent == WON_DIR),
+                 key=lambda p: p.stat().st_mtime)
+    if won:
+        picks.append(won[-1])
+    return picks[:k]
+
+
+def _few_shot(archetype: str, claim: str = "") -> str:
+    """Curated gold specs of this archetype, injected as exemplars — they
+    move density and structure more than any critique pass. The canonical
+    {archetype}.json is always kept as the mold; the remaining slots are the
+    BEST-MATCHING exemplars for this claim (by claim_context / chart / craft
+    / firm) drawn from the whole pool — hand-authored {archetype}_N.json,
+    induced big-firm exemplars, and won/ winners — via exemplar_retrieval.
+    Falls back to the historical mtime rule when retrieval is off. Max 3."""
+    base = _FEW_SHOTS_DIR / f"{archetype}.json"
+    paths: list[Path] = [base] if base.is_file() else []
+    pool = sorted(_FEW_SHOTS_DIR.glob(f"{archetype}_*.json"))
     if WON_DIR.is_dir():
-        won = sorted(WON_DIR.glob(f"{archetype}_*.json"),
-                     key=lambda p: p.stat().st_mtime)
-        if won:
-            paths.append(won[-1])
-    paths = paths[:3]
-    if not paths:
+        pool += sorted(WON_DIR.glob(f"{archetype}_*.json"))
+    k = max(0, 3 - len(paths))
+    picks = select_exemplars(archetype, claim, pool, _FEW_SHOTS_DIR, k)
+    if not picks:  # retrieval disabled or nothing loaded -> historical rule
+        picks = _fallback_picks(archetype, pool, k)
+    seen: set[Path] = set()
+    ordered: list[Path] = []
+    for p in paths + picks:
+        if p not in seen and p.is_file():
+            seen.add(p)
+            ordered.append(p)
+    ordered = ordered[:3]
+    if not ordered:
         return ""
     return "".join(
         f"\n\nEXAMPLE {i} of an excellent spec of this type (match its "
         "density and structure, NOT its topic or numbers):\n"
         + p.read_text(encoding="utf-8")
-        for i, p in enumerate(paths, start=1))
+        for i, p in enumerate(ordered, start=1))
 
 
 def generate_slide(archetype: str, intent: str, prompt: str,
@@ -193,7 +218,7 @@ def generate_slide(archetype: str, intent: str, prompt: str,
         table += "\n\n" + priors
     base_prompt = (
         f"Deck request:\n{prompt}\n\n"
-        f"{facts.prompt_block() if facts else ''}{prior}{_few_shot(archetype)}"
+        f"{facts.prompt_block() if facts else ''}{prior}{_few_shot(archetype, intent)}"
         f"{table}\n\n"
         f"Write the spec for ONE slide of type '{archetype}'. Slide intent: {intent}")
     attempt_prompt = base_prompt
