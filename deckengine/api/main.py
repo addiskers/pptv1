@@ -41,6 +41,26 @@ def demo_spec() -> dict:
                       .read_text(encoding="utf-8"))
 
 
+@app.get("/themes")
+def list_themes() -> list[dict]:
+    """Enumerate available themes with swatch colors so the UI picker is
+    data-driven (brand themes drop in as files, no UI change)."""
+    from ..core.theme import THEMES_DIR, load_theme
+    out = []
+    for p in sorted(THEMES_DIR.glob("*.json")):
+        try:
+            t = load_theme(p.stem)
+        except Exception:  # noqa: BLE001 — a malformed theme just hides
+            continue
+        out.append({"name": p.stem,
+                    "primary": "#" + t.color_primary,
+                    "primary_dark": "#" + t.color_primary_dark,
+                    "accent": "#" + t.color_accent,
+                    "bg": "#" + t.color_bg,
+                    "ink": "#" + t.color_ink})
+    return out
+
+
 def _check_key(x_api_key: str | None) -> None:
     expected = os.environ.get("DECKENGINE_API_KEY")
     if expected and x_api_key != expected:

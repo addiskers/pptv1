@@ -3,257 +3,630 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DeckEngine</title>
+<title>DeckEngine — consulting-grade decks from a sentence</title>
 <style>
   :root {
-    --navy: #1F3864; --navy-dark: #16294A; --accent: #C55A11;
-    --ink: #2b2b2b; --muted: #6b7280; --bg: #f4f5f7; --card: #ffffff;
-    --grid: #e2e5ea; --positive: #21614B;
+    --bg: #f4f2ec; --surface: #ffffff; --surface-2: #faf9f5;
+    --ink: #23262b; --muted: #6f6a61; --faint: #8b8578;
+    --line: #e4e1d8; --line-strong: #d3cfc4;
+    --navy: #2c3a47; --slate: #51626f; --accent: #c05621;
+    --accent-soft: #f5e7dc; --green: #2e6b57; --gold: #b8860b;
+    --shadow-sm: 0 1px 2px rgba(35,38,43,.06), 0 1px 3px rgba(35,38,43,.05);
+    --shadow-md: 0 4px 12px rgba(35,38,43,.08), 0 2px 4px rgba(35,38,43,.05);
+    --shadow-lg: 0 18px 48px rgba(35,38,43,.16), 0 6px 16px rgba(35,38,43,.10);
+    --r-lg: 16px; --r-md: 10px; --r-sm: 8px;
   }
   * { box-sizing: border-box; margin: 0; }
-  body { font: 15px/1.5 "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--ink); }
-  header { background: var(--navy); color: #fff; padding: 18px 28px; display: flex; align-items: baseline; gap: 14px; }
-  header h1 { font: 600 22px Georgia, serif; letter-spacing: .3px; }
-  header span { color: #b9c4d8; font-size: 13px; }
-  main { max-width: 1060px; margin: 26px auto; padding: 0 20px; display: grid; gap: 20px; }
-  .card { background: var(--card); border: 1px solid var(--grid); border-radius: 10px; padding: 22px; }
-  .tabs { display: flex; gap: 6px; margin-bottom: 18px; }
-  .tabs button { border: 1px solid var(--grid); background: #fff; padding: 8px 18px; border-radius: 999px; cursor: pointer; font-weight: 600; color: var(--muted); }
-  .tabs button.active { background: var(--navy); border-color: var(--navy); color: #fff; }
-  label { display: block; font-weight: 600; font-size: 13px; margin: 14px 0 6px; color: var(--navy-dark); }
-  textarea, select, input[type=text] { width: 100%; border: 1px solid var(--grid); border-radius: 8px; padding: 10px 12px; font: inherit; background: #fbfcfd; }
-  textarea:focus, select:focus { outline: 2px solid #9db3d8; }
-  textarea.prompt { min-height: 110px; }
-  textarea.mono { font: 12.5px/1.45 Consolas, monospace; min-height: 180px; }
-  .row { display: flex; gap: 12px; align-items: end; flex-wrap: wrap; }
-  .row > div { flex: 1; min-width: 180px; }
-  .actions { margin-top: 18px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-  .btn { border: 0; border-radius: 8px; padding: 11px 22px; font: 600 15px "Segoe UI"; cursor: pointer; }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:disabled { background: #d8c7ba; cursor: default; }
-  .btn-ghost { background: #eef1f5; color: var(--navy-dark); }
+  html { scroll-behavior: smooth; }
+  body {
+    font: 15px/1.55 -apple-system, "Segoe UI", Roboto, system-ui, sans-serif;
+    background: var(--bg); color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .serif { font-family: Georgia, "Times New Roman", serif; }
+  a { color: var(--accent); }
+  button { font-family: inherit; }
+
+  /* header */
+  header {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(244,242,236,.85);
+    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 24px;
+  }
+  .brand { display: flex; align-items: baseline; gap: 10px; }
+  .brand .mark {
+    font: 700 21px Georgia, serif; letter-spacing: .2px; color: var(--navy);
+  }
+  .brand .mark b { color: var(--accent); font-weight: 700; }
+  .brand .tag { font-size: 12.5px; color: var(--muted); display: none; }
+  @media (min-width: 640px) { .brand .tag { display: inline; } }
+  .header-spacer { flex: 1; }
+  .link-btn {
+    border: 1px solid var(--line-strong); background: var(--surface);
+    color: var(--navy); border-radius: 999px; padding: 7px 16px;
+    font-weight: 600; font-size: 13.5px; cursor: pointer; display: inline-flex;
+    align-items: center; gap: 7px; transition: all .15s;
+  }
+  .link-btn:hover { border-color: var(--slate); box-shadow: var(--shadow-sm); }
+  .link-btn svg { width: 15px; height: 15px; }
+
+  main { max-width: 940px; margin: 0 auto; padding: 34px 20px 80px; }
+
+  /* hero */
+  .hero { text-align: center; margin-bottom: 26px; }
+  .hero h1 {
+    font: 400 40px/1.12 Georgia, serif; color: var(--navy);
+    letter-spacing: -.5px; margin-bottom: 12px;
+  }
+  .hero h1 em { font-style: italic; color: var(--accent); }
+  .hero p { color: var(--muted); font-size: 16px; max-width: 560px; margin: 0 auto; }
+  @media (max-width: 560px) { .hero h1 { font-size: 30px; } }
+
+  /* card */
+  .card {
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r-lg); box-shadow: var(--shadow-md);
+    padding: 24px;
+  }
+  .compose textarea {
+    width: 100%; border: 1px solid var(--line-strong); border-radius: var(--r-md);
+    padding: 16px; font: 16px/1.5 inherit; background: var(--surface-2);
+    resize: vertical; min-height: 120px; transition: border-color .15s, box-shadow .15s;
+  }
+  .compose textarea:focus {
+    outline: none; border-color: var(--slate);
+    box-shadow: 0 0 0 3px rgba(81,98,111,.12);
+  }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 4px; }
+  .chip {
+    border: 1px solid var(--line-strong); background: var(--surface-2);
+    color: var(--slate); border-radius: 999px; padding: 6px 13px;
+    font-size: 12.5px; cursor: pointer; transition: all .15s;
+  }
+  .chip:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+  .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+  @media (max-width: 620px) { .controls { grid-template-columns: 1fr; } }
+  .field label {
+    display: block; font-weight: 600; font-size: 12px; letter-spacing: .04em;
+    text-transform: uppercase; color: var(--faint); margin-bottom: 8px;
+  }
+
+  /* dropzone */
+  .dropzone {
+    border: 1.5px dashed var(--line-strong); border-radius: var(--r-md);
+    padding: 14px; text-align: center; cursor: pointer; background: var(--surface-2);
+    transition: all .15s; color: var(--muted); font-size: 13.5px;
+  }
+  .dropzone:hover, .dropzone.drag { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  .dropzone svg { width: 20px; height: 20px; display: block; margin: 0 auto 6px; opacity: .6; }
+  .dropzone.has-file { border-style: solid; border-color: var(--green); color: var(--green); background: #f0f6f3; }
+  .dropzone .fname { font-weight: 600; }
+  .dropzone .clear { margin-left: 8px; color: var(--muted); text-decoration: underline; }
+
+  /* theme swatches */
+  .themes { display: flex; flex-wrap: wrap; gap: 10px; }
+  .theme-opt {
+    border: 1.5px solid var(--line); border-radius: var(--r-sm); padding: 9px 11px;
+    cursor: pointer; display: flex; align-items: center; gap: 9px; background: var(--surface);
+    transition: all .15s; flex: 1; min-width: 130px;
+  }
+  .theme-opt:hover { border-color: var(--line-strong); }
+  .theme-opt.sel { border-color: var(--navy); box-shadow: 0 0 0 2px rgba(44,58,71,.12); }
+  .theme-opt .sw { display: flex; gap: 3px; }
+  .theme-opt .sw span { width: 12px; height: 18px; border-radius: 3px; border: 1px solid rgba(0,0,0,.08); }
+  .theme-opt .nm { font-size: 12.5px; font-weight: 600; color: var(--ink); text-transform: capitalize; }
+
+  /* toggle */
+  .toggle-row { display: flex; align-items: center; gap: 10px; margin-top: 16px; padding: 12px 14px;
+    background: var(--surface-2); border: 1px solid var(--line); border-radius: var(--r-md); }
+  .switch { position: relative; width: 40px; height: 23px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; inset: 0; background: var(--line-strong); border-radius: 999px; transition: .2s; cursor: pointer; }
+  .slider::before { content: ""; position: absolute; height: 17px; width: 17px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .2s; box-shadow: var(--shadow-sm); }
+  .switch input:checked + .slider { background: var(--green); }
+  .switch input:checked + .slider::before { transform: translateX(17px); }
+  .toggle-row .t-txt { font-size: 13px; }
+  .toggle-row .t-txt b { display: block; color: var(--ink); }
+  .toggle-row .t-txt span { color: var(--muted); font-size: 12.5px; }
+
+  .actions { margin-top: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .btn {
+    border: 0; border-radius: var(--r-md); padding: 13px 26px; font: 600 15.5px inherit;
+    cursor: pointer; display: inline-flex; align-items: center; gap: 9px; transition: all .15s;
+  }
+  .btn svg { width: 17px; height: 17px; }
+  .btn-primary { background: var(--accent); color: #fff; box-shadow: var(--shadow-sm); }
+  .btn-primary:hover { background: #a94a17; box-shadow: var(--shadow-md); }
+  .btn-primary:disabled { background: #d8c7ba; cursor: default; box-shadow: none; }
+  .btn-ghost { background: var(--surface-2); color: var(--navy); border: 1px solid var(--line-strong); }
+  .btn-ghost:hover { border-color: var(--slate); }
+  .btn-green { background: var(--green); color: #fff; text-decoration: none; box-shadow: var(--shadow-sm); }
+  .btn-green:hover { background: #245a49; }
   .hint { font-size: 12.5px; color: var(--muted); }
-  #status { display: none; }
-  .spinner { width: 18px; height: 18px; border: 3px solid #d5dbe6; border-top-color: var(--navy); border-radius: 50%; display: inline-block; vertical-align: -4px; animation: spin 0.9s linear infinite; margin-right: 10px; }
+  kbd { font: 11px/1 ui-monospace, monospace; background: var(--surface-2); border: 1px solid var(--line-strong);
+    border-bottom-width: 2px; border-radius: 5px; padding: 3px 6px; color: var(--muted); }
+
+  /* advanced expander */
+  .adv { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 14px; }
+  .adv summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--slate); list-style: none; display: flex; align-items: center; gap: 6px; }
+  .adv summary::-webkit-details-marker { display: none; }
+  .adv summary::before { content: "▸"; transition: transform .15s; }
+  .adv[open] summary::before { transform: rotate(90deg); }
+  .adv textarea { width: 100%; margin-top: 12px; border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+    padding: 12px; font: 12.5px/1.5 ui-monospace, "Consolas", monospace; min-height: 200px; background: var(--surface-2); }
+
+  /* stage panels */
+  .stage { margin-top: 22px; }
+  .hidden { display: none !important; }
+
+  .progress { text-align: center; padding: 40px 24px; }
+  .progress .ring { width: 46px; height: 46px; border: 4px solid var(--line); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.85s linear infinite; margin: 0 auto 18px; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .warn { background: #fff7ed; border: 1px solid #fdba74; color: #9a3412; border-radius: 8px; padding: 10px 14px; font-size: 13px; margin-top: 10px; white-space: pre-wrap; }
-  .err  { background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; border-radius: 8px; padding: 10px 14px; font-size: 13.5px; margin-top: 10px; white-space: pre-wrap; }
-  .ok   { color: var(--positive); font-weight: 600; }
-  #previews { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-top: 16px; }
-  #previews img { width: 100%; border: 1px solid var(--grid); border-radius: 6px; box-shadow: 0 1px 4px rgba(20,30,60,.08); cursor: zoom-in; transition: transform .12s; }
-  #previews img:hover { transform: scale(1.02); }
-  #lightbox { position: fixed; inset: 0; background: rgba(15,20,35,.85); display: none; align-items: center; justify-content: center; z-index: 50; cursor: zoom-out; }
-  #lightbox img { max-width: 94vw; max-height: 94vh; border-radius: 6px; }
-  a.download { display: inline-block; background: var(--positive); color: #fff; text-decoration: none; padding: 11px 22px; border-radius: 8px; font-weight: 600; }
+  .progress h3 { font: 600 18px inherit; color: var(--navy); margin-bottom: 6px; }
+  .progress p { color: var(--muted); font-size: 13.5px; max-width: 440px; margin: 0 auto; }
+  .steps { display: flex; justify-content: center; gap: 6px; margin-top: 20px; flex-wrap: wrap; }
+  .steps .s { font-size: 12px; color: var(--faint); padding: 5px 12px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); }
+  .steps .s.on { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+  .steps .s.done { color: var(--green); border-color: #bfe0d3; background: #f0f6f3; }
+
+  /* outline gate */
+  .gate h2 { font: 400 24px Georgia, serif; color: var(--navy); margin-bottom: 6px; }
+  .gate .lede { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+  .gate .gov { width: 100%; border: 1px solid var(--line-strong); border-radius: var(--r-md);
+    padding: 13px; font: italic 16px/1.5 Georgia, serif; background: var(--accent-soft); color: var(--navy); resize: vertical; min-height: 56px; }
+  .gov-label { font-weight: 600; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--faint); margin: 4px 0 8px; }
+  .storyline { margin: 20px 0; display: flex; flex-direction: column; gap: 10px; }
+  .slot { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1px solid var(--line);
+    border-radius: var(--r-md); background: var(--surface-2); transition: border-color .15s; }
+  .slot:focus-within { border-color: var(--slate); background: var(--surface); }
+  .slot .num { font: 600 13px inherit; color: #fff; background: var(--slate); width: 24px; height: 24px; flex-shrink: 0;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-top: 4px; }
+  .slot .body { flex: 1; }
+  .slot .badge { font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+    color: var(--slate); background: #e9edf0; border-radius: 4px; padding: 2px 7px; display: inline-block; margin-bottom: 6px; }
+  .slot .claim { width: 100%; border: 0; background: transparent; font: 15px/1.45 inherit; color: var(--ink); resize: vertical; padding: 0; min-height: 24px; }
+  .slot .claim:focus { outline: none; }
+
+  /* results */
+  .result-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 4px; }
+  .result-head .check { width: 40px; height: 40px; background: #f0f6f3; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .result-head .check svg { width: 22px; height: 22px; color: var(--green); }
+  .result-head h2 { font: 600 20px inherit; color: var(--navy); }
+  .result-head .sub { color: var(--muted); font-size: 13px; }
+  .result-actions { margin: 20px 0; display: flex; gap: 12px; flex-wrap: wrap; }
+  details.warns { margin-bottom: 16px; }
+  details.warns summary { cursor: pointer; font-size: 13px; color: var(--gold); font-weight: 600; }
+  details.warns .body { background: #fdf8ef; border: 1px solid #ecd9a8; border-radius: var(--r-sm);
+    padding: 12px 14px; font: 12.5px/1.6 ui-monospace, monospace; color: #7a5a12; margin-top: 8px; white-space: pre-wrap; max-height: 200px; overflow: auto; }
+
+  .previews { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .pv { position: relative; border-radius: var(--r-md); overflow: hidden; border: 1px solid var(--line);
+    box-shadow: var(--shadow-sm); background: var(--surface); transition: transform .15s, box-shadow .15s; }
+  .pv:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .pv img { width: 100%; display: block; cursor: zoom-in; }
+  .pv .n { position: absolute; top: 8px; left: 8px; font: 600 11px inherit; color: #fff;
+    background: rgba(44,58,71,.82); border-radius: 5px; padding: 3px 8px; }
+  .pv .rework { position: absolute; top: 8px; right: 8px; border: 0; border-radius: 6px; padding: 5px 11px;
+    font: 600 12px inherit; background: rgba(192,86,33,.92); color: #fff; cursor: pointer; opacity: 0; transition: opacity .15s; display: flex; align-items: center; gap: 5px; }
+  .pv:hover .rework { opacity: 1; }
+  .pv .rework svg { width: 12px; height: 12px; }
+
+  /* lightbox */
+  #lightbox { position: fixed; inset: 0; background: rgba(20,22,26,.9); display: none; align-items: center;
+    justify-content: center; z-index: 60; cursor: zoom-out; padding: 30px; }
+  #lightbox img { max-width: 96vw; max-height: 92vh; border-radius: var(--r-sm); box-shadow: var(--shadow-lg); }
+
+  /* recent drawer */
+  .drawer-bg { position: fixed; inset: 0; background: rgba(20,22,26,.4); z-index: 40; display: none; }
+  .drawer { position: fixed; top: 0; right: 0; height: 100%; width: min(420px, 92vw); background: var(--bg);
+    box-shadow: var(--shadow-lg); z-index: 41; transform: translateX(100%); transition: transform .22s ease;
+    display: flex; flex-direction: column; }
+  .drawer.open { transform: translateX(0); }
+  .drawer-head { padding: 18px 20px; border-bottom: 1px solid var(--line); display: flex; align-items: center; }
+  .drawer-head h3 { font: 600 17px inherit; color: var(--navy); flex: 1; }
+  .drawer-head button { border: 0; background: none; cursor: pointer; color: var(--muted); font-size: 22px; line-height: 1; }
+  .drawer-list { overflow-y: auto; padding: 12px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .deck-item { border: 1px solid var(--line); border-radius: var(--r-md); padding: 13px 15px; background: var(--surface);
+    cursor: pointer; transition: all .15s; }
+  .deck-item:hover { border-color: var(--slate); box-shadow: var(--shadow-sm); }
+  .deck-item .t { font-weight: 600; font-size: 14px; color: var(--ink); margin-bottom: 4px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .deck-item .m { font-size: 12px; color: var(--muted); }
+  .drawer-empty { text-align: center; color: var(--muted); padding: 40px 20px; font-size: 13.5px; }
+
+  /* toast */
+  #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #3a2018; color: #fff; padding: 13px 20px; border-radius: var(--r-md); font-size: 13.5px;
+    box-shadow: var(--shadow-lg); z-index: 70; opacity: 0; transition: all .25s; max-width: 90vw; }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast.err { background: #7a2018; }
+  footer { text-align: center; color: var(--faint); font-size: 12px; padding: 30px 20px; }
 </style>
 </head>
 <body>
-<header><h1>DeckEngine</h1><span>describe it &rarr; consulting-grade, fully editable .pptx</span></header>
+<header>
+  <div class="brand">
+    <span class="mark serif">Deck<b>Engine</b></span>
+    <span class="tag">a sentence in &rarr; a consulting-grade, fully editable deck out</span>
+  </div>
+  <div class="header-spacer"></div>
+  <button class="link-btn" onclick="openDrawer()">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+    Recent decks
+  </button>
+</header>
+
 <main>
-  <div class="card">
-    <div class="tabs">
-      <button id="tab-prompt" class="active" onclick="setTab('prompt')">Describe your deck</button>
-      <button id="tab-spec" onclick="setTab('spec')">JSON spec</button>
+  <!-- COMPOSE -->
+  <section id="compose">
+    <div class="hero">
+      <h1 class="serif">Describe it. Get a deck that <em>reads like a partner made it.</em></h1>
+      <p>The engine plans the storyline, writes assertion-evidence slides, picks the right chart for each claim, and renders a fully editable PowerPoint.</p>
     </div>
+    <div class="card compose">
+      <textarea id="prompt" placeholder="e.g. A 7-slide market assessment of India's cold-chain logistics market for an investment committee — size &amp; growth, segmentation, demand drivers, competitive landscape, and where the opportunity concentrates. Illustrative numbers are fine."></textarea>
+      <div class="chips" id="chips"></div>
 
-    <div id="pane-prompt">
-      <label>What type of ppt do you want?</label>
-      <textarea id="prompt" class="prompt" placeholder="e.g. 8-slide impact report on our India agriculture programs — farmer income, climate resilience and cost of cultivation across UP, Bihar and Odisha. End with a KPI dashboard."></textarea>
-      <div class="row">
-        <div>
-          <label for="csvfile">Data (optional CSV — every number in the deck will come from here)</label>
-          <input type="file" id="csvfile" accept=".csv,.txt" title="CSV data file">
+      <div class="controls">
+        <div class="field">
+          <label>Data — optional CSV</label>
+          <div class="dropzone" id="dropzone">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+            <div id="dz-text">Drop a CSV or click to upload<br><span style="font-size:12px">every number in the deck will trace to it</span></div>
+          </div>
+          <input type="file" id="csvfile" accept=".csv,.txt" hidden>
         </div>
-        <div>
-          <label for="theme">Theme</label>
-          <select id="theme" title="Deck theme"><option value="consulting_navy">consulting_navy</option></select>
+        <div class="field">
+          <label>Brand theme</label>
+          <div class="themes" id="themes"></div>
         </div>
       </div>
-      <div class="actions">
-        <button class="btn btn-primary" id="go" onclick="generate()">Generate deck</button>
-        <span class="hint">An LLM plans &amp; writes the slides — needs OPENAI_API_KEY (or ANTHROPIC_API_KEY) set where the server runs.</span>
-      </div>
-    </div>
 
-    <div id="pane-spec" style="display:none">
-      <label>Deck spec (JSON) — full manual control, no API key needed</label>
-      <textarea id="spec" class="mono" spellcheck="false"></textarea>
-      <div class="actions">
-        <button class="btn btn-primary" onclick="renderSpec()">Render deck</button>
-        <button class="btn btn-ghost" onclick="loadDemo()">Load demo spec</button>
-        <span class="hint">Edit anything — add a column, add table rows — the layout reflows.</span>
+      <div class="toggle-row">
+        <label class="switch"><input type="checkbox" id="review" checked><span class="slider"></span></label>
+        <div class="t-txt"><b>Review the storyline before slides are written</b><span>The 30-second check where deck quality is decided. Turn off to build in one shot.</span></div>
       </div>
-    </div>
-  </div>
 
-  <div class="card" id="status">
-    <div id="running"><span class="spinner"></span><b id="phase">Working…</b>
-      <div class="hint" id="phasehint" style="margin-top:6px"></div></div>
-    <div id="outline-gate" style="display:none">
-      <p style="font-weight:700;color:var(--navy-dark);margin-bottom:4px">Approve the storyline before slides are written</p>
-      <p class="hint" style="margin-bottom:12px">Read the claims top to bottom — they should argue like a story. Edit anything, then approve. This 30-second check is where deck quality is decided.</p>
-      <label>Governing thought (the deck's one-sentence answer)</label>
-      <textarea id="gov" class="prompt" style="min-height:54px"></textarea>
-      <div id="claims"></div>
       <div class="actions">
-        <button class="btn btn-primary" onclick="approveOutline()">Approve &amp; build slides</button>
-        <span class="hint">Slides take 60–90s after approval.</span>
+        <button class="btn btn-primary" id="go" onclick="generate()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          Generate deck
+        </button>
+        <span class="hint">Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> · needs an LLM key set on the server</span>
+      </div>
+
+      <details class="adv">
+        <summary>Advanced — paste a JSON spec (no API key needed)</summary>
+        <textarea id="spec" spellcheck="false" placeholder="Paste a DeckSpec JSON here for full manual control…"></textarea>
+        <div class="actions">
+          <button class="btn btn-ghost" onclick="renderSpec()">Render spec</button>
+          <button class="btn btn-ghost" onclick="loadDemo()">Load demo spec</button>
+          <span class="hint">Deterministic layout — edit anything and it reflows.</span>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- PROGRESS -->
+  <section id="progress" class="stage hidden">
+    <div class="card progress">
+      <div class="ring"></div>
+      <h3 id="p-title">Working…</h3>
+      <p id="p-sub"></p>
+      <div class="steps" id="steps">
+        <span class="s" data-step="outline">Storyline</span>
+        <span class="s" data-step="approve">Your review</span>
+        <span class="s" data-step="slides">Writing slides</span>
+        <span class="s" data-step="render">Rendering</span>
       </div>
     </div>
-    <div id="result" style="display:none">
-      <p class="ok" id="doneline"></p>
-      <div class="actions"><a class="download" id="dl" href="#">Download .pptx</a></div>
-      <div id="warnings"></div>
-      <div id="previews"></div>
+  </section>
+
+  <!-- OUTLINE GATE -->
+  <section id="gate" class="stage hidden">
+    <div class="card gate">
+      <h2 class="serif">Approve the storyline</h2>
+      <p class="lede">Read the claims top to bottom — they should argue like a story. Edit anything, then build.</p>
+      <div class="gov-label">Governing thought — the deck's one-sentence answer</div>
+      <textarea id="gov" class="gov" aria-label="Governing thought"></textarea>
+      <div class="storyline" id="storyline"></div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="approveOutline()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+          Build the slides
+        </button>
+        <button class="btn btn-ghost" onclick="resetToCompose()">Start over</button>
+        <span class="hint">Slides take ~60–90s after approval.</span>
+      </div>
     </div>
-    <div id="error" style="display:none" class="err"></div>
-  </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result" class="stage hidden">
+    <div class="card">
+      <div class="result-head">
+        <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg></div>
+        <div style="flex:1">
+          <h2 id="r-title">Your deck is ready</h2>
+          <div class="sub" id="r-sub"></div>
+        </div>
+      </div>
+      <div class="result-actions">
+        <a class="btn btn-green" id="dl" href="#" download>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"/></svg>
+          Download .pptx
+        </a>
+        <button class="btn btn-ghost" onclick="resetToCompose()">New deck</button>
+      </div>
+      <details class="warns" id="warnbox"><summary></summary><div class="body" id="warnbody"></div></details>
+      <div class="previews" id="previews"></div>
+    </div>
+  </section>
 </main>
-<div id="lightbox" onclick="this.style.display='none'"><img id="lightimg"></div>
+
+<div id="lightbox" onclick="this.style.display='none'"><img id="lightimg" alt="slide"></div>
+
+<div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-head"><h3>Recent decks</h3><button onclick="closeDrawer()">&times;</button></div>
+  <div class="drawer-list" id="drawerList"><div class="drawer-empty">Loading…</div></div>
+</aside>
+
+<div id="toast"></div>
+<footer>DeckEngine · deterministic layout · every number traceable · fully editable output</footer>
 
 <script>
-let csvText = null;
-document.getElementById('csvfile').addEventListener('change', e => {
-  const f = e.target.files[0];
-  if (!f) { csvText = null; return; }
-  const r = new FileReader();
-  r.onload = () => csvText = r.result;
-  r.readAsText(f);
-});
+const $ = id => document.getElementById(id);
+let csvText = null, currentJob = null, selectedTheme = 'consulting_navy', pollTimer = null;
 
-function setTab(t) {
-  for (const k of ['prompt','spec']) {
-    document.getElementById('tab-'+k).classList.toggle('active', k===t);
-    document.getElementById('pane-'+k).style.display = k===t ? '' : 'none';
-  }
-}
+const EXAMPLES = [
+  "Market entry strategy for an EV two-wheeler brand in Southeast Asia",
+  "Competitive landscape of India's quick-commerce sector",
+  "8-slide board update on our FY26 cost-transformation program",
+  "Due-diligence scan of a mid-market SaaS acquisition target",
+];
 
-async function loadDemo() {
-  const res = await fetch('/demo-spec');
-  document.getElementById('spec').value = JSON.stringify(await res.json(), null, 2);
-}
+// ---- init ----
+(function init() {
+  const c = $('chips');
+  EXAMPLES.forEach(t => {
+    const b = document.createElement('button');
+    b.className = 'chip'; b.textContent = t;
+    b.onclick = () => { $('prompt').value = t; $('prompt').focus(); };
+    c.appendChild(b);
+  });
+  loadThemes();
+  const dz = $('dropzone'), fi = $('csvfile');
+  dz.onclick = () => fi.click();
+  dz.ondragover = e => { e.preventDefault(); dz.classList.add('drag'); };
+  dz.ondragleave = () => dz.classList.remove('drag');
+  dz.ondrop = e => { e.preventDefault(); dz.classList.remove('drag'); if (e.dataTransfer.files[0]) readCsv(e.dataTransfer.files[0]); };
+  fi.onchange = e => { if (e.target.files[0]) readCsv(e.target.files[0]); };
+  $('prompt').addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') generate();
+  });
+})();
 
-function showRunning(msg, hint) {
-  document.getElementById('status').style.display = '';
-  document.getElementById('running').style.display = '';
-  document.getElementById('result').style.display = 'none';
-  document.getElementById('error').style.display = 'none';
-  document.getElementById('phase').textContent = msg;
-  document.getElementById('phasehint').textContent = hint || '';
-  document.getElementById('status').scrollIntoView({behavior:'smooth'});
-}
-function showError(msg) {
-  document.getElementById('running').style.display = 'none';
-  const e = document.getElementById('error');
-  e.style.display = ''; e.textContent = msg;
-}
-
-async function generate() {
-  const prompt = document.getElementById('prompt').value.trim();
-  if (!prompt) return showAndFocus();
-  showRunning('Planning the storyline…',
-              'Stage 1 drafts the claim chain — you approve it before any slide is written. ~20s.');
-  const res = await fetch('/generate', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({prompt, csv_text: csvText, theme: document.getElementById('theme').value})});
-  poll((await res.json()).job_id);
-}
-function showAndFocus(){ document.getElementById('prompt').focus(); }
-
-async function renderSpec() {
-  let spec;
-  try { spec = JSON.parse(document.getElementById('spec').value); }
-  catch (e) { document.getElementById('status').style.display=''; return showError('Spec is not valid JSON: '+e.message); }
-  showRunning('Rendering deck…', 'Deterministic layout — measuring text, placing components.');
-  const res = await fetch('/render', {method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({spec})});
-  if (!res.ok) return showError(await res.text());
-  poll((await res.json()).job_id);
-}
-
-let currentJob = null;
-
-function showOutlineGate(job) {
-  document.getElementById('running').style.display = 'none';
-  document.getElementById('outline-gate').style.display = '';
-  document.getElementById('gov').value = job.outline.governing_thought;
-  const box = document.getElementById('claims');
+async function loadThemes() {
+  const box = $('themes');
+  let themes = [{name:'consulting_navy',primary:'#1f3864',accent:'#c05621',bg:'#f4f2ec'},
+                {name:'consulting_paper',primary:'#51626f',accent:'#c05621',bg:'#f2f1ec'}];
+  try {
+    const r = await fetch('/themes');
+    if (r.ok) { const j = await r.json(); if (j.length) themes = j; }
+  } catch (e) {}
+  selectedTheme = themes[0].name;
   box.innerHTML = '';
-  job.outline.slides.forEach((s, i) => {
-    const row = document.createElement('div');
-    row.innerHTML = '<label>Slide ' + (i + 1) + ' — <span style="color:var(--muted)">' +
-      s.slide_type + '</span></label>' +
-      '<input type="text" class="claim" data-type="' + s.slide_type +
-      '" title="slide claim">';
-    box.appendChild(row);
-    row.querySelector('input').value = s.claim;
+  themes.forEach((t, i) => {
+    const el = document.createElement('div');
+    el.className = 'theme-opt' + (i === 0 ? ' sel' : '');
+    el.innerHTML = '<div class="sw"><span style="background:' + (t.bg||'#eee') + '"></span>' +
+      '<span style="background:' + (t.primary||'#345') + '"></span>' +
+      '<span style="background:' + (t.accent||'#c05') + '"></span></div>' +
+      '<span class="nm">' + t.name.replace(/_/g, ' ') + '</span>';
+    el.onclick = () => {
+      selectedTheme = t.name;
+      [...box.children].forEach(c => c.classList.remove('sel'));
+      el.classList.add('sel');
+    };
+    box.appendChild(el);
   });
 }
 
-async function approveOutline() {
-  const outline = {
-    governing_thought: document.getElementById('gov').value,
-    slides: [...document.querySelectorAll('#claims .claim')].map(el => (
-      {slide_type: el.dataset.type, claim: el.value}))
+function readCsv(f) {
+  const r = new FileReader();
+  r.onload = () => {
+    csvText = r.result;
+    const dz = $('dropzone');
+    dz.classList.add('has-file');
+    $('dz-text').innerHTML = '<span class="fname">' + f.name + '</span>' +
+      '<a class="clear" onclick="clearCsv(event)">remove</a>';
   };
-  document.getElementById('outline-gate').style.display = 'none';
-  showRunning('Writing and rendering the slides…',
-              'Each approved claim becomes a slide title backed by evidence.');
-  await fetch('/jobs/' + currentJob + '/approve', {method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({outline})});
-  poll(currentJob);
+  r.readAsText(f);
+}
+function clearCsv(e) {
+  e.stopPropagation(); csvText = null; $('csvfile').value = '';
+  $('dropzone').classList.remove('has-file');
+  $('dz-text').innerHTML = 'Drop a CSV or click to upload<br><span style="font-size:12px">every number in the deck will trace to it</span>';
 }
 
-async function poll(jobId) {
+function show(stage) {
+  ['compose','progress','gate','result'].forEach(s => $(s).classList.toggle('hidden', s !== stage));
+  if (stage !== 'compose') $(stage).scrollIntoView({behavior:'smooth', block:'start'});
+}
+function resetToCompose() { if (pollTimer) clearInterval(pollTimer); show('compose'); }
+
+function setSteps(active, done) {
+  document.querySelectorAll('#steps .s').forEach(s => {
+    const k = s.dataset.step;
+    s.classList.toggle('on', k === active);
+    s.classList.toggle('done', done.includes(k));
+  });
+}
+function progress(title, sub, active, done) {
+  $('p-title').textContent = title; $('p-sub').textContent = sub || '';
+  setSteps(active, done || []); show('progress');
+}
+function toast(msg, isErr) {
+  const t = $('toast'); t.textContent = msg; t.className = isErr ? 'err show' : 'show';
+  setTimeout(() => t.classList.remove('show'), isErr ? 6000 : 3500);
+}
+
+// ---- generate flow ----
+async function generate() {
+  const prompt = $('prompt').value.trim();
+  if (!prompt) { $('prompt').focus(); return toast('Describe the deck you want first.', true); }
+  const review = $('review').checked;
+  progress('Planning the storyline…',
+    review ? 'Stage 1 drafts the claim chain. You approve it before any slide is written.'
+           : 'Building end to end — storyline, slides, and render.',
+    'outline', []);
+  try {
+    const res = await fetch('/generate', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({prompt, csv_text: csvText, theme: selectedTheme, auto_approve: !review})});
+    if (!res.ok) throw new Error(await res.text());
+    poll((await res.json()).job_id);
+  } catch (e) { fail(e.message); }
+}
+
+async function renderSpec() {
+  let spec;
+  try { spec = JSON.parse($('spec').value); }
+  catch (e) { return toast('Spec is not valid JSON: ' + e.message, true); }
+  progress('Rendering deck…', 'Deterministic layout — measuring text, placing components.', 'render', ['outline','slides']);
+  try {
+    const res = await fetch('/render', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({spec})});
+    if (!res.ok) throw new Error(await res.text());
+    poll((await res.json()).job_id);
+  } catch (e) { fail(e.message); }
+}
+
+async function loadDemo() {
+  try { const r = await fetch('/demo-spec'); $('spec').value = JSON.stringify(await r.json(), null, 2); }
+  catch (e) { toast('Could not load demo spec.', true); }
+}
+
+function showGate(job) {
+  $('gov').value = job.outline.governing_thought || '';
+  const box = $('storyline'); box.innerHTML = '';
+  (job.outline.slides || []).forEach((s, i) => {
+    const row = document.createElement('div');
+    row.className = 'slot';
+    row.innerHTML = '<div class="num">' + (i+1) + '</div><div class="body">' +
+      '<span class="badge">' + (s.slide_type||'slide').replace(/_/g,' ') + '</span>' +
+      '<textarea class="claim" aria-label="Slide ' + (i+1) + ' claim" data-type="' + (s.slide_type||'') + '" rows="1"></textarea></div>';
+    box.appendChild(row);
+    const ta = row.querySelector('.claim');
+    ta.value = s.claim || '';
+    autosize(ta); ta.addEventListener('input', () => autosize(ta));
+  });
+  show('gate');
+}
+function autosize(ta) { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; }
+
+async function approveOutline() {
+  const outline = {
+    governing_thought: $('gov').value,
+    slides: [...document.querySelectorAll('#storyline .claim')].map(el => ({slide_type: el.dataset.type, claim: el.value}))
+  };
+  progress('Writing and rendering the slides…',
+    'Each claim becomes a slide title backed by evidence — the right chart chosen per claim.',
+    'slides', ['outline','approve']);
+  try {
+    await fetch('/jobs/' + currentJob + '/approve', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({outline})});
+    poll(currentJob);
+  } catch (e) { fail(e.message); }
+}
+
+function poll(jobId) {
   currentJob = jobId;
-  const t = setInterval(async () => {
-    const job = await (await fetch('/jobs/'+jobId)).json();
-    if (job.status === 'running') return;
-    clearInterval(t);
-    if (job.status === 'error') return showError(job.error);
-    if (job.status === 'awaiting_approval') return showOutlineGate(job);
-    document.getElementById('running').style.display = 'none';
-    document.getElementById('result').style.display = '';
-    document.getElementById('doneline').textContent =
-      '✓ Deck ready' + (job.previews ? ' — ' + job.previews + ' slides' : '');
-    document.getElementById('dl').href = '/download/'+jobId;
-    const w = document.getElementById('warnings');
-    w.innerHTML = '';
-    if ((job.warnings||[]).length)
-      w.innerHTML = '<div class="warn">Build warnings:\n' + job.warnings.join('\n') + '</div>';
-    const p = document.getElementById('previews');
-    p.innerHTML = '';
-    for (let i = 1; i <= (job.previews||0); i++) {
-      const wrap = document.createElement('div');
-      wrap.style.position = 'relative';
-      const img = document.createElement('img');
-      img.src = '/previews/'+jobId+'/'+i+'?v='+Date.now();
-      img.onclick = () => { document.getElementById('lightimg').src = img.src;
-                            document.getElementById('lightbox').style.display = 'flex'; };
-      const btn = document.createElement('button');
-      btn.textContent = '↻ rework';
-      btn.title = 'Regenerate just this slide with an instruction';
-      btn.style.cssText = 'position:absolute;top:8px;right:8px;border:0;' +
-        'border-radius:6px;padding:4px 10px;font:600 12px "Segoe UI";' +
-        'background:rgba(31,56,100,.85);color:#fff;cursor:pointer';
-      btn.onclick = async (e) => {
-        e.stopPropagation();
-        const instruction = window.prompt(
-          'How should slide ' + i + ' change?
-(e.g. "make the title sharper", "use a bar chart", "cut to 4 bullets")');
-        if (!instruction) return;
-        showRunning('Reworking slide ' + i + '…',
-                    'One slide is regenerated; the rest of the deck is untouched. The whole deck re-renders in seconds.');
-        await fetch('/decks/' + jobId + '/slides/' + i, {method: 'PATCH',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({instruction})});
-        poll(jobId);
-      };
-      wrap.appendChild(img); wrap.appendChild(btn);
-      p.appendChild(wrap);
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    let job;
+    try { job = await (await fetch('/jobs/' + jobId)).json(); }
+    catch (e) { return; }
+    if (job.status === 'running') {
+      if ($('progress').classList.contains('hidden')) progress('Working…', '', 'slides', ['outline']);
+      return;
     }
+    clearInterval(pollTimer);
+    if (job.status === 'error') return fail(job.error || 'Generation failed.');
+    if (job.status === 'awaiting_approval') return showGate(job);
+    renderResult(jobId, job);
   }, 1500);
 }
+
+function renderResult(jobId, job) {
+  const n = job.previews || job.slides || 0;
+  $('r-sub').textContent = (n ? n + ' slides · ' : '') + 'fully editable PowerPoint';
+  $('dl').href = '/download/' + jobId;
+  const wb = $('warnbox');
+  if ((job.warnings || []).length) {
+    wb.classList.remove('hidden');
+    wb.querySelector('summary').textContent = '⚠ ' + job.warnings.length + ' build note' + (job.warnings.length>1?'s':'') + ' (deck still valid)';
+    $('warnbody').textContent = job.warnings.join('\n');
+  } else wb.classList.add('hidden');
+  const p = $('previews'); p.innerHTML = '';
+  for (let i = 1; i <= n; i++) {
+    const pv = document.createElement('div'); pv.className = 'pv';
+    const img = document.createElement('img');
+    img.src = '/previews/' + jobId + '/' + i + '?v=' + Date.now(); img.alt = 'slide ' + i; img.loading = 'lazy';
+    img.onclick = () => { $('lightimg').src = img.src; $('lightbox').style.display = 'flex'; };
+    const num = document.createElement('div'); num.className = 'n'; num.textContent = i;
+    const rw = document.createElement('button'); rw.className = 'rework';
+    rw.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v6h6M20 20v-6h-6M20 8a8 8 0 00-14-3M4 16a8 8 0 0014 3"/></svg>rework';
+    rw.onclick = e => { e.stopPropagation(); rework(jobId, i); };
+    pv.append(img, num, rw); p.appendChild(pv);
+  }
+  show('result');
+}
+
+async function rework(jobId, i) {
+  const instruction = window.prompt('How should slide ' + i + ' change?\n(e.g. "make the title sharper", "use a waterfall chart", "cut to 4 bullets")');
+  if (!instruction) return;
+  progress('Reworking slide ' + i + '…', 'Just this slide is regenerated; the rest is untouched. The deck re-renders in seconds.', 'render', ['outline','slides']);
+  try {
+    await fetch('/decks/' + jobId + '/slides/' + i, {method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({instruction})});
+    poll(jobId);
+  } catch (e) { fail(e.message); }
+}
+
+function fail(msg) {
+  show('compose');
+  const m = /api key|OPENAI|ANTHROPIC/i.test(msg||'')
+    ? 'No LLM key on the server. Set OPENAI_API_KEY or ANTHROPIC_API_KEY where DeckEngine runs, or use the JSON-spec path (no key needed).'
+    : (msg || 'Something went wrong.');
+  toast(m, true);
+}
+
+// ---- recent decks ----
+async function openDrawer() {
+  $('drawerBg').style.display = 'block'; $('drawer').classList.add('open');
+  const list = $('drawerList'); list.innerHTML = '<div class="drawer-empty">Loading…</div>';
+  try {
+    const decks = await (await fetch('/decks')).json();
+    if (!decks.length) { list.innerHTML = '<div class="drawer-empty">No decks yet. Generate your first one.</div>'; return; }
+    list.innerHTML = '';
+    decks.forEach(d => {
+      const el = document.createElement('div'); el.className = 'deck-item';
+      el.innerHTML = '<div class="t">' + (d.title || 'Untitled deck') + '</div>' +
+        '<div class="m">' + (d.slides||'?') + ' slides' + (d.warnings ? ' · ' + d.warnings + ' notes' : '') + '</div>';
+      el.onclick = async () => {
+        closeDrawer();
+        const job = await (await fetch('/jobs/' + d.deck_id)).json();
+        currentJob = d.deck_id; renderResult(d.deck_id, job);
+      };
+      list.appendChild(el);
+    });
+  } catch (e) { list.innerHTML = '<div class="drawer-empty">Could not load recent decks.</div>'; }
+}
+function closeDrawer() { $('drawerBg').style.display = 'none'; $('drawer').classList.remove('open'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawer(); $('lightbox').style.display = 'none'; } });
 </script>
 </body>
 </html>
