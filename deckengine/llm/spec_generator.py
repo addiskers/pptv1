@@ -25,6 +25,8 @@ from pydantic import BaseModel, ValidationError
 
 from ..schema.slide_types import DeckMeta, DeckSpec, SlideSpec
 from .facts import FactTable, verify_spec_numbers
+from .format_rules import (check_outline_formats, check_slide_format,
+                           decision_table_text)
 from .story import REVIEW_PROMPT, Outline, check_outline
 from .writing import check_slide_writing
 
@@ -120,9 +122,14 @@ def generate_outline(prompt: str, facts: FactTable | None) -> Outline:
          "2x2s, funnels, option scorecards or image-led slides: the "
          "matrix_2x2, funnel, harvey_balls and image_block components live "
          "only inside custom_layout trees. Open with a title slide; close "
-         "with an exec_summary or kpi_dashboard when it fits.")
+         "with an exec_summary or kpi_dashboard when it fits.\n\n"
+         + decision_table_text())
     outline = Outline.model_validate(_structured_call("emit_outline", schema, p))
-    problems = check_outline(outline)
+
+    def _problems(o: Outline) -> list[str]:
+        return check_outline(o) + check_outline_formats(o, facts)
+
+    problems = _problems(outline)
     review = REVIEW_PROMPT
     if problems:
         review += ("\n\nDeterministic checks flagged these problems — fix "
@@ -131,7 +138,7 @@ def generate_outline(prompt: str, facts: FactTable | None) -> Outline:
     try:
         revised = Outline.model_validate(
             _structured_call("emit_outline", schema, review))
-        if len(check_outline(revised)) <= len(problems):
+        if len(_problems(revised)) <= len(problems):
             outline = revised
     except (ValidationError, RuntimeError) as e:  # review is best-effort
         log.warning("outline review pass failed, keeping original: %s", e)
@@ -176,9 +183,13 @@ def generate_slide(archetype: str, intent: str, prompt: str,
         prior = ("\n\nSlides ALREADY WRITTEN (do NOT repeat their content; "
                  "this slide must add something new):\n" +
                  "\n".join(f"- {t}" for t in prior_slides))
+    # teach the format decision table where the chart choice is live
+    table = ("\n\n" + decision_table_text()
+             if archetype in ("chart_slide", "custom_layout") else "")
     base_prompt = (
         f"Deck request:\n{prompt}\n\n"
-        f"{facts.prompt_block() if facts else ''}{prior}{_few_shot(archetype)}\n\n"
+        f"{facts.prompt_block() if facts else ''}{prior}{_few_shot(archetype)}"
+        f"{table}\n\n"
         f"Write the spec for ONE slide of type '{archetype}'. Slide intent: {intent}")
     attempt_prompt = base_prompt
     slide = None
@@ -218,6 +229,16 @@ def generate_slide(archetype: str, intent: str, prompt: str,
             continue
         if wproblems:
             log.warning("writing problems survived repairs: %s", wproblems)
+        fproblems = check_slide_format(slide, facts)
+        if fproblems and attempt < MAX_REPAIRS:
+            attempt_prompt = (base_prompt +
+                              "\n\nChart format problems — fix ALL of them "
+                              "while keeping the same facts and claim:\n" +
+                              "\n".join(f"- {p}" for p in fproblems) +
+                              "\nEmit the full JSON again.")
+            continue
+        if fproblems:
+            log.warning("format problems survived repairs: %s", fproblems)
         return slide
     if slide is None:
         raise RuntimeError(f"slide {archetype} failed validation after "

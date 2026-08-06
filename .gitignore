@@ -8,3 +8,5 @@ eval/baselines/*.pptx
 assets/icons/cache/
 assets/cache_faded/
 assets/cache_crop/
+# corpus-derived data (client-confidential source material) — never committed
+corpus/work/
