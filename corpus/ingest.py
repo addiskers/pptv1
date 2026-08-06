@@ -43,6 +43,10 @@ TARGET_WIDTH = 1280
 TARGET_HEIGHT = 720
 NEAR_DUP_HAMMING = 4
 TEXT_CAP = 2000
+# Edge snapping: 0.05in grid = 45720 EMU = 3.6pt per grid step.
+EDGE_GRID_EMU = 45720
+EDGE_GRID_PT = 3.6
+EDGE_CAP = 60
 
 
 # --- pure helpers -----------------------------------------------------------
@@ -124,7 +128,15 @@ def chart_types_from_pptx(prs) -> list[str]:
     return out
 
 
-def shape_stats_for_slide(slide) -> ShapeStats:
+def _edge_pts(grid_indices: set[int]) -> list[int]:
+    """Grid indices -> sorted int point values, capped at EDGE_CAP."""
+    return [int(round(g * EDGE_GRID_PT))
+            for g in sorted(grid_indices)][:EDGE_CAP]
+
+
+def shape_stats_for_slide(slide, slide_width: int | None = None,
+                          slide_height: int | None = None) -> ShapeStats:
+    from pptx.enum.dml import MSO_FILL
     from pptx.enum.shapes import MSO_SHAPE_TYPE
     n_shapes = n_textboxes = n_pictures = n_tables = 0
     n_charts = n_groups = 0
@@ -132,8 +144,33 @@ def shape_stats_for_slide(slide) -> ShapeStats:
     fonts: list[str] = []
     texts: list[str] = []
     has_smartart = False
+    x_grid: set[int] = set()
+    y_grid: set[int] = set()
+    fills: set[str] = set()
+    area_emu = 0
     for sh in _walk_shapes(slide.shapes):
         n_shapes += 1
+        try:
+            left, top = sh.left, sh.top
+            width, height = sh.width, sh.height
+        except Exception:
+            left = top = width = height = None
+        if None not in (left, top, width, height):
+            x_grid.add(round(left / EDGE_GRID_EMU))
+            x_grid.add(round((left + width) / EDGE_GRID_EMU))
+            y_grid.add(round(top / EDGE_GRID_EMU))
+            y_grid.add(round((top + height) / EDGE_GRID_EMU))
+            # Naive: overlaps and group children double-count; the
+            # consumer clamps and treats this as a coarse signal only.
+            area_emu += width * height
+        try:
+            fill = sh.fill
+            if fill.type == MSO_FILL.SOLID:
+                fills.add(str(fill.fore_color.rgb))
+        except Exception:
+            # Inherited/theme fills raise on .rgb; skip, keep count of
+            # explicit solid fills only.
+            pass
         try:
             stype = sh.shape_type
         except Exception:
@@ -172,12 +209,20 @@ def shape_stats_for_slide(slide) -> ShapeStats:
             title_text = title.text or ""
     except Exception:
         pass
+    covered = None
+    if slide_width and slide_height:
+        covered = min(1.0, max(0.0,
+                               area_emu / (slide_width * slide_height)))
     return ShapeStats(n_shapes=n_shapes, n_textboxes=n_textboxes,
                       n_pictures=n_pictures, n_tables=n_tables,
                       n_charts=n_charts, n_groups=n_groups,
                       chart_xml_types=chart_types,
                       has_smartart=has_smartart, title_text=title_text,
-                      fonts=fonts, all_text="\n".join(texts))
+                      fonts=fonts, all_text="\n".join(texts),
+                      x_edges=_edge_pts(x_grid),
+                      y_edges=_edge_pts(y_grid),
+                      n_distinct_fills=min(len(fills), EDGE_CAP),
+                      covered_frac=covered)
 
 
 # --- jsonl / manifest IO ----------------------------------------------------
@@ -252,6 +297,8 @@ def _record(deck_id: str, idx: int, png: Path, source_type: str,
             ref: list[tuple[int, str]]) -> SlideRecord:
     with Image.open(png) as img:
         phash = dhash(img)
+        if stats is not None and img.height:
+            stats.aspect = round(img.width / img.height, 4)
     dup_of = _match_ref(ref, phash)
     slide_id = f"{deck_id}:{idx:03d}"
     if dup_of is None:
@@ -278,7 +325,8 @@ def _ingest_pptx(deck_id: str, pptx: Path, source_path: Path,
     pngs = sorted(com_convert.export_slide_pngs(
         pptx, png_dir, TARGET_WIDTH, TARGET_HEIGHT))
     prs = Presentation(str(pptx))
-    stats = [shape_stats_for_slide(s) for s in prs.slides]
+    stats = [shape_stats_for_slide(s, prs.slide_width, prs.slide_height)
+             for s in prs.slides]
     records = []
     for idx, png in enumerate(pngs):
         ss = stats[idx] if idx < len(stats) else None

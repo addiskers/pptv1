@@ -28,6 +28,7 @@ from .facts import FactTable, verify_spec_numbers
 from .format_rules import (check_outline_formats, check_slide_format,
                            decision_table_text)
 from .story import REVIEW_PROMPT, Outline, check_outline
+from .style_priors import prior_block
 from .writing import check_slide_writing
 
 log = logging.getLogger("deckengine")
@@ -186,6 +187,10 @@ def generate_slide(archetype: str, intent: str, prompt: str,
     # teach the format decision table where the chart choice is live
     table = ("\n\n" + decision_table_text()
              if archetype in ("chart_slide", "custom_layout") else "")
+    # corpus-mined style priors (empty until a corpus run has been done)
+    priors = prior_block(archetype, intent)
+    if priors:
+        table += "\n\n" + priors
     base_prompt = (
         f"Deck request:\n{prompt}\n\n"
         f"{facts.prompt_block() if facts else ''}{prior}{_few_shot(archetype)}"

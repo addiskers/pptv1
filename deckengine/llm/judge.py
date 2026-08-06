@@ -31,11 +31,23 @@ def _png_b64(path: Path) -> str:
     return base64.standard_b64encode(path.read_bytes()).decode("ascii")
 
 
+def _craft_checklist() -> str:
+    """Corpus-mined craft markers appended to the rubric (empty until a
+    corpus run exists; text-only by design — no anchor images)."""
+    from .style_priors import load_priors
+    items = load_priors().get("judge_craft_checklist") or []
+    if not isinstance(items, list) or not items:
+        return ""
+    lines = [str(x) for x in items[:6]]
+    return ("\n\nTop-firm craft markers — reward the candidate that shows "
+            "them:\n" + "\n".join(f"- {x}" for x in lines))
+
+
 def pairwise_judge(png_a: Path, png_b: Path, claim: str) -> tuple[str, str]:
     """Return ("A"|"B", reason). Raises on provider errors — callers fall
     back to the deterministic score."""
     from .spec_generator import model_id, provider
-    prompt = RUBRIC.format(claim=claim)
+    prompt = RUBRIC.format(claim=claim) + _craft_checklist()
     if provider() == "openai":
         from openai import OpenAI
         client = OpenAI()
