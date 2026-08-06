@@ -178,12 +178,13 @@ def test_option_and_criteria_counts():
 
 def test_decision_table_text_cap_and_content():
     text = decision_table_text()
-    assert len(text) <= 1200
+    assert len(text) <= 1800  # rules + the variant-hint tier
     lines = text.splitlines()
-    assert 12 <= len(lines) <= 15
     assert lines[0].startswith("FORMAT SELECTION")
     assert "2x2" in text and "waterfall" in text and "line" in text
-    assert len(lines) == len(RULES) + 1
+    # variant hints present
+    assert "endpoint_labels" in text and "benchmark" in text
+    assert "CHART STYLE" in text
 
 
 # -- outline lint --------------------------------------------------------------

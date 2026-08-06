@@ -1,12 +1,18 @@
 """native_chart — real editable PowerPoint charts that ARGUE.
 
-Bar / stacked bar / line / donut via python-pptx's chart API (fully editable in
-PowerPoint: right-click -> Edit Data). The spec forces rhetorical decisions:
-sort order, one highlighted category (accent color), and an annotation callout.
-Series colors cycle through theme roles; the highlight always wins.
+Bar / stacked bar / line / donut / waterfall via python-pptx's chart API
+(editable in PowerPoint: right-click -> Edit Data). The spec forces
+rhetorical decisions: sort order, one highlighted category, an annotation.
 
-Chart XML is the flakiest OOXML there is — style ONLY through the python-pptx
-API here; any raw-XML fixup belongs in render/xml_utils.py.
+The `style` block (ChartStyleSpec) adds the top-firm rendering variants the
+corpus mining found: value labels everywhere (91-100% of elite chart
+slides), one highlighted series with the rest muted, endpoint labels + a
+CAGR chip on growth lines, a dashed forecast tail, a benchmark reference
+line, 100% stacking, horizontal bars, and a compact mode for multi-chart
+slides. Overlays (benchmark line, CAGR chip) are drawn as measured shapes
+ON TOP of the chart frame — the engine's home turf — because chart XML is
+the flakiest OOXML there is; raw chart-XML surgery lives in
+render/xml_utils.py.
 """
 from __future__ import annotations
 
@@ -17,19 +23,26 @@ from pptx.util import Emu, Pt
 
 from ..core.bbox import BBox
 from ..core.fit_text import Span
-from ..core.pptx_shapes import add_shape
+from ..core.pptx_shapes import add_hline, add_shape
 from ..core.pptx_text import add_text_box, make_text_frame, write_spans_paragraph
 from ..core.units import inch
+from ..render.xml_utils import add_point_data_labels, set_series_line_dash
 from ..schema.components import NativeChartSpec
 from .base import Component, RenderContext, register
 
-_XL = {"bar": XL_CHART_TYPE.COLUMN_CLUSTERED,
-       "stacked_bar": XL_CHART_TYPE.COLUMN_STACKED,
-       "line": XL_CHART_TYPE.LINE,
-       "donut": XL_CHART_TYPE.DOUGHNUT}
 _SERIES_ROLES = ("primary", "accent", "positive", "primary_dark", "ink_muted",
                  "negative")
 _ANNOT_H_MULT = 1.0  # annotation strip height in theme units (when present)
+
+# plot-area insets as fractions of the chart FRAME — empirically tuned
+# against PowerPoint's default column/line plot so the benchmark overlay
+# lands on the right y-pixel.
+_PLOT_LEFT = 0.10
+_PLOT_RIGHT = 0.03
+_PLOT_TOP = 0.05
+_PLOT_BOTTOM = 0.14
+
+_MUTE_ROLE = "grid"
 
 
 @register("native_chart")
@@ -43,7 +56,8 @@ class NativeChart(Component):
         series = [(s.name, list(s.values)) for s in data.series]
         n = min([len(cats)] + [len(v) for _, v in series])
         cats, series = cats[:n], [(nm, v[:n]) for nm, v in series]
-        if data.sort in ("desc", "asc") and series:
+        if (data.sort in ("desc", "asc") and series
+                and data.chart_type not in ("waterfall",)):
             order = sorted(range(n), key=lambda i: series[0][1][i],
                            reverse=data.sort == "desc")
             cats = [cats[i] for i in order]
@@ -51,7 +65,10 @@ class NativeChart(Component):
         return cats, series
 
     def _annot_h(self, data: NativeChartSpec, ctx: RenderContext) -> int:
-        return ctx.theme.spacing(2.4) if data.annotation else 0
+        if not data.annotation:
+            return 0
+        base = ctx.theme.spacing(2.4)
+        return base // 2 if data.style.compact else base
 
     def measure(self, data: NativeChartSpec, width: int,
                 ctx: RenderContext) -> int:
@@ -63,105 +80,369 @@ class NativeChart(Component):
     def render(self, slide, data: NativeChartSpec, bbox: BBox,
                ctx: RenderContext) -> int:
         theme = ctx.theme
+        st = data.style
         annot_h = self._annot_h(data, ctx)
         total = self.measure(data, bbox.w, ctx)
         if ctx.fill_hint and bbox.h > total:
             total = bbox.h  # charts fill their zone gracefully
         chart_h = max(inch(1.6), total - annot_h)
+        frame = BBox(bbox.x, bbox.y, bbox.w, chart_h)
 
         cats, series = self._sorted(data)
-        cd = CategoryChartData()
-        cd.categories = cats
-        for name, values in series:
-            cd.add_series(name, values)
+        horizontal = st.direction == "horizontal" and data.chart_type in (
+            "bar", "stacked_bar")
+        if horizontal:
+            # PowerPoint lists horizontal-bar categories bottom-up; reverse so
+            # the reading order stays top-first.
+            cats = list(reversed(cats))
+            series = [(nm, list(reversed(v))) for nm, v in series]
 
-        frame = slide.shapes.add_chart(
-            _XL[data.chart_type], Emu(bbox.x), Emu(bbox.y),
-            Emu(bbox.w), Emu(chart_h), cd)
-        chart = frame.chart
-        self._style(chart, data, cats, series, ctx)
+        if data.chart_type == "waterfall":
+            self._render_waterfall(slide, data, frame, cats, series, ctx)
+        else:
+            self._render_standard(slide, data, frame, cats, series,
+                                   horizontal, ctx)
+
+        # overlays (drawn above the chart frame)
+        if st.benchmark is not None and data.chart_type in (
+                "bar", "stacked_bar", "line"):
+            self._draw_benchmark(slide, data, frame, cats, series, ctx)
+        if st.cagr_chip:
+            self._draw_cagr_chip(slide, data, frame, series, ctx)
 
         if data.annotation:
             strip = BBox(bbox.x, bbox.y + chart_h + theme.spacing(0.4),
                          bbox.w, annot_h - theme.spacing(0.4))
             bar, text = strip.take_left(theme.spacing(0.35))
             add_shape(slide, bar, theme, fill_role="accent")
+            size = ctx.size("micro") if st.compact else ctx.size("small")
             box = add_text_box(slide, text.inset(left=theme.spacing(0.4)),
                                anchor="middle")
             write_spans_paragraph(box.text_frame,
                                   [Span(data.annotation, bold=True)],
-                                  ctx.size("small"), theme,
-                                  family=ctx.font("body"),
+                                  size, theme, family=ctx.font("body"),
                                   default_color_role="ink")
         return total
 
-    def _style(self, chart, data: NativeChartSpec, cats, series,
-               ctx: RenderContext) -> None:
+    # -- standard chart types -----------------------------------------------
+
+    def _xl_type(self, data: NativeChartSpec, horizontal: bool):
+        if data.chart_type == "line":
+            return XL_CHART_TYPE.LINE
+        if data.chart_type == "donut":
+            return XL_CHART_TYPE.DOUGHNUT
+        if data.chart_type == "stacked_bar":
+            if data.style.percent_100:
+                return (XL_CHART_TYPE.BAR_STACKED_100 if horizontal
+                        else XL_CHART_TYPE.COLUMN_STACKED_100)
+            return (XL_CHART_TYPE.BAR_STACKED if horizontal
+                    else XL_CHART_TYPE.COLUMN_STACKED)
+        return (XL_CHART_TYPE.BAR_CLUSTERED if horizontal
+                else XL_CHART_TYPE.COLUMN_CLUSTERED)
+
+    def _render_standard(self, slide, data, frame, cats, series, horizontal,
+                         ctx):
+        st = data.style
+        # forecast split: single-series line -> solid + dashed halves
+        forecast = (st.forecast_from and data.chart_type == "line"
+                    and len(series) == 1 and st.forecast_from in cats)
+        if st.forecast_from and not forecast:
+            ctx.report.warn(
+                f"native_chart: forecast_from {st.forecast_from!r} ignored "
+                "(needs a single-series line whose category exists)")
+
+        cd = CategoryChartData()
+        cd.categories = cats
+        if forecast:
+            name, vals = series[0]
+            idx = cats.index(st.forecast_from)
+            solid = [v if i <= idx else None for i, v in enumerate(vals)]
+            dashed = [v if i >= idx else None for i, v in enumerate(vals)]
+            cd.add_series(name, solid)
+            cd.add_series(name + " (forecast)", dashed)
+        else:
+            for name, values in series:
+                cd.add_series(name, values)
+
+        chart = slide.shapes.add_chart(
+            self._xl_type(data, horizontal), Emu(frame.x), Emu(frame.y),
+            Emu(frame.w), Emu(frame.h), cd).chart
+        self._style(chart, data, cats, series, forecast, horizontal, ctx)
+
+    def _style(self, chart, data, cats, series, forecast, horizontal, ctx):
         theme = ctx.theme
+        st = data.style
         chart.has_title = False
-        chart.font.size = Pt(theme.size_micro)
+        size = theme.size_micro - 1.5 if st.compact else theme.size_micro
+        size = max(6.0, size)
+        chart.font.size = Pt(size)
         chart.font.name = ctx.font("body")
         chart.font.color.rgb = RGBColor.from_string(theme.color("ink"))
 
         multi = len(series) > 1
-        chart.has_legend = multi
-        if multi:
+        # legend: off for compact, forecast split (2 fake series) or single
+        show_legend = multi and not st.compact and not forecast
+        chart.has_legend = show_legend
+        if show_legend:
             chart.legend.position = XL_LEGEND_POSITION.BOTTOM
             chart.legend.include_in_layout = False
-            chart.legend.font.size = Pt(theme.size_micro)
+            chart.legend.font.size = Pt(size)
 
+        highlight_ser = (st.highlight_series
+                         if st.highlight_series
+                         and any(nm == st.highlight_series for nm, _ in series)
+                         else None)
+        if st.highlight_series and highlight_ser is None:
+            ctx.report.warn(
+                f"native_chart: highlight_series {st.highlight_series!r} "
+                "not found; no muting applied")
+
+        plot_names = ([series[0][0], series[0][0] + " (forecast)"]
+                      if forecast else [nm for nm, _ in series])
         for si, plot_series in enumerate(chart.series):
-            role = _SERIES_ROLES[si % len(_SERIES_ROLES)]
+            nm = plot_names[si] if si < len(plot_names) else ""
+            base_nm = nm.replace(" (forecast)", "")
+            if highlight_ser is not None:
+                role = "accent" if base_nm == highlight_ser else _MUTE_ROLE
+            else:
+                role = _SERIES_ROLES[si % len(_SERIES_ROLES)]
+            hexc = RGBColor.from_string(theme.color(role))
             if data.chart_type == "line":
-                plot_series.format.line.color.rgb = RGBColor.from_string(
-                    theme.color(role))
+                plot_series.format.line.color.rgb = hexc
                 plot_series.format.line.width = Pt(2.25)
                 plot_series.smooth = False
+                if forecast and si == 1:
+                    set_series_line_dash(plot_series, "dash")
             else:
                 plot_series.format.fill.solid()
-                plot_series.format.fill.fore_color.rgb = RGBColor.from_string(
+                plot_series.format.fill.fore_color.rgb = hexc
+
+        self._point_colors(chart, data, cats, series, ctx)
+        self._value_labels(chart, data, series, forecast, ctx)
+        self._axes(chart, data, ctx)
+
+    def _point_colors(self, chart, data, cats, series, ctx):
+        """Per-point emphasis: highlight one category, diverging by sign,
+        donut per-slice — single-series only."""
+        theme = ctx.theme
+        if len(series) != 1:
+            return
+        pts = chart.series[0].points
+        hi_idx = cats.index(data.highlight) if data.highlight in cats else -1
+        if data.chart_type in ("bar",) and any(
+                v < 0 for v in series[0][1]):
+            # diverging: color by sign (highlight still wins its point)
+            for i, v in enumerate(series[0][1]):
+                if i == hi_idx:
+                    role = "accent"
+                else:
+                    role = "positive" if v >= 0 else "negative"
+                pts[i].format.fill.solid()
+                pts[i].format.fill.fore_color.rgb = RGBColor.from_string(
                     theme.color(role))
-
-        # highlight one category in accent (single-series bar/donut only —
-        # that's where per-point emphasis reads correctly)
-        if (data.highlight and data.highlight in cats and not multi
-                and data.chart_type in ("bar", "donut")):
-            idx = cats.index(data.highlight)
-            point = chart.series[0].points[idx]
-            point.format.fill.solid()
-            point.format.fill.fore_color.rgb = RGBColor.from_string(
+            return
+        if data.chart_type in ("bar", "donut") and hi_idx >= 0:
+            pts[hi_idx].format.fill.solid()
+            pts[hi_idx].format.fill.fore_color.rgb = RGBColor.from_string(
                 theme.color("accent"))
-
-        # donut: colored slices per category when single-series
-        if data.chart_type == "donut" and not multi:
-            for pi, point in enumerate(chart.series[0].points):
-                if data.highlight and pi == (cats.index(data.highlight)
-                                             if data.highlight in cats else -1):
+        if data.chart_type == "donut":
+            for pi, point in enumerate(pts):
+                if pi == hi_idx:
                     continue
                 role = _SERIES_ROLES[pi % len(_SERIES_ROLES)]
                 point.format.fill.solid()
                 point.format.fill.fore_color.rgb = RGBColor.from_string(
                     theme.color(role))
 
-        # value axis: light gridlines, micro labels (bar/line only)
-        if data.chart_type in ("bar", "stacked_bar", "line"):
-            va = chart.value_axis
-            va.has_major_gridlines = True
-            va.major_gridlines.format.line.color.rgb = RGBColor.from_string(
-                theme.color("grid"))
-            va.major_gridlines.format.line.width = Pt(0.5)
-            va.format.line.fill.background()
-            va.tick_labels.font.size = Pt(theme.size_micro)
-            ca = chart.category_axis
-            ca.format.line.color.rgb = RGBColor.from_string(theme.color("grid"))
-            ca.tick_labels.font.size = Pt(theme.size_micro)
-            # single-series bar: value labels on bars, no y-axis clutter
-            if data.chart_type == "bar" and not multi:
-                plot = chart.plots[0]
-                plot.has_data_labels = True
-                dl = plot.data_labels
-                dl.font.size = Pt(theme.size_micro)
-                dl.font.bold = True
-                dl.font.color.rgb = RGBColor.from_string(theme.color("ink"))
-                dl.number_format = f'0"{data.value_suffix}"'
-                dl.number_format_is_linked = False
+    def _num_format(self, suffix: str) -> str:
+        return f'#,##0.#"{suffix}"' if suffix else '#,##0.#'
+
+    def _value_labels(self, chart, data, series, forecast, ctx):
+        theme = ctx.theme
+        st = data.style
+        multi = len(series) > 1
+        # resolve auto: single-series bar keeps the historic default ON
+        want = st.value_labels
+        if want is None:
+            want = data.chart_type == "bar" and not multi
+        if st.endpoint_labels and data.chart_type == "line":
+            # per-point first+last on each plotted series
+            fmt = self._num_format(data.value_suffix)
+            csize = max(6.0, theme.size_micro - (1.5 if st.compact else 0))
+            for ser in chart.series:
+                n = len(list(ser.values))
+                idxs = sorted({0, n - 1}) if n else []
+                if idxs:
+                    add_point_data_labels(
+                        ser, idxs, fmt, csize, theme.color("ink"))
+            return
+        if not want:
+            return
+        fmt = f'0"{data.value_suffix}"' if (
+            data.chart_type == "bar" and st.value_labels is None
+        ) else self._num_format(data.value_suffix)
+        for plot in chart.plots:
+            plot.has_data_labels = True
+            dl = plot.data_labels
+            dl.font.size = Pt(max(6.0, theme.size_micro
+                                  - (1.5 if st.compact else 0)))
+            dl.font.bold = True
+            dl.font.color.rgb = RGBColor.from_string(theme.color("ink"))
+            dl.number_format = fmt
+            dl.number_format_is_linked = False
+
+    def _axes(self, chart, data, ctx):
+        theme = ctx.theme
+        if data.chart_type not in ("bar", "stacked_bar", "line"):
+            return
+        va = chart.value_axis
+        va.has_major_gridlines = True
+        va.major_gridlines.format.line.color.rgb = RGBColor.from_string(
+            theme.color("grid"))
+        va.major_gridlines.format.line.width = Pt(0.5)
+        va.format.line.fill.background()
+        va.tick_labels.font.size = Pt(max(6.0, theme.size_micro))
+        # pin the scale when a benchmark overlay needs an exact mapping
+        if data.style.benchmark is not None:
+            lo, hi = self._axis_bounds(data)
+            va.minimum_scale = lo
+            va.maximum_scale = hi
+        ca = chart.category_axis
+        ca.format.line.color.rgb = RGBColor.from_string(theme.color("grid"))
+        ca.tick_labels.font.size = Pt(max(6.0, theme.size_micro))
+
+    # -- axis bounds + overlays ---------------------------------------------
+
+    def _axis_bounds(self, data) -> tuple[float, float]:
+        vals = [v for _, s in [(s.name, s.values) for s in data.series]
+                for v in s]
+        dmax = max(vals) if vals else 1.0
+        dmin = min(vals) if vals else 0.0
+        if data.style.benchmark is not None:
+            dmax = max(dmax, data.style.benchmark.value)
+            dmin = min(dmin, data.style.benchmark.value)
+        lo = min(0.0, dmin * 1.1)
+        hi = self._nice_ceiling(max(dmax, 0.0) * 1.05)
+        if hi <= lo:
+            hi = lo + 1.0
+        return lo, hi
+
+    def _nice_ceiling(self, v: float) -> float:
+        import math
+        if v <= 0:
+            return 1.0
+        exp = math.floor(math.log10(v))
+        base = 10 ** exp
+        for m in (1, 2, 2.5, 5, 10):
+            if m * base >= v:
+                return m * base
+        return 10 * base
+
+    def _draw_benchmark(self, slide, data, frame, cats, series, ctx):
+        theme = ctx.theme
+        bm = data.style.benchmark
+        lo, hi = self._axis_bounds(data)
+        plot_x = frame.x + round(frame.w * _PLOT_LEFT)
+        plot_w = round(frame.w * (1 - _PLOT_LEFT - _PLOT_RIGHT))
+        plot_y = frame.y + round(frame.h * _PLOT_TOP)
+        plot_h = round(frame.h * (1 - _PLOT_TOP - _PLOT_BOTTOM))
+        frac = (bm.value - lo) / (hi - lo) if hi > lo else 0.0
+        frac = min(1.0, max(0.0, frac))
+        y = plot_y + round(plot_h * (1 - frac))
+        add_hline(slide, plot_x, y, plot_w, theme, role="ink_muted",
+                  weight_pt=1.25, dash="dash")
+        lbl = f"{bm.label} {bm.value:g}{data.value_suffix}"
+        box = add_text_box(slide, BBox(plot_x, y - theme.spacing(1.8),
+                                       plot_w, theme.spacing(1.6)),
+                           align="right", anchor="bottom")
+        write_spans_paragraph(box.text_frame, [Span(lbl, bold=True)],
+                              ctx.size("micro"), theme, family=ctx.font("body"),
+                              align="right", default_color_role="ink_muted")
+
+    def _draw_cagr_chip(self, slide, data, frame, series, ctx):
+        theme = ctx.theme
+        if not series:
+            return
+        vals = series[0][1]
+        if len(vals) < 2 or vals[0] <= 0:
+            ctx.report.warn("native_chart: cagr_chip needs a positive first "
+                            "value and >=2 periods; skipped")
+            return
+        periods = len(vals) - 1
+        cagr = ((vals[-1] / vals[0]) ** (1 / periods) - 1) * 100
+        text = f"CAGR {cagr:+.1f}%"
+        w = theme.spacing(9)
+        h = theme.spacing(3.2)
+        chip = BBox(frame.right - w - theme.spacing(1.5),
+                    frame.y + theme.spacing(1.2), w, h)
+        s = add_shape(slide, chip, theme, shape="rounded",
+                      fill_role="surface_alt", corner_radius=0.3)
+        tf = make_text_frame(s, align="center", anchor="middle")
+        write_spans_paragraph(tf, [Span(text, bold=True)], ctx.size("small"),
+                              theme, family=ctx.font("body"), align="center",
+                              default_color_role="ink")
+
+    # -- waterfall -----------------------------------------------------------
+
+    def _render_waterfall(self, slide, data, frame, cats, series, ctx):
+        theme = ctx.theme
+        if data.sort != "none":
+            ctx.report.warn("native_chart: waterfall ignores sort (order is "
+                            "the bridge sequence)")
+        vals = series[0][1] if series else []
+        n = len(vals)
+        # compute base (invisible) and visible height + a color role per bar
+        bases: list[float] = []
+        visibles: list[float] = []
+        roles: list[str] = []
+        cum = 0.0
+        for i, v in enumerate(vals):
+            first, last = i == 0, i == n - 1
+            if first:
+                bases.append(0.0)
+                visibles.append(v)
+                roles.append("primary_dark")
+                cum = v
+            elif last:
+                bases.append(0.0)
+                visibles.append(v)
+                roles.append("primary_dark")
+            else:
+                after = cum + v
+                bases.append(min(cum, after))
+                visibles.append(abs(v))
+                roles.append("positive" if v >= 0 else "negative")
+                cum = after
+        # arithmetic check: last should equal the running total of deltas
+        if n >= 2:
+            reconstructed = sum(vals[:-1])
+            if abs(vals[-1] - reconstructed) > 0.02 * max(1.0, abs(vals[-1])):
+                ctx.report.warn(
+                    f"native_chart: waterfall does not balance "
+                    f"(sum of steps {reconstructed:g} vs closing {vals[-1]:g})")
+
+        cd = CategoryChartData()
+        cd.categories = cats
+        cd.add_series("base", bases)
+        cd.add_series("value", visibles)
+        chart = slide.shapes.add_chart(
+            XL_CHART_TYPE.COLUMN_STACKED, Emu(frame.x), Emu(frame.y),
+            Emu(frame.w), Emu(frame.h), cd).chart
+        chart.has_title = False
+        chart.has_legend = False
+        size = max(6.0, theme.size_micro - (1.5 if data.style.compact else 0))
+        chart.font.size = Pt(size)
+        chart.font.name = ctx.font("body")
+        chart.font.color.rgb = RGBColor.from_string(theme.color("ink"))
+        base_ser, val_ser = chart.series[0], chart.series[1]
+        base_ser.format.fill.background()      # invisible pedestal
+        base_ser.format.line.fill.background()
+        for i, point in enumerate(val_ser.points):
+            point.format.fill.solid()
+            point.format.fill.fore_color.rgb = RGBColor.from_string(
+                theme.color(roles[i]))
+        # signed value labels on the visible series (original deltas)
+        fmt = self._num_format(data.value_suffix)
+        add_point_data_labels(val_ser, list(range(n)), fmt, size,
+                              theme.color("ink"))
+        self._axes(chart, data, ctx)

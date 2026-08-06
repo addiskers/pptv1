@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "theme": "consulting_paper",
+  "meta": {
+    "title": "Chart variant showcase (A+ golden)",
+    "date": "24 July 2026",
+    "footer_org": "DeckEngine"
+  },
+  "slides": [
+    {
+      "slide_type": "chart_slide",
+      "title": "Revenue triples to **$21B** by 2028 with the inflection already behind us",
+      "chart": {
+        "kind": "native_chart",
+        "chart_type": "line",
+        "categories": ["2022", "2023", "2024", "2025", "2026", "2027", "2028"],
+        "series": [{"name": "Revenue", "values": [7, 9, 12, 14, 16, 18.5, 21]}],
+        "sort": "none",
+        "highlight": null,
+        "annotation": "The 2024 capacity unlock bent the curve; the dashed segment is committed pipeline, not hope.",
+        "value_suffix": "B",
+        "style": {"endpoint_labels": true, "cagr_chip": true, "forecast_from": "2026"}
+      },
+      "footnote": "illustrative data"
+    },
+    {
+      "slide_type": "chart_slide",
+      "title": "The EBITDA bridge holds flat at **$120M**: pricing wins fully absorb input inflation",
+      "chart": {
+        "kind": "native_chart",
+        "chart_type": "waterfall",
+        "categories": ["FY24 EBITDA", "Volume", "Price", "Input costs", "Opex", "FY25 EBITDA"],
+        "series": [{"name": "EBITDA", "values": [120, 18, 12, -22, -8, 120]}],
+        "sort": "none",
+        "highlight": null,
+        "annotation": "Two levers add $30M; two headwinds take $30M — the bridge proves resilience, not stagnation.",
+        "value_suffix": "M",
+        "style": {"value_labels": true}
+      },
+      "footnote": "illustrative data"
+    },
+    {
+      "slide_type": "chart_slide",
+      "title": "Four of six plants beat the **74%** industry utilization benchmark",
+      "chart": {
+        "kind": "native_chart",
+        "chart_type": "bar",
+        "categories": ["Pune", "Baroda", "Chennai", "Indore", "Nashik", "Kanpur"],
+        "series": [{"name": "Utilization", "values": [91, 86, 82, 78, 69, 58]}],
+        "sort": "desc",
+        "highlight": "Pune",
+        "annotation": "Kanpur and Nashik sit below benchmark — the consolidation candidates.",
+        "value_suffix": "%",
+        "style": {"benchmark": {"value": 74, "label": "industry avg"}}
+      },
+      "footnote": "illustrative data"
+    },
+    {
+      "slide_type": "custom_layout",
+      "title": "Acme outgrows the market **and** the mix is shifting to services",
+      "root": {
+        "kind": "cols",
+        "gap": 0.8,
+        "children": [
+          {
+            "kind": "native_chart",
+            "chart_type": "line",
+            "categories": ["2022", "2023", "2024", "2025"],
+            "series": [
+              {"name": "Acme", "values": [100, 118, 141, 170]},
+              {"name": "Market", "values": [100, 108, 116, 124]},
+              {"name": "Rival B", "values": [100, 104, 110, 115]}
+            ],
+            "sort": "none",
+            "highlight": null,
+            "annotation": "Indexed to 100: Acme compounds ahead of everyone.",
+            "value_suffix": "",
+            "style": {"highlight_series": "Acme", "compact": true}
+          },
+          {
+            "kind": "native_chart",
+            "chart_type": "stacked_bar",
+            "categories": ["2022", "2023", "2024", "2025"],
+            "series": [
+              {"name": "Products", "values": [72, 66, 58, 51]},
+              {"name": "Services", "values": [28, 34, 42, 49]}
+            ],
+            "sort": "none",
+            "highlight": null,
+            "annotation": "Services approach half of revenue.",
+            "value_suffix": "%",
+            "style": {"percent_100": true, "compact": true}
+          }
+        ]
+      },
+      "footnote": "illustrative data — evidence-pair pattern: one chart per assertion in the conjoined claim"
+    }
+  ]
+}

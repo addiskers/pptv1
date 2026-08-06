@@ -156,7 +156,7 @@ def classified_row(sid: str, **over) -> dict:
             "endpoint_labels": "endpoint_labels" in features,
             "avg_or_target_line": False, "delta_brackets": False,
             "cagr_arrow": False, "forecast_dashed": False,
-            "indexed_base100": False, "area_fill": False,
+            "indexed_base100": False, "area_fill": "area_fill" in features,
             "series_highlight": "series_highlight" in features,
             "sorted_desc": "sorted_desc" in features,
             "annotations": 1 if "annotations" in features else 0,
@@ -187,7 +187,7 @@ def build_pattern_corpus(work: Path) -> None:
             craft=["so_what_band"], has_bottom_band=True, firm_style=firm)
     for i in range(2):
         add(f"s{i + 5}", "d2", "other/deckB.pptx", 80, chart_type="line",
-            features=["endpoint_labels"], structure="two_col",
+            features=["area_fill"], structure="two_col",
             density=2, title_is_action=False, firm_style="bcg_like")
     add("s7", "d3", "other/deckC.pptx", 80, chart_type="donut_pie",
         claim_context="benchmark", slide_role="dashboard",
@@ -221,7 +221,7 @@ def test_exact_frequencies_and_min_support(tmp_path):
     assert cv["bar"]["n"] == 4
     assert cv["bar"]["features"] == {"sorted_desc": 1.0,
                                      "value_labels": 1.0}
-    assert cv["line"]["features"] == {}  # endpoint_labels not renderable
+    assert cv["line"]["features"] == {}  # area_fill not renderable
 
     ctx = data["by_claim_context"]
     assert set(ctx) == {"ranking_comparison"}  # benchmark n=1 dropped
@@ -245,7 +245,7 @@ def test_exact_frequencies_and_min_support(tmp_path):
     assert g["craft_freq"] == {"so_what_band": 0.5714,
                                "kpi_cards": 0.1429}
 
-    assert data["capability_gaps"] == {"endpoint_labels": 0.2857}
+    assert data["capability_gaps"] == {"area_fill": 0.2857}
     prov = data["provenance"]
     assert prov["n_decks"] == 3
     assert prov["firm_style_mix"] == {"bcg_like": 0.4286,
@@ -270,7 +270,7 @@ def test_own_glob_doubles_weight(tmp_path):
     rank = data["by_claim_context"]["ranking_comparison"]
     # own deck: 4 slides at w=2 -> bar 8/10, line 2/10
     assert rank["chart_type_freq"] == {"bar": 0.8, "line": 0.2}
-    assert data["capability_gaps"] == {"endpoint_labels": 0.1818}  # 2/11
+    assert data["capability_gaps"] == {"area_fill": 0.1818}  # 2/11
 
 
 def test_firm_cap_rebalances_to_half(tmp_path):
@@ -311,7 +311,7 @@ def test_checklist_only_references_whitelisted_names(tmp_path):
     for entry in checklist:
         assert entry.split(":", 1)[0] in allowed
     joined = " ".join(checklist)
-    assert "endpoint_labels" not in joined  # gaps never make the list
+    assert "area_fill" not in joined  # gaps never make the list
     # highest-frequency signals surface
     assert any(e.startswith("value_labels:") for e in checklist)
     assert any(e.startswith("so_what_band:") for e in checklist)

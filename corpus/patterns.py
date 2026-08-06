@@ -43,9 +43,11 @@ from pydantic import BaseModel, ConfigDict, Field
 # RENDERABLE WHITELIST — everything the engine can actually draw today.
 # deckengine/llm/style_priors.py duplicates these sets (import-light on
 # the engine side); keep the two in sync when a component ships.
-RENDERABLE_CHARTS = {"bar", "stacked_bar", "line", "donut_pie"}
+RENDERABLE_CHARTS = {"bar", "stacked_bar", "line", "donut_pie", "waterfall"}
 RENDERABLE_FEATURES = {"value_labels", "sorted_desc",
-                       "series_highlight", "annotations"}
+                       "series_highlight", "annotations",
+                       "endpoint_labels", "forecast_dashed",
+                       "avg_or_target_line", "cagr_arrow"}
 RENDERABLE_CRAFT = {"so_what_band", "brace", "arrow_callout", "icon_rail",
                     "kpi_cards", "framework_2x2", "funnel", "harvey_balls",
                     "heatmap_cells", "big_number", "chevron",

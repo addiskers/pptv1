@@ -28,9 +28,13 @@ MAX_CHARS = 500  # ~120 tokens; unit-tested hard cap
 
 _PRIOR_ARCHETYPES = {"chart_slide", "custom_layout", "kpi_dashboard"}
 
-_WL_CHARTS = {"bar", "stacked_bar", "line", "donut_pie"}
+# waterfall + the four style knobs are now renderable (A+); corpus tag ->
+# engine field: avg_or_target_line -> style.benchmark, cagr_arrow ->
+# style.cagr_chip, forecast_dashed -> style.forecast_from.
+_WL_CHARTS = {"bar", "stacked_bar", "line", "donut_pie", "waterfall"}
 _WL_FEATURES = {"value_labels", "sorted_desc", "series_highlight",
-                "annotations"}
+                "annotations", "endpoint_labels", "forecast_dashed",
+                "avg_or_target_line", "cagr_arrow"}
 _WL_CRAFT = {"so_what_band", "brace", "arrow_callout", "icon_rail",
              "kpi_cards", "framework_2x2", "funnel", "harvey_balls",
              "heatmap_cells", "big_number", "chevron", "timeline_bar",

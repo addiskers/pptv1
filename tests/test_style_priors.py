@@ -14,11 +14,11 @@ PRIORS = {
     "by_claim_context": {
         "ranking_comparison": {
             "n": 40,
-            # waterfall outranks bar but is NOT renderable: it must
-            # never be cited, nor endpoint_labels below
-            "chart_type_freq": {"bar": 0.72, "waterfall": 0.95},
+            # scatter outranks bar but is NOT renderable: it must
+            # never be cited, nor delta_brackets below
+            "chart_type_freq": {"bar": 0.72, "scatter": 0.95},
             "top_features": {"value_labels": 0.66,
-                             "endpoint_labels": 0.9},
+                             "delta_brackets": 0.9},
             # photo_background outranks so_what_band but is NOT
             # renderable craft: it must never be cited either
             "craft_freq": {"so_what_band": 0.44,
@@ -99,8 +99,8 @@ def test_ranking_claim_cites_ranking_stats(priors_file):
     assert "value_labels on 66%" in block
     assert "so_what_band" in block
     # capability-gap names must never leak into a prompt
-    assert "waterfall" not in block
-    assert "endpoint_labels" not in block
+    assert "scatter" not in block
+    assert "delta_brackets" not in block
     assert "photo_background" not in block
 
 

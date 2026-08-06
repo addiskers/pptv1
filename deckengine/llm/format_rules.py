@@ -11,6 +11,13 @@ check_outline_formats() turns type/claim mismatches into suggestions
 (never blockers); check_slide_format() flags objective data-shape
 violations phrased as repair instructions.
 
+recommend_style() is the VARIANT TIER below the format verdict:
+advisory ChartStyleSpec knobs (endpoint labels + CAGR chip, forecast
+dashing, benchmark line, series highlight, 100% stacking, horizontal
+bars) from the same signals. Boolean/literal knobs carry concrete
+values; knobs whose value needs data the rules cannot see (the first
+future category, the claim's subject series) carry guidance STRINGS.
+
 v1 approximations (lexicons, not parses):
 - 'growth mindset' fires the trend SIGNAL; the trend RULE stays quiet
   because the fact shape (n_periods >= 2) must corroborate the claim.
@@ -313,11 +320,29 @@ def first_rule(signals: Signals) -> FormatRule | None:
     return next((r for r in RULES if r.detect(signals)), None)
 
 
+_VARIANT_HINTS = (
+    "CHART STYLE (native_chart.style — top-firm defaults from the corpus):",
+    "- always label values (91-100% of elite charts do) and annotate the "
+    "takeaway on the chart",
+    "- growth line: style.endpoint_labels + style.cagr_chip (engine computes "
+    "the CAGR)",
+    "- forecast/'by 20XX': style.forecast_from='<first future period>' dashes "
+    "the tail",
+    "- 'vs benchmark/target/average': style.benchmark={value,label} draws a "
+    "dashed reference line",
+    "- multi-series where one is the subject: style.highlight_series='<name>' "
+    "mutes the rest to gray",
+    "- 'bridge/walk from X to Y': chart_type='waterfall' (signed steps, "
+    "opening + closing totals)",
+)
+
+
 def decision_table_text() -> str:
-    """Compact rule table for prompts (capped <= 1200 chars by test)."""
+    """Compact rule table + variant hints for prompts (capped <= 1800)."""
     lines = ["FORMAT SELECTION - match the layout shape to the argument "
              "shape:"]
     lines += [f"- {r.when} -> {r.then}; {r.rationale}" for r in RULES]
+    lines += ["", *_VARIANT_HINTS]
     return "\n".join(lines)
 
 
@@ -389,6 +414,24 @@ def _chart_problems(chart: dict, title: str) -> list[str]:
     if len(series) > 3:
         out.append(f"{len(series)} series on one chart: split into "
                    "small multiples or drop to <=3")
+    # waterfall must balance: sum of steps == closing total
+    if ctype == "waterfall" and series:
+        vals = series[0].get("values") or []
+        if len(vals) >= 2:
+            steps = sum(vals[:-1])
+            if abs(vals[-1] - steps) > 0.02 * max(1.0, abs(vals[-1])):
+                out.append(
+                    f"waterfall does not balance: steps sum to {steps:g} but "
+                    f"the closing total is {vals[-1]:g} — make them equal")
+    # variant knobs that name data must reference something real
+    style = chart.get("style") or {}
+    ff = style.get("forecast_from")
+    if ff and ff not in cats:
+        out.append(f"style.forecast_from {ff!r} is not a category: use an "
+                   "exact category name")
+    hs = style.get("highlight_series")
+    if hs and hs not in [s.get("name") for s in series]:
+        out.append(f"style.highlight_series {hs!r} is not a series name")
     return out
 
 

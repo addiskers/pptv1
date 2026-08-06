@@ -223,11 +223,45 @@ class ChartSeriesSpec(BaseModel):
     values: list[float] = Field(min_length=1, max_length=24)
 
 
+class BenchmarkLineSpec(BaseModel):
+    value: float
+    label: PlainStr = Field(max_length=24)  # e.g. "industry avg"
+
+
+class ChartStyleSpec(BaseModel):
+    """Rendering-variant knobs (the '30 ways' layer). Everything defaults
+    off/auto so existing specs render unchanged; corpus style priors steer
+    the LLM's choices and the engine computes any numbers itself."""
+    value_labels: bool | None = Field(default=None, description=(
+        "label every point/bar with its value; null = auto (on for "
+        "single-series — the 91%-of-top-decks default)"))
+    endpoint_labels: bool = Field(default=False, description=(
+        "line charts: label only the first and last points"))
+    highlight_series: PlainStr | None = Field(default=None, max_length=40,
+        description="series name to keep in accent while others mute to gray")
+    forecast_from: PlainStr | None = Field(default=None, max_length=24,
+        description="category where the future starts; the line beyond it "
+                    "renders dashed")
+    benchmark: BenchmarkLineSpec | None = Field(default=None, description=(
+        "dashed horizontal reference line at a value, with a label"))
+    cagr_chip: bool = Field(default=False, description=(
+        "corner chip stating the CAGR between first and last values — "
+        "computed by the engine, never by the model"))
+    percent_100: bool = Field(default=False, description=(
+        "stacked bars normalized to 100%"))
+    direction: Literal["vertical", "horizontal"] = "vertical"
+    compact: bool = Field(default=False, description=(
+        "micro sizing for multi-chart slides: smaller fonts, no legend"))
+
+
 class NativeChartSpec(BaseModel):
     """A chart must ARGUE, not just plot: sort, highlight and annotation are
-    required decisions (explicitly 'none' if deliberately unused)."""
+    required decisions (explicitly 'none' if deliberately unused).
+    waterfall: values are SIGNED contributions; first category is the
+    opening level and the last category is the closing total (the engine
+    verifies the arithmetic and floats the middle bars)."""
     kind: Literal["native_chart"] = "native_chart"
-    chart_type: Literal["bar", "stacked_bar", "line", "donut"]
+    chart_type: Literal["bar", "stacked_bar", "line", "donut", "waterfall"]
     categories: list[PlainStr] = Field(min_length=1, max_length=24)
     series: list[ChartSeriesSpec] = Field(min_length=1, max_length=6)
     sort: Literal["desc", "asc", "none"] = Field(
@@ -240,6 +274,7 @@ class NativeChartSpec(BaseModel):
         max_length=160,
         description="One short callout stating what the chart proves, or null")
     value_suffix: PlainStr = Field(default="", max_length=8)  # e.g. "%", " Mn"
+    style: ChartStyleSpec = Field(default_factory=ChartStyleSpec)
 
 
 # --- comparison_columns: recursive children -----------------------------
