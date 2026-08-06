@@ -41,6 +41,13 @@ EST_USD_PER_SLIDE = 0.02  # draft + up to 2 judge/repair vision calls
 RETRIES = 3
 BACKOFF_BASE = 2.0
 
+# slide roles that are cover/section chrome — not worth replicating as
+# reusable exemplars (they carry no transferable structure).
+SKIP_ROLES = {"title", "divider", "other"}
+# craft our vector engine deliberately cannot reproduce; a slide built on
+# these can never pass the fidelity bar, so don't spend vision calls on it.
+UNREPRODUCIBLE_CRAFT = {"photo_background", "watermark_image"}
+
 # corpus slide_role -> DeckEngine archetype (the mold we replicate into)
 ROLE_TO_ARCHETYPE = {
     "title": "title", "divider": "section_divider",
@@ -93,6 +100,13 @@ def select_candidates(work: Path, total_cap: int = 30,
         if rec is None or sc is None:
             continue
         role = cl.get("slide_role", "other")
+        # skip slides our vector engine cannot faithfully reproduce:
+        # cover/divider chrome, and anything photo/watermark-driven.
+        if role in SKIP_ROLES:
+            continue
+        craft = set(cl.get("craft_elements") or [])
+        if craft & UNREPRODUCIBLE_CRAFT:
+            continue
         archetype = ROLE_TO_ARCHETYPE.get(role, "custom_layout")
         cands.append({
             "slide_id": sid, "deck_id": rec.get("deck_id"),
@@ -298,8 +312,9 @@ def induce_one(cand: dict, work: Path) -> dict:
                     + "/5. Fix these structural gaps: "
                     + "; ".join(verdict.get("gaps", [])) + ".")
 
-    # neutralize + leak gate
-    from .neutralize import neutralize_spec
+    # neutralize + leak gate (absolute import works both as the `corpus`
+    # package in tests and as a `python corpus/induce.py` script)
+    from corpus.neutralize import neutralize_spec
     neutral, leaked = neutralize_spec(best["spec"].model_dump(), text,
                                       archetype)
     result = {"slide_id": cand["slide_id"], "archetype": archetype,

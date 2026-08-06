@@ -27,19 +27,59 @@ _SPECIFIC_NUM = re.compile(r"\d[\d,]*\.\d+|\d{1,3}(?:,\d{3})+|\d{4,}")
 # proper-noun phrases: runs of Capitalized words
 _PROPER = re.compile(r"\b[A-Z][a-zA-Z&.'-]+(?:\s+[A-Z][a-zA-Z&.'-]+)*")
 
-# generic business/geographic vocabulary that is NOT identifying — appears
-# in both source and neutralized text legitimately.
+# Vocabulary that is NOT identifying — it appears in both source and
+# neutralized text legitimately (common English + business/industry topic
+# words + the neutralizer keeps the INDUSTRY, only names/numbers change).
+# A leak is a DISTINCTIVE name or a SPECIFIC number, not a topic noun, so
+# this list is deliberately broad to keep precision high.
 _STOP = {
+    # function / very common English
     "the", "a", "an", "and", "or", "of", "in", "to", "for", "with", "by",
-    "market", "markets", "revenue", "growth", "share", "cost", "costs",
-    "price", "pricing", "margin", "ebitda", "cagr", "total", "value",
-    "volume", "segment", "segments", "region", "regions", "north", "south",
-    "east", "west", "product", "products", "service", "services", "sales",
-    "customer", "customers", "channel", "channels", "q1", "q2", "q3", "q4",
-    "fy", "usd", "inr", "eur", "gbp", "mn", "bn", "b", "m", "k", "yoy",
-    "exhibit", "source", "note", "notes", "figure", "chart", "table",
-    "overview", "summary", "strategy", "analysis", "opportunity", "risk",
-    "risks", "key", "other", "others", "top", "new", "current", "future",
+    "on", "at", "as", "is", "are", "was", "were", "be", "been", "this",
+    "that", "these", "those", "it", "its", "they", "them", "their", "we",
+    "our", "you", "your", "he", "she", "his", "her", "will", "would", "can",
+    "could", "should", "may", "might", "must", "not", "no", "yes", "but",
+    "however", "therefore", "thus", "while", "when", "where", "which",
+    "who", "what", "how", "why", "all", "any", "each", "every", "some",
+    "many", "most", "more", "less", "few", "several", "both", "than",
+    "then", "also", "only", "over", "under", "up", "down", "out", "into",
+    "from", "about", "across", "between", "through", "during", "after",
+    "before", "next", "last", "first", "second", "third", "one", "two",
+    "three", "four", "five", "six", "seven", "eight", "nine", "ten",
+    "billion", "million", "thousand", "hundred", "percent",
+    # business / consulting vocabulary
+    "market", "markets", "revenue", "revenues", "growth", "share", "shares",
+    "cost", "costs", "price", "pricing", "margin", "margins", "ebitda",
+    "cagr", "total", "value", "values", "volume", "volumes", "segment",
+    "segments", "region", "regions", "north", "south", "east", "west",
+    "global", "national", "international", "domestic", "local", "product",
+    "products", "service", "services", "sales", "customer", "customers",
+    "channel", "channels", "demand", "supply", "capacity", "profit",
+    "profits", "loss", "losses", "investment", "investments", "return",
+    "returns", "capital", "assets", "operations", "operating", "business",
+    "businesses", "company", "companies", "industry", "industries",
+    "sector", "sectors", "competition", "competitive", "competitor",
+    "competitors", "strategy", "strategic", "analysis", "opportunity",
+    "opportunities", "risk", "risks", "trend", "trends", "forecast",
+    "outlook", "performance", "productivity", "efficiency", "quality",
+    "innovation", "technology", "digital", "platform", "solutions",
+    "management", "leadership", "team", "teams", "employee", "employees",
+    "staff", "workforce", "board", "executive", "executives",
+    "requirements", "survey", "report", "data", "insights", "findings",
+    "benchmark", "adoption", "transformation", "generative", "ai",
+    "q1", "q2", "q3", "q4", "fy", "usd", "inr", "eur", "gbp", "mn", "bn",
+    "yoy", "exhibit", "source", "note", "notes", "figure", "chart",
+    "table", "overview", "summary", "key", "other", "others", "top",
+    "new", "current", "future", "increase", "decrease", "improve",
+    "reduce", "grow", "scale", "drive", "deliver", "enable", "support",
+    # common industry topic nouns (the neutralizer keeps the industry)
+    "banking", "bank", "banks", "finance", "financial", "insurance",
+    "retail", "healthcare", "pharma", "pharmaceutical", "energy", "oil",
+    "gas", "automotive", "manufacturing", "agriculture", "tourism",
+    "travel", "travellers", "travelers", "visitor", "visitors",
+    "hospitality", "telecom", "media", "consumer", "enterprise", "public",
+    "government", "education", "logistics", "transport", "mobility",
+    "convention", "designation", "winning",
 }
 
 
@@ -49,9 +89,10 @@ def _tokens(text: str) -> tuple[set[str], set[str]]:
     nums = {n for n in nums if not _is_year(n)}
     props: set[str] = set()
     for m in _PROPER.finditer(text):
-        for w in re.findall(r"[A-Za-z&.'-]+", m.group()):
-            lw = w.lower()
-            if len(lw) >= 3 and lw not in _STOP:
+        for w in re.findall(r"[A-Za-z][A-Za-z&']*", m.group()):
+            lw = w.strip(".'-&").lower()  # drop trailing punctuation
+            # a leak is a DISTINCTIVE name: >=4 chars and not a common word
+            if len(lw) >= 4 and lw not in _STOP:
                 props.add(lw)
     return props, nums
 
