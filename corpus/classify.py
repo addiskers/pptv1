@@ -442,6 +442,9 @@ def run_classify(work: str | Path, sample: float | None = None,
 
 
 def main(argv: list[str] | None = None) -> None:
+    # provider keys live in the repo .env (same pattern as api/main.py)
+    from deckengine.envfile import load_env
+    load_env()
     ap = argparse.ArgumentParser(
         description="Vision-classify surviving corpus slides.")
     ap.add_argument("--work",

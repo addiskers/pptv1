@@ -73,13 +73,19 @@ def deck_id_for(src_root: Path, path: Path) -> str:
     return hashlib.sha1(rel.encode("utf-8")).hexdigest()[:12]
 
 
-def iter_source_files(src: Path, decks_glob: str | None = None) -> list[Path]:
-    """Deck files under src, sorted; skips Office temp ~$ files."""
+def iter_source_files(src: Path, decks_glob: str | None = None,
+                      exclude_dirs: set[str] | None = None) -> list[Path]:
+    """Deck files under src, sorted; skips Office temp ~$ files and any
+    file with an excluded directory name anywhere in its relative path
+    (the corpus root often also holds the engine repo / preview dirs)."""
     out: list[Path] = []
     for p in sorted(src.rglob("*")):
         if not p.is_file() or p.suffix.lower() not in SOURCE_SUFFIXES:
             continue
         if p.name.startswith("~$"):
+            continue
+        rel_parts = p.relative_to(src).parts[:-1]
+        if exclude_dirs and any(part in exclude_dirs for part in rel_parts):
             continue
         if decks_glob:
             rel = p.relative_to(src).as_posix()
@@ -378,7 +384,8 @@ def ingest_deck(deck_id: str, path: Path, work: Path,
 
 def run_ingest(src: str | Path, work: str | Path,
                limit: int | None = None,
-               decks: str | None = None) -> dict:
+               decks: str | None = None,
+               exclude_dirs: set[str] | None = None) -> dict:
     src = Path(src).resolve()
     work = Path(work).resolve()
     work.mkdir(parents=True, exist_ok=True)
@@ -386,7 +393,7 @@ def run_ingest(src: str | Path, work: str | Path,
 
     todo: list[tuple[str, Path, os.stat_result]] = []
     skipped = 0
-    for path in iter_source_files(src, decks):
+    for path in iter_source_files(src, decks, exclude_dirs):
         if work == path or work in path.parents:
             # If work lives under src, derived files (work/converted/
             # <deck_id>/*.pptx) would be walked as brand-new source
@@ -444,10 +451,15 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--work",
                     default=str(Path(__file__).resolve().parent / "work"),
                     help="derived-data dir (default: corpus/work)")
+    ap.add_argument("--exclude", default="deckengine",
+                    help="comma-separated directory names to skip anywhere "
+                         "under src (default: deckengine)")
     args = ap.parse_args(argv)
     if not args.src:
         ap.error("--src required (or set DECKENGINE_CORPUS)")
-    summary = run_ingest(args.src, args.work, args.limit, args.decks)
+    exclude = {d.strip() for d in args.exclude.split(",") if d.strip()}
+    summary = run_ingest(args.src, args.work, args.limit, args.decks,
+                         exclude_dirs=exclude or None)
     print(json.dumps(summary))
 
 
