@@ -449,3 +449,83 @@ def check_slide_format(slide, facts: FactTable | None = None) -> list[str]:
     for c in charts:
         problems.extend(_chart_problems(c, slide.title))
     return problems
+
+
+# -- deterministic chart enrichment: make every chart RICH by content ---------
+
+_YEAR_TOKEN = re.compile(r"\b20\d{2}\b")
+_FORECAST_WORD = re.compile(r"\b(?:forecast\w*|projected|projections?)\b", re.I)
+
+
+def _iter_chart_models(node):
+    """Yield every NativeChartSpec anywhere in a slide model (chart_slide's
+    chart, a custom_layout tree leaf, ...)."""
+    from pydantic import BaseModel
+
+    from ..schema.components import NativeChartSpec
+    if isinstance(node, NativeChartSpec):
+        yield node
+        return
+    if isinstance(node, BaseModel):
+        for name in type(node).model_fields:
+            yield from _iter_chart_models(getattr(node, name))
+    elif isinstance(node, (list, tuple)):
+        for v in node:
+            yield from _iter_chart_models(v)
+
+
+def enrich_slide_charts(slide) -> None:
+    """Fill the ChartStyleSpec knobs the author left at DEFAULT so each chart
+    gets the top-firm treatment its claim + data warrant — growth lines get
+    endpoint labels + an engine-computed CAGR chip, a named subject series is
+    highlighted while the rest mute, long-label bars turn horizontal,
+    share-over-time stacks normalize to 100%. Explicit author choices always
+    win (only default-valued knobs are touched). Mutates in place; safe on
+    any slide type (no charts -> no-op)."""
+    title = plain(getattr(slide, "title", "") or "")
+    sig = signals_from(title)
+    for chart in _iter_chart_models(slide):
+        _enrich_chart(chart, title, sig)
+
+
+def _enrich_chart(chart, title: str, sig: Signals) -> None:
+    st = chart.style
+    ct = chart.chart_type
+    cats = [str(c) for c in chart.categories]
+    n_cat, n_ser = len(cats), len(chart.series)
+    first_vals = list(chart.series[0].values) if chart.series else []
+
+    # value labels — elite charts label values (91-100%); turn on for any
+    # single-series bar/line the author left on auto.
+    if st.value_labels is None and n_ser == 1 and ct in ("bar", "line"):
+        st.value_labels = True
+
+    if ct == "line" and n_ser == 1 and n_cat >= 3 and sig.trend:
+        if not st.endpoint_labels:
+            st.endpoint_labels = True
+        if not st.cagr_chip and first_vals and first_vals[0] > 0:
+            st.cagr_chip = True
+
+    # explicit forecast language + enough dated history -> dash the last leg
+    if (ct == "line" and n_ser == 1 and st.forecast_from is None
+            and _FORECAST_WORD.search(title)):
+        yrs = [c for c in cats if _YEAR_TOKEN.fullmatch(c.strip())]
+        if len(yrs) >= 4:
+            st.forecast_from = cats[n_cat - 3]
+
+    # multi-series whose subject is named in the title -> highlight it, mute rest
+    if n_ser > 1 and st.highlight_series is None:
+        for s in chart.series:
+            if s.name and re.search(rf"\b{re.escape(s.name)}\b", title, re.I):
+                st.highlight_series = s.name
+                break
+
+    # long category labels on a single-series bar -> horizontal reads cleaner
+    if (ct == "bar" and n_ser == 1 and st.direction == "vertical"
+            and n_cat and sum(len(c) for c in cats) / n_cat > 14):
+        st.direction = "horizontal"
+
+    # share-over-time stacked bars -> 100% normalized
+    if (ct == "stacked_bar" and not st.percent_100 and sig.composition
+            and re.search(r"\bover\s+time|shift|since|20\d{2}\b", title, re.I)):
+        st.percent_100 = True

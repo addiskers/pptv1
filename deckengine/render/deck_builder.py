@@ -37,8 +37,13 @@ def build_deck(spec: DeckSpec, out_path: str | Path) -> BuildReport:
 
     # pre-pass: split any deep-dive slide whose table exceeds one page
     from ..layout.pagination import paginate_deep_dive
+    from ..llm.format_rules import enrich_slide_charts
     expanded = []
     for s in spec.slides:
+        # deterministic chart enrichment: rich, content-driven chart styling
+        # (endpoint labels, CAGR chip, highlight, horizontal, 100% stack) —
+        # applied to every deck, respecting any explicit author style choices
+        enrich_slide_charts(s)
         if s.slide_type == "data_deep_dive":
             expanded.extend(paginate_deep_dive(s, ctx))
         else:
@@ -60,6 +65,7 @@ def build_deck(spec: DeckSpec, out_path: str | Path) -> BuildReport:
             raise
         if slide_spec.slide_type not in ("title", "section_divider"):
             _footer(slide, spec, i, ctx)
+        _logo(slide, spec.meta.logo, report)
 
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -88,6 +94,25 @@ def _paint_bg_image(slide, src: str, opacity: float,
                              Emu(band.x + (band.w - w) // 2),
                              Emu(band.y + (band.h - h) // 2),
                              Emu(w), Emu(h))
+
+
+def _logo(slide, src: str | None, report: BuildReport) -> None:
+    """Brand logo, aspect-contained in a small box pinned to the top-right
+    corner. Runs on EVERY slide (the cover's date moved left to clear it).
+    A missing asset warns + skips — a logo never blocks a render."""
+    if not src:
+        return
+    from ..core.assets import image_size, resolve_asset
+    path = resolve_asset(src)
+    if path is None:
+        report.warn(f"logo {src!r} not found under assets/; skipped")
+        return
+    box_w, box_h = inch(1.4), inch(0.42)
+    iw, ih = image_size(path)
+    scale = min(box_w / iw, box_h / ih)
+    w, h = round(iw * scale), round(ih * scale)
+    x = SLIDE_W_16_9 - inch(0.4) - w  # right edge, matches slide margins
+    slide.shapes.add_picture(str(path), Emu(x), Emu(inch(0.22)), Emu(w), Emu(h))
 
 
 def _footer(slide, spec: DeckSpec, page: int, ctx: RenderContext) -> None:
