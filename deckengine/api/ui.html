@@ -52,6 +52,14 @@
   }
   .link-btn:hover { border-color: var(--slate); box-shadow: var(--shadow-sm); }
   .link-btn svg { width: 15px; height: 15px; }
+  .account-chip {
+    display: none; font-size: 12.5px; color: var(--muted);
+    border: 1px solid var(--line-strong); border-radius: 999px;
+    padding: 6px 14px; background: var(--surface); align-items: center;
+  }
+  .account-chip.on { display: inline-flex; }
+  #logoutBtn { display: none; }
+  #logoutBtn.on { display: inline-flex; }
 
   main { max-width: 940px; margin: 0 auto; padding: 34px 20px 80px; }
 
@@ -255,10 +263,12 @@
     <span class="tag">a sentence in &rarr; a consulting-grade, fully editable deck out</span>
   </div>
   <div class="header-spacer"></div>
+  <span id="account" class="account-chip"></span>
   <button class="link-btn" onclick="openDrawer()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
     Recent decks
   </button>
+  <button class="link-btn" id="logoutBtn" type="button" onclick="logout()">Sign out</button>
 </header>
 
 <main>
@@ -512,6 +522,34 @@ function toast(msg, isErr) {
   setTimeout(() => t.classList.remove('show'), isErr ? 6000 : 3500);
 }
 
+// ---- auth ----
+async function initAuth() {
+  try {
+    const r = await fetch('/me');
+    if (r.status === 401) { location.href = '/login'; return; }
+    const me = await r.json();
+    const chip = $('account');
+    if (me.quota !== null && me.quota !== undefined) {
+      chip.textContent = me.email + ' · ' + me.used + '/' + me.quota + ' deck' + (me.quota === 1 ? '' : 's');
+      chip.classList.add('on');
+      $('logoutBtn').classList.add('on');
+      if (me.used >= me.quota) {
+        toast('Your account has used its deck allowance (' + me.used + '/' + me.quota + '). Open it from Recent decks — reworking slides there is free.', true);
+      }
+    }
+  } catch (e) {}
+}
+async function logout() {
+  try { await fetch('/logout', {method: 'POST'}); } catch (e) {}
+  location.href = '/login';
+}
+async function apiError(res) {
+  if (res.status === 401) { location.href = '/login'; return 'Signed out.'; }
+  try { const d = await res.json(); if (d.detail) return d.detail; } catch (e) {}
+  return await res.text();
+}
+initAuth();
+
 // ---- generate flow ----
 async function generate() {
   const prompt = $('prompt').value.trim();
@@ -524,7 +562,7 @@ async function generate() {
   try {
     const res = await fetch('/generate', {method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({prompt, csv_text: csvText, theme: selectedTheme, logo: logoAsset, auto_approve: !review})});
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) throw new Error(await apiError(res));
     poll((await res.json()).job_id);
   } catch (e) { fail(e.message); }
 }
@@ -537,7 +575,7 @@ async function renderSpec() {
   progress('Rendering deck…', 'Deterministic layout — measuring text, placing components.', 'render', ['outline','slides']);
   try {
     const res = await fetch('/render', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({spec})});
-    if (!res.ok) throw new Error(await res.text());
+    if (!res.ok) throw new Error(await apiError(res));
     poll((await res.json()).job_id);
   } catch (e) { fail(e.message); }
 }

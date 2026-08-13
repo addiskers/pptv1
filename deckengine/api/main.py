@@ -1,6 +1,8 @@
 """FastAPI layer: POST /generate -> job -> pptx + previews.
 
-Auth: set DECKENGINE_API_KEY; requests must send X-API-Key. (Review finding:
+Auth: user sessions (data/users.json, per-user deck quota — see auth.py);
+X-API-Key matching DECKENGINE_API_KEY remains a service bypass, and
+DECKENGINE_AUTH=0 disables auth for local development. (Review finding:
 never serve client-confidential decks unauthenticated.)
 Run: uvicorn deckengine.api.main:app --reload
 """
@@ -12,13 +14,14 @@ import tempfile
 import uuid
 from pathlib import Path
 
-from fastapi import (BackgroundTasks, FastAPI, File, Header, HTTPException,
-                     UploadFile)
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi import (BackgroundTasks, Depends, FastAPI, File,
+                     HTTPException, Request, Response, UploadFile)
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from pydantic import BaseModel
 
 from ..render.deck_builder import build_deck
 from ..schema.slide_types import DeckSpec
+from . import auth
 
 from ..envfile import load_env
 load_env()
@@ -28,12 +31,89 @@ app = FastAPI(title="DeckEngine", version="0.1.0")
 JOBS_DIR = Path(tempfile.gettempdir()) / "deckengine_jobs"
 _JOBS: dict[str, dict] = {}
 _UI = Path(__file__).with_name("ui.html")
+_LOGIN = Path(__file__).with_name("login.html")
 _REPO = Path(__file__).resolve().parents[2]
 
 
-@app.get("/", response_class=HTMLResponse)
-def ui() -> str:
-    return _UI.read_text(encoding="utf-8")
+@app.get("/")
+def ui(request: Request):
+    if auth.identity_of(request) is None:
+        return RedirectResponse("/login")
+    return HTMLResponse(_UI.read_text(encoding="utf-8"))
+
+
+# -- auth ----------------------------------------------------------------
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+@app.get("/login", response_class=HTMLResponse)
+def login_page() -> str:
+    return _LOGIN.read_text(encoding="utf-8")
+
+
+@app.post("/login")
+def login(req: LoginRequest, response: Response) -> dict:
+    user = auth.get_user(req.email)
+    if not user or not auth.verify_password(req.password, user.get("pw", "")):
+        raise HTTPException(401, "Invalid email or password.")
+    response.set_cookie(auth.SESSION_COOKIE,
+                        auth.make_session(req.email.lower().strip()),
+                        max_age=auth.SESSION_TTL, httponly=True,
+                        samesite="lax")
+    return {"ok": True}
+
+
+@app.post("/logout")
+def logout(response: Response) -> dict:
+    response.delete_cookie(auth.SESSION_COOKIE)
+    return {"ok": True}
+
+
+@app.get("/me")
+def me(user: str = Depends(auth.current_user)) -> dict:
+    if auth.is_service(user):
+        return {"email": user, "quota": None, "used": 0}
+    return {"email": user, "quota": auth.quota_for(user),
+            "used": _decks_used(user)}
+
+
+def _decks_used(email: str) -> int:
+    """Decks this user has created (running + done; errors refund)."""
+    ids = set(_JOBS)
+    if JOBS_DIR.is_dir():
+        ids |= {d.name for d in JOBS_DIR.iterdir()
+                if (d / "meta.json").is_file()}
+    used = 0
+    for jid in ids:
+        meta = _load_job(jid) or {}
+        if meta.get("owner") == email and meta.get("status") != "error":
+            used += 1
+    return used
+
+
+def _check_quota(user: str) -> None:
+    if auth.is_service(user):
+        return
+    quota = auth.quota_for(user)
+    used = _decks_used(user)
+    if used >= quota:
+        raise HTTPException(
+            403, f"Deck limit reached ({used}/{quota}). Your account can "
+                 "create one presentation — contact SkyQuest to raise the "
+                 "limit.")
+
+
+def _own_or_404(user: str, job: dict | None) -> dict:
+    """Regular users only see their own jobs (legacy ownerless jobs stay
+    admin/service-visible only)."""
+    if job is None:
+        raise HTTPException(404)
+    if not auth.is_service(user) and job.get("owner") != user:
+        raise HTTPException(404)
+    return job
 
 
 @app.get("/demo-spec")
@@ -64,11 +144,10 @@ def list_themes() -> list[dict]:
 
 @app.post("/assets")
 async def upload_asset(file: UploadFile = File(...),
-                      x_api_key: str | None = Header(default=None)) -> dict:
+                       user: str = Depends(auth.current_user)) -> dict:
     """Store an uploaded image (e.g. a brand logo) under assets/uploads/ and
     return its asset name to drop into a spec's meta.logo or the generate
     request. resolve_asset() finds it by that name at render time."""
-    _check_key(x_api_key)
     import re
     from ..core.assets import ASSETS_DIR
     raw = Path(file.filename or "logo.png").name
@@ -77,12 +156,6 @@ async def upload_asset(file: UploadFile = File(...),
     dest_dir.mkdir(parents=True, exist_ok=True)
     (dest_dir / safe).write_bytes(await file.read())
     return {"asset": f"uploads/{safe}"}
-
-
-def _check_key(x_api_key: str | None) -> None:
-    expected = os.environ.get("DECKENGINE_API_KEY")
-    if expected and x_api_key != expected:
-        raise HTTPException(401, "invalid API key")
 
 
 class GenerateFromSpec(BaseModel):
@@ -103,24 +176,25 @@ class ApproveOutline(BaseModel):
 
 @app.post("/render")
 def render_spec(req: GenerateFromSpec, background: BackgroundTasks,
-                x_api_key: str | None = Header(default=None)) -> dict:
+                user: str = Depends(auth.current_user)) -> dict:
     """Deterministic path: validated spec in, pptx out."""
-    _check_key(x_api_key)
+    _check_quota(user)
     job_id = uuid.uuid4().hex[:12]
-    _JOBS[job_id] = {"status": "running"}
+    _JOBS[job_id] = {"status": "running", "owner": user}
     background.add_task(_run_render, job_id, req.spec)
     return {"job_id": job_id}
 
 
 @app.post("/generate")
 def generate(req: GenerateFromPrompt, background: BackgroundTasks,
-             x_api_key: str | None = Header(default=None)) -> dict:
+             user: str = Depends(auth.current_user)) -> dict:
     """LLM path. Default flow: stage 1 produces a claim-chain outline for HUMAN
     APPROVAL (the highest-leverage 30 seconds in the pipeline); POST
     /jobs/{id}/approve continues to slides. auto_approve=True skips the gate."""
-    _check_key(x_api_key)
+    _check_quota(user)
     job_id = uuid.uuid4().hex[:12]
-    _JOBS[job_id] = {"status": "running", "request": req.model_dump()}
+    _JOBS[job_id] = {"status": "running", "owner": user,
+                     "request": req.model_dump()}
     if req.auto_approve:
         background.add_task(_run_generate, job_id, req, None)
     else:
@@ -130,43 +204,38 @@ def generate(req: GenerateFromPrompt, background: BackgroundTasks,
 
 @app.post("/jobs/{job_id}/approve")
 def approve(job_id: str, req: ApproveOutline, background: BackgroundTasks,
-            x_api_key: str | None = Header(default=None)) -> dict:
-    _check_key(x_api_key)
-    job = _JOBS.get(job_id)
-    if not job or job.get("status") != "awaiting_approval":
+            user: str = Depends(auth.current_user)) -> dict:
+    job = _own_or_404(user, _JOBS.get(job_id))
+    if job.get("status") != "awaiting_approval":
         raise HTTPException(409, "job is not awaiting approval")
     from ..llm.story import Outline
     outline = Outline.model_validate(req.outline)
     gen_req = GenerateFromPrompt.model_validate(job["request"])
-    _JOBS[job_id] = {"status": "running", "request": job["request"]}
+    _JOBS[job_id] = {"status": "running", "owner": job.get("owner"),
+                     "request": job["request"]}
     background.add_task(_run_generate, job_id, gen_req, outline)
     return {"job_id": job_id, "status": "running"}
 
 
 @app.get("/jobs/{job_id}")
 def job_status(job_id: str,
-               x_api_key: str | None = Header(default=None)) -> dict:
-    _check_key(x_api_key)
-    job = _load_job(job_id)
-    if job is None:
-        raise HTTPException(404)
-    return job
+               user: str = Depends(auth.current_user)) -> dict:
+    return _own_or_404(user, _load_job(job_id))
 
 
 @app.get("/download/{job_id}")
 def download(job_id: str,
-             x_api_key: str | None = Header(default=None)) -> FileResponse:
-    _check_key(x_api_key)
-    job = _load_job(job_id)
-    if not job or job.get("status") != "done":
+             user: str = Depends(auth.current_user)) -> FileResponse:
+    job = _own_or_404(user, _load_job(job_id))
+    if job.get("status") != "done":
         raise HTTPException(404, "not ready")
     return FileResponse(job["path"], filename="deck.pptx")
 
 
 @app.get("/previews/{job_id}/{n}")
 def preview_png(job_id: str, n: int,
-                x_api_key: str | None = Header(default=None)) -> FileResponse:
-    _check_key(x_api_key)
+                user: str = Depends(auth.current_user)) -> FileResponse:
+    _own_or_404(user, _load_job(job_id))
     p = JOBS_DIR / job_id / "previews" / f"slide{n:02d}.png"
     if not p.is_file():
         raise HTTPException(404)
@@ -192,6 +261,7 @@ def _run_render(job_id: str, spec: DeckSpec) -> None:
                 "warnings": report.warnings,
                 "truncations": report.truncations,
                 "previews": previews,
+                "owner": _JOBS.get(job_id, {}).get("owner"),
                 "request": _JOBS.get(job_id, {}).get("request")}
         # persist: the spec is the source of truth; jobs survive restarts
         (job_dir / "spec.json").write_text(spec.model_dump_json(indent=2),
@@ -199,7 +269,8 @@ def _run_render(job_id: str, spec: DeckSpec) -> None:
         (job_dir / "meta.json").write_text(json.dumps(meta), encoding="utf-8")
         _JOBS[job_id] = meta
     except Exception as e:  # noqa: BLE001
-        _JOBS[job_id] = {"status": "error", "error": str(e)}
+        _JOBS[job_id] = {"status": "error", "error": str(e),
+                         "owner": _JOBS.get(job_id, {}).get("owner")}
 
 
 def _load_job(job_id: str) -> dict | None:
@@ -214,8 +285,7 @@ def _load_job(job_id: str) -> dict | None:
 
 
 @app.get("/decks")
-def list_decks(x_api_key: str | None = Header(default=None)) -> list[dict]:
-    _check_key(x_api_key)
+def list_decks(user: str = Depends(auth.current_user)) -> list[dict]:
     out = []
     if JOBS_DIR.is_dir():
         for d in sorted(JOBS_DIR.iterdir(),
@@ -223,6 +293,8 @@ def list_decks(x_api_key: str | None = Header(default=None)) -> list[dict]:
             meta_p = d / "meta.json"
             if meta_p.is_file():
                 m = json.loads(meta_p.read_text(encoding="utf-8"))
+                if not auth.is_service(user) and m.get("owner") != user:
+                    continue  # users only see their own decks
                 out.append({"deck_id": d.name, "title": m.get("title"),
                             "slides": m.get("slides"),
                             "warnings": len(m.get("warnings", []))})
@@ -236,13 +308,13 @@ class RegenSlide(BaseModel):
 @app.patch("/decks/{job_id}/slides/{n}")
 def regen_slide(job_id: str, n: int, req: RegenSlide,
                 background: BackgroundTasks,
-                x_api_key: str | None = Header(default=None)) -> dict:
+                user: str = Depends(auth.current_user)) -> dict:
     """Regenerate ONE slide's spec, then re-render the whole deck (rendering
-    is deterministic and takes seconds — never do in-place pptx surgery)."""
-    _check_key(x_api_key)
-    job = _load_job(job_id)
+    is deterministic and takes seconds — never do in-place pptx surgery).
+    Reworking an existing deck does NOT consume quota."""
+    job = _own_or_404(user, _load_job(job_id))
     spec_p = JOBS_DIR / job_id / "spec.json"
-    if not job or job.get("status") != "done" or not spec_p.is_file():
+    if job.get("status") != "done" or not spec_p.is_file():
         raise HTTPException(409, "deck not ready or spec missing")
     spec = DeckSpec.model_validate_json(spec_p.read_text(encoding="utf-8"))
     if not (1 <= n <= len(spec.slides)):

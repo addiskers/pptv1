@@ -49,6 +49,13 @@ def test_notes_written_and_readable(tmp_path):
     assert not prs.slides[2].has_notes_slide  # no empty notes parts
 
 
+def test_overlong_notes_trim_instead_of_failing():
+    long = ("Point at the water chart and hold there. " * 12)  # ~500 chars
+    s = BulletContentSpec(title="T", bullets=[{"text": "a"}], notes=long)
+    assert s.notes is not None and len(s.notes) <= 350
+    assert s.notes.endswith(".")  # trimmed at a sentence boundary
+
+
 # -- per-chart source line ---------------------------------------------------
 
 def _chart(**kw):

@@ -68,6 +68,7 @@ def test_upload_asset_endpoint(tmp_path, monkeypatch):
 
     from deckengine.core import assets
     from deckengine.api.main import app
+    monkeypatch.setenv("DECKENGINE_AUTH", "0")  # dev bypass for this test
     monkeypatch.setattr(assets, "ASSETS_DIR", tmp_path)
 
     buf = io.BytesIO()

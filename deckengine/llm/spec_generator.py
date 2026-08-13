@@ -79,7 +79,24 @@ def model_id() -> str:
 
 def _structured_call(name: str, schema: dict, prompt: str,
                      max_tokens: int = 16000) -> dict:
-    """One structured-output call, provider-dispatched. Returns the raw dict."""
+    """One structured-output call, provider-dispatched, with transient-error
+    retries (a network blip must never kill a 20-slide generation)."""
+    import time as _time
+    last: Exception | None = None
+    for attempt in range(3):
+        try:
+            return _structured_call_once(name, schema, prompt, max_tokens)
+        except (json.JSONDecodeError, RuntimeError):
+            raise  # real model failures go to the repair loop, not a retry
+        except Exception as e:  # noqa: BLE001 — connection/rate-limit class
+            last = e
+            log.warning("LLM call failed (attempt %d/3): %s", attempt + 1, e)
+            _time.sleep(2 * (attempt + 1))
+    raise RuntimeError(f"LLM unreachable after 3 attempts: {last}")
+
+
+def _structured_call_once(name: str, schema: dict, prompt: str,
+                          max_tokens: int = 16000) -> dict:
     if provider() == "openai":
         from openai import OpenAI
         client = OpenAI()
@@ -457,8 +474,16 @@ def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
         if item.slide_type not in _ARCHETYPES:
             log.warning("skipping unknown archetype %r", item.slide_type)
             continue
-        slide = generate_slide_best(item.slide_type, item.claim, deck_context,
-                                    facts, prior_slides=prior, theme=theme)
+        try:
+            slide = generate_slide_best(item.slide_type, item.claim,
+                                        deck_context, facts,
+                                        prior_slides=prior, theme=theme)
+        except RuntimeError as e:
+            # one stubborn slide must NEVER kill a whole deck: ship without
+            # it and record the gap (the claim chain stays reviewable)
+            log.warning("skipping slide %r (%s): %s",
+                        item.claim[:60], item.slide_type, e)
+            continue
         if facts:
             # CSV facts are official by construction — mark their displays
             slide = inject_fact_markers(slide, facts)

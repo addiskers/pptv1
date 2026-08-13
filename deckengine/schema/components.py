@@ -213,7 +213,9 @@ class ChevronPathwaySpec(BaseModel):
 class NumberedBlockSpec(BaseModel):
     kind: Literal["numbered_block"] = "numbered_block"
     number: PlainStr = Field(max_length=3)        # "1", "1A", "2B"
-    title: RichStr = Field(max_length=120)
+    # 160 matches slide-title budgets: models consistently write block
+    # titles as full assertions; the renderer shrink-fits them anyway
+    title: RichStr = Field(max_length=160)
     body: RichStr | None = Field(default=None, max_length=400)
 
 
@@ -279,12 +281,15 @@ class NativeChartSpec(BaseModel):
     annotation: PlainStr | None = Field(
         max_length=160,
         description="One short callout stating what the chart proves, or null")
-    source: RichStr | None = Field(
+    source: Annotated[
+        str, BeforeValidator(lambda v: v[:140] if isinstance(v, str) else v)
+    ] | None = Field(
         default=None, max_length=140,
         description="Per-chart provenance line, e.g. 'Source: IEA 2025 "
                     "[[src:official]]' — rendered as a micro line under the "
                     "chart (annotation carries rhetoric; source carries "
-                    "provenance)")
+                    "provenance). Overlong values trim: the render ellipsizes "
+                    "this line anyway, so length must never fail a slide.")
     value_suffix: PlainStr = Field(default="", max_length=8)  # e.g. "%", " Mn"
     style: ChartStyleSpec = Field(default_factory=ChartStyleSpec)
 

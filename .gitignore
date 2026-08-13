@@ -13,3 +13,6 @@ corpus/work/
 
 # runtime user uploads (logos) - never committed
 assets/uploads/
+
+# session signing secret - never committed
+data/.secret
