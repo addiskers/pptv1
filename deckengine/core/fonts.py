@@ -44,54 +44,53 @@ def _search_dirs() -> list[Path]:
 
 
 # Known filename stems per (family, bold, italic). The FIRST existing file
-# wins, so the real font is used on Windows and the metric clone on Linux.
+# wins, so the real font is used on Windows and the metric clone elsewhere.
+#
+# HARD RULE: every stem listed for a family MUST be metric-compatible with
+# it (verified deltas: Gelasio=Georgia 0.000%, Selawik=Segoe worst 0.28%,
+# Carlito=Calibri 0.000%, LiberationSans=Arial 0.000%). The EC2 deck
+# disaster came from Liberation Serif (Times-metric) standing in for
+# Georgia: text measured 8-12% narrow, PowerPoint re-wrapped everything.
+# A missing clone must FAIL LOUDLY, never silently mis-measure.
 _KNOWN: dict[tuple[str, bool, bool], list[str]] = {
     ("Segoe UI", False, False): [
-        "segoeui.ttf", "selawk.ttf", "Selawik-Regular.ttf",
-        "Carlito-Regular.ttf", "LiberationSans-Regular.ttf", "DejaVuSans.ttf"],
+        "segoeui.ttf", "selawk.ttf", "Selawik-Regular.ttf"],
     ("Segoe UI", True, False): [
-        "segoeuib.ttf", "selawkb.ttf", "Selawik-Bold.ttf",
-        "Carlito-Bold.ttf", "LiberationSans-Bold.ttf", "DejaVuSans-Bold.ttf"],
+        "segoeuib.ttf", "selawkb.ttf", "Selawik-Bold.ttf"],
+    # Selawik ships no italic: the upright file stands in (advance widths
+    # of the SAME face — acceptable drift; house style caps italics anyway)
     ("Segoe UI", False, True): [
-        "segoeuii.ttf", "seguisli.ttf", "Selawik-Regular.ttf",
-        "Carlito-Italic.ttf", "LiberationSans-Italic.ttf",
-        "DejaVuSans-Oblique.ttf"],
+        "segoeuii.ttf", "seguisli.ttf", "selawk.ttf"],
     ("Segoe UI", True, True): [
-        "segoeuiz.ttf", "Selawik-Bold.ttf", "Carlito-BoldItalic.ttf",
-        "LiberationSans-BoldItalic.ttf", "DejaVuSans-BoldOblique.ttf"],
-    ("Georgia", False, False): [
-        "georgia.ttf", "Gelasio-Regular.ttf", "LiberationSerif-Regular.ttf",
-        "DejaVuSerif.ttf"],
-    ("Georgia", True, False): [
-        "georgiab.ttf", "Gelasio-Bold.ttf", "LiberationSerif-Bold.ttf",
-        "DejaVuSerif-Bold.ttf"],
-    ("Georgia", False, True): [
-        "georgiai.ttf", "Gelasio-Italic.ttf", "LiberationSerif-Italic.ttf",
-        "DejaVuSerif-Italic.ttf"],
-    ("Georgia", True, True): [
-        "georgiaz.ttf", "Gelasio-BoldItalic.ttf",
-        "LiberationSerif-BoldItalic.ttf"],
+        "segoeuiz.ttf", "selawkb.ttf"],
+    ("Georgia", False, False): ["georgia.ttf", "Gelasio-Regular.ttf"],
+    ("Georgia", True, False): ["georgiab.ttf", "Gelasio-Bold.ttf"],
+    ("Georgia", False, True): ["georgiai.ttf", "Gelasio-Italic.ttf"],
+    ("Georgia", True, True): ["georgiaz.ttf", "Gelasio-BoldItalic.ttf"],
     ("Arial", False, False): [
-        "arial.ttf", "LiberationSans-Regular.ttf", "Arimo-Regular.ttf",
-        "DejaVuSans.ttf"],
+        "arial.ttf", "LiberationSans-Regular.ttf", "Arimo-Regular.ttf"],
     ("Arial", True, False): [
-        "arialbd.ttf", "LiberationSans-Bold.ttf", "Arimo-Bold.ttf",
-        "DejaVuSans-Bold.ttf"],
+        "arialbd.ttf", "LiberationSans-Bold.ttf", "Arimo-Bold.ttf"],
     ("Arial", False, True): [
         "ariali.ttf", "LiberationSans-Italic.ttf", "Arimo-Italic.ttf"],
     ("Arial", True, True): [
-        "arialbi.ttf", "LiberationSans-BoldItalic.ttf", "Arimo-BoldItalic.ttf"],
-    ("Calibri", False, False): [
-        "calibri.ttf", "Carlito-Regular.ttf", "LiberationSans-Regular.ttf",
-        "DejaVuSans.ttf"],
-    ("Calibri", True, False): [
-        "calibrib.ttf", "Carlito-Bold.ttf", "LiberationSans-Bold.ttf",
-        "DejaVuSans-Bold.ttf"],
+        "arialbi.ttf", "LiberationSans-BoldItalic.ttf",
+        "Arimo-BoldItalic.ttf"],
+    ("Calibri", False, False): ["calibri.ttf", "Carlito-Regular.ttf"],
+    ("Calibri", True, False): ["calibrib.ttf", "Carlito-Bold.ttf"],
+    ("Calibri", False, True): ["calibrii.ttf", "Carlito-Italic.ttf"],
+    ("Calibri", True, True): ["calibriz.ttf", "Carlito-BoldItalic.ttf"],
+    # No OFL metric clone of Nirmala exists; Noto Devanagari is a GLYPH
+    # fallback, not metric-compatible — themes using Nirmala are
+    # Windows-only until licensed (documented limitation).
     ("Nirmala UI", False, False): [
         "Nirmala.ttf", "NirmalaS.ttf", "NotoSansDevanagari-Regular.ttf",
         "NotoSans-Regular.ttf"],
     ("Nirmala UI", True, False): [
         "NirmalaB.ttf", "NotoSansDevanagari-Bold.ttf", "NotoSans-Bold.ttf"],
+    # markers (●◐○) render in Segoe UI Symbol; single glyphs at micro size,
+    # measured with the same file that renders per-machine
+    ("Segoe UI Symbol", False, False): ["seguisym.ttf", "DejaVuSans.ttf"],
 }
 
 
