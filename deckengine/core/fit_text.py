@@ -162,32 +162,29 @@ class TextMeasurer:
                     if cur and cur_w + sw > budget:
                         flush()
                     if not cur and sw > budget:
-                        # single token wider than the line: hard-split by characters
-                        for piece in self._char_split(stripped, family, base_size, budget):
-                            if cur:
-                                flush()
-                            cur = [piece]
-                            cur_w = self.span_width_emu(piece, family, base_size)
+                        # single token wider than the line: keep it WHOLE on
+                        # its own over-wide line (next token flushes it).
+                        # fit_text treats that as a fit failure (shrink first,
+                        # ellipsize only at the size floor) — NEVER a mid-word
+                        # split ("Marke/t").
+                        cur = [stripped]
+                        cur_w = sw
                         continue
                     cur.append(token)
                     cur_w += tw
             flush()
         return lines
 
-    def _char_split(self, span: Span, family: str, base_size: float,
-                    budget: int) -> list[Span]:
-        out: list[Span] = []
-        buf = ""
-        for ch in span.text:
-            if buf and self.span_width_emu(replace(span, text=buf + ch), family,
-                                           base_size) > budget:
-                out.append(replace(span, text=buf))
-                buf = ch
-            else:
-                buf += ch
-        if buf:
-            out.append(replace(span, text=buf))
-        return out or [replace(span, text="")]
+    def ellipsize_token(self, span: Span, family: str, base_size: float,
+                        budget: int) -> Span:
+        """Longest prefix + ellipsis that fits the budget ("Marke…")."""
+        text = span.text.rstrip()
+        while text:
+            cand = replace(span, text=text.rstrip(".,;") + ELLIPSIS)
+            if self.span_width_emu(cand, family, base_size) <= budget:
+                return cand
+            text = text[:-1]
+        return replace(span, text=ELLIPSIS)
 
 
 def _trim_trailing_ws(spans: list[Span]) -> list[Span]:
@@ -210,11 +207,16 @@ def fit_text(spans: list[Span], bbox: BBox, family: str, *,
     """Try max_size; shrink in 0.5pt steps to min_size; then truncate with ellipsis."""
     m = measurer or TextMeasurer()
     size = max_size
+    budget = int(bbox.w * WRAP_SAFETY)
     while True:
         lines = m.wrap(spans, family, size, bbox.w, line_spacing)
         height = sum(ln.height_emu for ln in lines)
         line_cap_ok = max_lines is None or len(lines) <= max_lines
-        if (height <= bbox.h and line_cap_ok) or strategy == "wrap_only":
+        # a kept-whole overlong token leaves an over-wide line: that is a fit
+        # failure too — shrink until it fits, never mid-word split
+        width_ok = all(ln.width_emu <= budget for ln in lines)
+        if (height <= bbox.h and line_cap_ok and width_ok) \
+                or strategy == "wrap_only":
             return FitResult(size, lines, False, height,
                              _spacing_pt(lines, size))
         if size - 0.5 >= min_size:
@@ -222,6 +224,20 @@ def fit_text(spans: list[Span], bbox: BBox, family: str, *,
             continue
         if strategy == "shrink_only":
             return FitResult(size, lines, False, height, _spacing_pt(lines, size))
+        # at the size floor: ellipsize any still-overwide token in place
+        ellipsized = False
+        for ln in lines:
+            if ln.width_emu > budget and ln.spans:
+                head_w = sum(m.span_width_emu(s, family, size)
+                             for s in ln.spans[:-1])
+                ln.spans[-1] = m.ellipsize_token(
+                    ln.spans[-1], family, size, budget - head_w)
+                ln.width_emu = head_w + m.span_width_emu(
+                    ln.spans[-1], family, size)
+                ellipsized = True
+        if height <= bbox.h and line_cap_ok:
+            return FitResult(size, lines, ellipsized, height,
+                             _spacing_pt(lines, size))
         # truncate: keep as many whole lines as fit, ellipsize the last
         kept: list[Line] = []
         used = 0

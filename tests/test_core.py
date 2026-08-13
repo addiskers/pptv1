@@ -84,9 +84,28 @@ class TestFitText:
         lines = self.m.wrap([Span("one\ntwo")], "Segoe UI", 10, inch(5))
         assert len(lines) == 2
 
-    def test_giant_word_char_splits(self):
+    def test_giant_word_kept_whole_never_char_split(self):
+        # a token wider than the line stays WHOLE on one over-wide line;
+        # fit_text shrinks/ellipsizes — wrap never emits "Marke/t" fragments
         lines = self.m.wrap([Span("A" * 200)], "Segoe UI", 10, inch(1))
-        assert len(lines) > 1
+        assert len(lines) == 1
+        assert lines[0].spans[0].text == "A" * 200
+
+    def test_overlong_token_ellipsized_at_floor(self):
+        word = "Supercalifragilisticexpialidocious"
+        box = BBox(0, 0, inch(1), inch(1))
+        fit = fit_text([Span(word)], box, "Segoe UI", max_size=12, min_size=8)
+        assert fit.truncated
+        txt = fit.lines[0].spans[0].text
+        assert txt.endswith("…") and word.startswith(txt[:-1])
+        assert all(ln.width_emu <= box.w for ln in fit.lines)
+
+    def test_overlong_token_shrinks_to_fit_without_ellipsis(self):
+        # wide box: shrinking alone rescues the long token — no truncation
+        fit = fit_text([Span("Muskmelon-Watermelon")], BBox(0, 0, inch(2.1), inch(1)),
+                       "Segoe UI", max_size=14, min_size=7)
+        assert not fit.truncated
+        assert fit.lines[0].spans[0].text == "Muskmelon-Watermelon"
 
     def test_empty(self):
         lines = self.m.wrap([Span("")], "Segoe UI", 10, inch(1))

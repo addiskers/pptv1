@@ -63,6 +63,16 @@ def _gaps_at(items: list[StackItem], unit: int, level: float) -> list[int]:
 def plan(items: list[StackItem], bbox: BBox, ctx: RenderContext,
          expand: bool = True) -> StackPlan:
     heights = [it.component.measure(it.data, bbox.w, ctx) for it in items]
+    # a blank-payload component measures 0: drop it AND its gap — an empty
+    # band must never leave a stray track/gap hole in the stack
+    if any(h <= 0 for h in heights):
+        for it, h in zip(items, heights):
+            if h <= 0:
+                ctx.report.warn(f"stack: dropped zero-height "
+                                f"{type(it.data).__name__} (blank payload)")
+        pairs = [(it, h) for it, h in zip(items, heights) if h > 0]
+        items = [it for it, _ in pairs]
+        heights = [h for _, h in pairs]
     unit = ctx.theme.unit
 
     # -- compression path (overflow) --------------------------------------

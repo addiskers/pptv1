@@ -18,7 +18,7 @@ from ..core.pptx_text import add_text_box, write_spans_paragraph, \
     write_fit_result
 from ..core.units import inch, to_pt
 from ..schema.components import ProgressPillSpec
-from ..schema.rich import parse_rich
+from ..schema.rich import parse_rich, plain
 from .base import Component, RenderContext, register
 
 _CORNER_RADIUS = 0.5      # full pill on track and segment
@@ -49,15 +49,28 @@ class ProgressPill(Component):
                         max_size=ctx.size("small"), min_size=_MIN_LABEL_PT,
                         measurer=ctx.measurer)
 
+    @staticmethod
+    def _blank(data: ProgressPillSpec) -> bool:
+        """No label, no display, no target: a bare grey track (the evaluated
+        deck's stray slide-23 bar) is a bug, not content — measure 0 so the
+        stacker drops it."""
+        return (not plain(data.label).strip() and not data.display.strip()
+                and not (data.target_display or "").strip())
+
     # -- contract -----------------------------------------------------------
 
     def measure(self, data: ProgressPillSpec, width: int,
                 ctx: RenderContext) -> int:
+        if self._blank(data):
+            return 0
         return (self._label_fit(data, width, ctx).height_emu
                 + ctx.theme.spacing(_GAP_MULT) + self._track_h(ctx))
 
     def render(self, slide, data: ProgressPillSpec, bbox: BBox,
                ctx: RenderContext) -> int:
+        if self._blank(data):
+            ctx.report.warn("progress_pill: all-blank payload; skipped")
+            return 0
         theme = ctx.theme
         family = ctx.font("body")
         size_micro = ctx.size("micro")
@@ -92,7 +105,9 @@ class ProgressPill(Component):
             Span(data.display, bold=True), family, size_micro)
         out_x = seg.right + theme.spacing(_OUT_GAP_MULT)
         out_w = track.right - out_x
-        if disp_w + theme.spacing(_INSIDE_PAD_MULT) <= seg.w:
+        if not data.display.strip():
+            pass  # no display text: nothing to place on the bar
+        elif disp_w + theme.spacing(_INSIDE_PAD_MULT) <= seg.w:
             dbox = add_text_box(slide, seg, align="center", anchor="middle")
             write_spans_paragraph(
                 dbox.text_frame,

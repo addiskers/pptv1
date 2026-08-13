@@ -70,10 +70,13 @@ class TimelineRow(Component):
         family = ctx.font("body")
         size = ctx.size("micro")
         n = len(data.milestones)
-        col_w = bbox.w // n
         marker_top = bbox.y + date_h + gap
         label_top = marker_top + marker_d + gap
-        step_frac = (_LAST_FRAC - _FIRST_FRAC) / (n - 1)
+        step_frac = (_LAST_FRAC - _FIRST_FRAC) / max(1, n - 1)
+        # date/label columns span the REAL center-to-center spacing
+        # (0.88w/(n-1)), not w/n — ~17% more room at n=4, so long labels
+        # wrap later; the edge clamp below keeps columns inside the bbox
+        col_w = round(bbox.w * step_frac) if n > 1 else bbox.w
 
         # rule first so the markers sit on top of it
         add_hline(slide, bbox.x, marker_top + marker_d // 2, bbox.w, ctx.theme,

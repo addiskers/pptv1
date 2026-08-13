@@ -22,7 +22,7 @@ from ..core.pptx_text import add_text_box, make_text_frame, write_fit_result, \
     write_spans_paragraph
 from ..core.units import inch, pt
 from ..schema.components import CalloutBandSpec
-from ..schema.rich import parse_rich
+from ..schema.rich import parse_rich, plain
 from .base import Component, RenderContext, register
 
 _MIN_BAND_H = inch(0.9)
@@ -82,14 +82,26 @@ class CalloutBand(Component):
     def _overhang(self, data: CalloutBandSpec, ctx: RenderContext) -> int:
         return ctx.theme.spacing(0.6) if data.label else 0
 
+    @staticmethod
+    def _blank(data: CalloutBandSpec) -> bool:
+        """All-blank payload: an empty surface band is a layout bug, not
+        content — measure 0 so the stacker drops it entirely."""
+        return (not (data.label or "").strip() and not (data.icon or "").strip()
+                and not any(plain(s).strip() for s in data.segments))
+
     # -- contract ----------------------------------------------------------
 
     def measure(self, data: CalloutBandSpec, width: int,
                 ctx: RenderContext) -> int:
+        if self._blank(data):
+            return 0
         return self._layout(data, width, ctx).band_h + self._overhang(data, ctx)
 
     def render(self, slide, data: CalloutBandSpec, bbox: BBox,
                ctx: RenderContext) -> int:
+        if self._blank(data):
+            ctx.report.warn("callout_band: all-blank payload; skipped")
+            return 0
         theme = ctx.theme
         lay = self._layout(data, bbox.w, ctx)
         overhang = self._overhang(data, ctx)

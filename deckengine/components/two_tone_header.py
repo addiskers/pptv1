@@ -16,7 +16,7 @@ from ..core.fit_text import FitResult, fit_text
 from ..core.pptx_shapes import add_shape
 from ..core.pptx_text import add_text_box, make_text_frame, write_fit_result
 from ..schema.components import TwoToneHeaderSpec
-from ..schema.rich import parse_rich
+from ..schema.rich import parse_rich, plain
 from .base import Component, RenderContext, register
 
 _PROBE_H = 10_000_000   # generous probe: fit decides its own natural height
@@ -55,15 +55,26 @@ class TwoToneHeader(Component):
         return (max(left.height_emu, right.height_emu)
                 + ctx.theme.spacing(_PAD_MULT))
 
+    @staticmethod
+    def _blank(data: TwoToneHeaderSpec) -> bool:
+        """Both cells blank: an empty two-tone band is a bug, not content —
+        measure 0 so the stacker drops it."""
+        return not plain(data.left).strip() and not plain(data.right).strip()
+
     # -- contract ------------------------------------------------------------
 
     def measure(self, data: TwoToneHeaderSpec, width: int,
                 ctx: RenderContext) -> int:
+        if self._blank(data):
+            return 0
         left, right, _, _ = self._fits(data, width, ctx)
         return self._band_h(left, right, ctx)
 
     def render(self, slide, data: TwoToneHeaderSpec, bbox: BBox,
                ctx: RenderContext) -> int:
+        if self._blank(data):
+            ctx.report.warn("two_tone_header: all-blank payload; skipped")
+            return 0
         theme = ctx.theme
         family = ctx.font("body")
         left, right, left_w, right_w = self._fits(data, bbox.w, ctx)

@@ -20,9 +20,10 @@ from ..schema.components import ChevronPathwaySpec
 from .base import Component, RenderContext, register
 
 _GAP_MULT = 0.15      # overlap-gap between adjacent chevrons
-_INSET_MULT = 0.8     # horizontal text inset, each side
+_INSET_MULT = 0.8     # horizontal text inset, each side (capped vs col width)
+_INSET_FRAC = 0.08    # ...never more than 8% of the column (narrow chevrons)
 _PAD_MULT = 0.6       # vertical padding added to the two reserved lines
-_MIN_SMALL = 7.5      # shrink floor for step text
+_MIN_SMALL = 6.5      # shrink floor for step text (relief before ellipsis)
 _MAX_LINES = 2
 _PROBE_H = 10_000_000  # fit decides real height; probe never truncates
 _TEXT_ROLE = "inverse_ink"
@@ -64,9 +65,12 @@ class ChevronPathway(Component):
             highlight = None
 
         family = ctx.font("body")
-        inset = ctx.theme.spacing(_INSET_MULT)
         cols = BBox(bbox.x, bbox.y, bbox.w, height).cols(
             n, gap=ctx.theme.spacing(_GAP_MULT))
+        # narrow chevrons (many steps): cap the inset so text keeps ≥84% of
+        # the column instead of shrinking/ellipsizing early
+        inset = min(ctx.theme.spacing(_INSET_MULT),
+                    int(cols[0].w * _INSET_FRAC) if cols else 0)
 
         for i, (step, col) in enumerate(zip(data.steps, cols)):
             fill = _HIGHLIGHT_ROLE if i == highlight else _FILL_ROLE

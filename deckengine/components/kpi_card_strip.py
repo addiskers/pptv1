@@ -24,7 +24,7 @@ from ..core.pptx_text import (add_text_box, make_text_frame, write_fit_result,
                               write_spans_paragraph)
 from ..core.units import inch, to_pt
 from ..schema.components import KpiCardSpec, KpiCardStripSpec
-from ..schema.rich import parse_rich
+from ..schema.rich import parse_rich, plain
 from .base import Component, RenderContext, get_component, register
 
 _PROBE_H = 10_000_000  # fit decides real height; probe never truncates
@@ -94,15 +94,28 @@ class KpiCardStrip(Component):
         card_h = max(card_content + 2 * pad, _MIN_CARD_H)
         return plans, card_h
 
+    @staticmethod
+    def _blank(data: KpiCardStripSpec) -> bool:
+        """Every card blank (no title/body text, no viz): an empty strip of
+        dark rects is a bug, not content — measure 0 so the stacker drops it."""
+        return all(not plain(c.title).strip()
+                   and not plain(c.body or "").strip()
+                   and c.viz is None for c in data.cards)
+
     # -- contract -----------------------------------------------------------
 
     def measure(self, data: KpiCardStripSpec, width: int,
                 ctx: RenderContext) -> int:
+        if self._blank(data):
+            return 0
         _, card_h = self._plan(data, width, ctx)
         return card_h
 
     def render(self, slide, data: KpiCardStripSpec, bbox: BBox,
                ctx: RenderContext) -> int:
+        if self._blank(data):
+            ctx.report.warn("kpi_card_strip: all-blank payload; skipped")
+            return 0
         plans, card_h = self._plan(data, bbox.w, ctx)
         if card_h > bbox.h:
             ctx.report.warn(
