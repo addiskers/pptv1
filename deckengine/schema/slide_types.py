@@ -26,7 +26,15 @@ from .components import (
 )
 
 
-class BgImage(BaseModel):
+class SpeakerNotes(BaseModel):
+    """Mixin: directive speaker notes on every archetype — what to SAY, what
+    to point at, what not to read aloud. Written into the pptx notes page
+    (notes pages are laid out by PowerPoint and exempt from the engine's
+    measured-layout contract)."""
+    notes: str | None = Field(default=None, max_length=350)
+
+
+class BgImage(SpeakerNotes):
     """Mixin: faint watermark painted across the body band before content
     (the reference deck's state maps behind columns). Missing assets warn
     and skip — never block a render."""
@@ -34,7 +42,7 @@ class BgImage(BaseModel):
     bg_image_opacity: float = Field(default=0.12, gt=0.02, le=0.5)
 
 
-class TitleSlideSpec(BaseModel):
+class TitleSlideSpec(SpeakerNotes):
     slide_type: Literal["title"] = "title"
     title: RichStr = Field(max_length=160)
     subtitle: RichStr | None = Field(default=None, max_length=300)
@@ -45,7 +53,7 @@ class TitleSlideSpec(BaseModel):
     wordmark: str | None = Field(default=None, max_length=40)
 
 
-class SectionDividerSpec(BaseModel):
+class SectionDividerSpec(SpeakerNotes):
     slide_type: Literal["section_divider"] = "section_divider"
     number: str | None = Field(default=None, max_length=4)
     title: RichStr = Field(max_length=140)

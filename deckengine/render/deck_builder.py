@@ -13,7 +13,7 @@ from ..core.bbox import BBox
 from ..core.fit_text import Span, TextMeasurer
 from ..core.fonts import default_registry
 from ..core.pptx_shapes import add_hline
-from ..core.pptx_text import add_text_box, write_spans_paragraph
+from ..core.pptx_text import add_text_box, set_notes, write_spans_paragraph
 from ..core.theme import load_theme
 from ..core.units import SLIDE_H_16_9, SLIDE_W_16_9, inch
 from ..schema.slide_types import DeckSpec
@@ -67,6 +67,9 @@ def build_deck(spec: DeckSpec, out_path: str | Path) -> BuildReport:
         if slide_spec.slide_type not in ("title", "section_divider"):
             _footer(slide, spec, i, ctx)
         _logo(slide, spec.meta.logo, report)
+        notes = getattr(slide_spec, "notes", None)
+        if notes and notes.strip():
+            set_notes(slide, notes.strip())
 
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)

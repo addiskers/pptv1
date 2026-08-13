@@ -136,6 +136,112 @@ def marker_coverage(slide: BaseModel) -> tuple[int, int]:
     return marked, total
 
 
+LEGEND = ("Markers: [[src:official]] official · [[src:recon]] reconstructed "
+          "· [[src:est]] estimate")
+
+
+def append_legend_once(slides: list[BaseModel]) -> None:
+    """Marker legend on the FIRST body slide with a footnote field — once
+    per deck, idempotent (mutates in place). Prefers a slide where the
+    combined text stays inside the 300-char footnote budget."""
+    if any(LEGEND in (getattr(s, "footnote", None) or "") for s in slides):
+        return
+    candidates = [s for s in slides if hasattr(s, "footnote")]
+    for s in candidates:
+        current = s.footnote
+        combined = f"{current}  ·  {LEGEND}" if current else LEGEND
+        if len(combined) <= 300:
+            s.footnote = combined
+            return
+    if candidates:  # every footnote is near-full: legend still must appear
+        candidates[0].footnote = LEGEND
+
+
+def methodology_appendix(slides: list[BaseModel]):
+    """Auto-built (never LLM-written) methodology slide: every ◐/○ figure
+    with its basis and slide number. ● figures are official and not listed.
+    The winning deck's pattern, made deterministic."""
+    from ..schema.slide_types import DataDeepDiveSpec
+    marked = collect_marked_figures(slides)
+    if not marked:
+        return None
+    basis = {"recon": "Reconstructed from stated anchors",
+             "est": "Estimate (author/model judgment)"}
+    groups = []
+    for tier, label in (("recon", "Reconstructed figures"),
+                        ("est", "Estimates")):
+        rows = [[r["figure"], f"{r['context'][:70]}", str(r["slide"])]
+                for r in marked if r["tier"] == tier][:30]
+        if rows:
+            groups.append({"label": label, "rows": rows})
+    if not groups:
+        return None
+    return DataDeepDiveSpec(
+        slide_type="data_deep_dive",
+        title="How to read the numbers: basis of every non-official figure",
+        subtitle=(LEGEND + " — reconstructed and estimated figures are "
+                  "listed below with where they appear"),
+        table={
+            "kind": "data_table",
+            "columns": [
+                {"label": "Figure", "frac": 0.14, "cell_kind": "number"},
+                {"label": "Context", "frac": 0.72},
+                {"label": "Slide", "frac": 0.14, "cell_kind": "number"},
+            ],
+            "groups": groups,
+        },
+        footnote=("Auto-generated methodology appendix. "
+                  f"{basis['recon']} (recon); {basis['est']} (est). "
+                  "Official figures carry [[src:official]] in place."))
+
+
+def inject_fact_markers(slide: BaseModel, facts) -> BaseModel:
+    """CSV mode: facts are official by construction — append
+    [[src:official]] after each fact display value in prose fields.
+    Deterministic and idempotent; best-effort (falls back to the original
+    slide if the marked text would break a field constraint)."""
+    displays = sorted(
+        {f.display for f in facts.facts.values()
+         if any(ch.isdigit() for ch in f.display) and len(f.display) >= 2},
+        key=len, reverse=True)
+    if not displays:
+        return slide
+
+    def _mark(text: str) -> str:
+        for d in displays:
+            i = 0
+            while True:
+                i = text.find(d, i)
+                if i < 0:
+                    break
+                end = i + len(d)
+                # whole-token match only: '12' must not match inside '312M'
+                before_ok = i == 0 or not text[i - 1].isalnum()
+                after_ok = end >= len(text) or not (text[end].isalnum()
+                                                    or text[end] in ".%")
+                window = text[end:end + _WINDOW + len("[[src:official]]")]
+                if before_ok and after_ok and not _MARKER.search(window):
+                    text = text[:end] + " [[src:official]]" + text[end:]
+                    end += len(" [[src:official]]")
+                i = end
+        return text
+
+    def _apply(node, key=None):
+        if isinstance(node, dict):
+            return {k: (_apply(v, k) if k not in _SKIP_KEYS else v)
+                    for k, v in node.items()}
+        if isinstance(node, list):
+            return [_apply(v, key) for v in node]
+        if isinstance(node, str) and key in MARKER_KEYS:
+            return _mark(node)
+        return node
+
+    try:
+        return type(slide).model_validate(_apply(slide.model_dump()))
+    except Exception:  # marked text tripped a max_length — keep original
+        return slide
+
+
 def collect_marked_figures(slides: list[BaseModel]) -> list[dict]:
     """Every ◐/○ figure with its slide index and context — feeds the auto
     methodology slide (● excluded: official needs no explanation)."""

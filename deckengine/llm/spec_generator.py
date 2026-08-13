@@ -28,7 +28,9 @@ from .facts import FactTable, verify_spec_numbers
 from .format_rules import (check_outline_formats, check_slide_format,
                            decision_table_text)
 from .exemplar_retrieval import select_exemplars
-from .provenance import check_slide_markers
+from .provenance import (append_legend_once, check_slide_markers,
+                         inject_fact_markers, marker_coverage,
+                         methodology_appendix)
 from .story import REVIEW_PROMPT, Outline, check_outline
 from .style_priors import prior_block
 from .writing import check_slide_writing
@@ -51,6 +53,7 @@ Hard rules:
 - Rich text markup: **bold** for emphasis on numbers/leads. *Italics* only for defined terms, at most twice per slide — italicising for tone is a machine tell.
 - Writing craft: never hedge (may/might/could/potentially — state it or cut it). No exclamation marks. Never open a line with Additionally/Furthermore/Moreover. Vary sentence rhythm: a short punch, then longer support.
 - Keep text tight: this engine renders at consulting density; long text gets shrunk then truncated.
+- Every slide includes "notes": 2-3 DIRECTIVE speaker sentences (max 350 chars) — what to say, what to point at, what question to expect. Never a restatement of the slide text.
 - Respect every field constraint in the schema exactly."""
 
 
@@ -130,8 +133,14 @@ def generate_outline(prompt: str, facts: FactTable | None) -> Outline:
          "image-led slides: the matrix_2x2, funnel, harvey_balls and "
          "image_block components live only inside custom_layout trees. Open "
          "with a title slide; close with an exec_summary or kpi_dashboard "
-         "when it fits.\n\n"
-         + decision_table_text())
+         "when it fits.\n"
+         + ("" if facts else
+            "Because this deck runs on marked real-world figures rather than "
+            "a provided dataset, the CLOSING exec_summary's last two sections "
+            "must be exactly: 'What we would want to be challenged on' and "
+            "'Where we are least confident' — honest, specific, tied to the "
+            "deck's weakest numbers.\n")
+         + "\n" + decision_table_text())
     outline = Outline.model_validate(_structured_call("emit_outline", schema, p))
 
     def _problems(o: Outline) -> list[str]:
@@ -197,11 +206,13 @@ def _few_shot(archetype: str, claim: str = "") -> str:
     ordered = ordered[:3]
     if not ordered:
         return ""
-    return "".join(
-        f"\n\nEXAMPLE {i} of an excellent spec of this type (match its "
-        "density and structure, NOT its topic or numbers):\n"
-        + p.read_text(encoding="utf-8")
-        for i, p in enumerate(ordered, start=1))
+    return ("\n\nNOTE: examples may predate the provenance-marker and "
+            "speaker-notes rules — your spec must still follow them."
+            + "".join(
+                f"\n\nEXAMPLE {i} of an excellent spec of this type (match "
+                "its density and structure, NOT its topic or numbers):\n"
+                + p.read_text(encoding="utf-8")
+                for i, p in enumerate(ordered, start=1)))
 
 
 def generate_slide(archetype: str, intent: str, prompt: str,
@@ -434,6 +445,9 @@ def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
             continue
         slide = generate_slide_best(item.slide_type, item.claim, deck_context,
                                     facts, prior_slides=prior, theme=theme)
+        if facts:
+            # CSV facts are official by construction — mark their displays
+            slide = inject_fact_markers(slide, facts)
         slides.append(slide)
         title = getattr(slide, "title", None) or item.claim
         prior.append(f"[{item.slide_type}] {title}")
@@ -443,6 +457,17 @@ def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
         appendix = sources_appendix(facts, slides)
         if appendix is not None:
             slides.append(appendix)
+    else:
+        # marker mode: legend once + the auto methodology slide
+        append_legend_once(slides)
+        appendix = methodology_appendix(slides)
+        if appendix is not None:
+            slides.append(appendix)
+        cov = [marker_coverage(s) for s in slides]
+        marked, total = sum(c[0] for c in cov), sum(c[1] for c in cov)
+        if total:
+            log.info("marker coverage: %d/%d prose figures marked",
+                     marked, total)
     return DeckSpec(theme=theme,
                     meta=meta or DeckMeta(title=prompt[:150]),
                     slides=slides)

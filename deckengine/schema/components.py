@@ -276,6 +276,12 @@ class NativeChartSpec(BaseModel):
     annotation: PlainStr | None = Field(
         max_length=160,
         description="One short callout stating what the chart proves, or null")
+    source: RichStr | None = Field(
+        default=None, max_length=140,
+        description="Per-chart provenance line, e.g. 'Source: IEA 2025 "
+                    "[[src:official]]' — rendered as a micro line under the "
+                    "chart (annotation carries rhetoric; source carries "
+                    "provenance)")
     value_suffix: PlainStr = Field(default="", max_length=8)  # e.g. "%", " Mn"
     style: ChartStyleSpec = Field(default_factory=ChartStyleSpec)
 

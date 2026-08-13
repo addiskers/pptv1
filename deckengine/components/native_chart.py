@@ -29,6 +29,7 @@ from ..core.pptx_text import (add_text_box, make_text_frame,
 from ..core.units import inch
 from ..render.xml_utils import add_point_data_labels, set_series_line_dash
 from ..schema.components import NativeChartSpec
+from ..schema.rich import parse_rich
 from .base import Component, RenderContext, register
 
 _SERIES_ROLES = ("primary", "accent", "positive", "primary_dark", "ink_muted",
@@ -87,10 +88,29 @@ class NativeChart(Component):
             return 0
         return fit.height_emu + ctx.theme.spacing(0.4) * 2
 
+    def _source_fit(self, data: NativeChartSpec, width: int,
+                    ctx: RenderContext):
+        """Per-chart provenance micro line (annotation = rhetoric, source =
+        provenance). Single line, ellipsized if needed."""
+        if not data.source:
+            return None
+        return fit_text(parse_rich(data.source, base_color_role="ink_muted"),
+                        BBox(0, 0, max(1, width), 10_000_000),
+                        ctx.font("body"), max_size=ctx.size("micro"),
+                        min_size=6.0, max_lines=1, measurer=ctx.measurer)
+
+    def _source_h(self, data: NativeChartSpec, width: int,
+                  ctx: RenderContext) -> int:
+        fit = self._source_fit(data, width, ctx)
+        if fit is None:
+            return 0
+        return fit.height_emu + ctx.theme.spacing(0.25)
+
     def measure(self, data: NativeChartSpec, width: int,
                 ctx: RenderContext) -> int:
         natural = min(max(round(width * 0.48), inch(2.2)), inch(3.4))
-        return natural + self._annot_h(data, width, ctx)
+        return (natural + self._annot_h(data, width, ctx)
+                + self._source_h(data, width, ctx))
 
     # -- render --------------------------------------------------------------
 
@@ -99,10 +119,11 @@ class NativeChart(Component):
         theme = ctx.theme
         st = data.style
         annot_h = self._annot_h(data, bbox.w, ctx)
+        source_h = self._source_h(data, bbox.w, ctx)
         total = self.measure(data, bbox.w, ctx)
         if ctx.fill_hint and bbox.h > total:
             total = bbox.h  # charts fill their zone gracefully
-        chart_h = max(inch(1.6), total - annot_h)
+        chart_h = max(inch(1.6), total - annot_h - source_h)
         frame = BBox(bbox.x, bbox.y, bbox.w, chart_h)
 
         cats, series = self._sorted(data)
@@ -143,6 +164,18 @@ class NativeChart(Component):
             write_fit_result(box.text_frame, fit, theme,
                              family=ctx.font("body"),
                              default_color_role="ink")
+
+        if data.source:
+            sfit = self._source_fit(data, bbox.w, ctx)
+            if sfit.truncated:
+                ctx.report.truncated(f"chart source: {data.source[:40]!r}")
+            sy = bbox.y + chart_h + annot_h + theme.spacing(0.25)
+            sbox = add_text_box(slide, BBox(bbox.x, sy, bbox.w,
+                                            max(1, source_h
+                                                - theme.spacing(0.25))))
+            write_fit_result(sbox.text_frame, sfit, theme,
+                             family=ctx.font("body"),
+                             default_color_role="ink_muted")
         return total
 
     # -- standard chart types -----------------------------------------------

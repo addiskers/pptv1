@@ -41,6 +41,13 @@ def add_text_box(slide, bbox: BBox, *, align: str = "left", anchor: str = "top")
     return box
 
 
+def set_notes(slide, text: str) -> None:
+    """Speaker notes. Notes pages are laid out by PowerPoint and exempt from
+    the measured-layout contract; never called with empty text (python-pptx
+    would still create the notes part)."""
+    slide.notes_slide.notes_text_frame.text = text
+
+
 def write_fit_result(tf, fit: FitResult, theme: Theme, *, family: str,
                      align: str = "left", default_color_role: str = "ink") -> None:
     """Write measured lines as one paragraph per line with exact point spacing.
