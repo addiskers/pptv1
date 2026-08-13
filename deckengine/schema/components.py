@@ -88,6 +88,9 @@ class DataTableSpec(BaseModel):
     heatmap_hi: float = 100.0
     header_fill_role: str = "primary"
     zebra: bool = False
+    # widen col 0 (capped +25%) when group labels would clip; explicit
+    # opt-out for authors who want their fracs untouched
+    auto_widen_label_col: bool = True
 
 
 class IconStatRowSpec(BaseModel):

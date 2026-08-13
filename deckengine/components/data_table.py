@@ -21,7 +21,7 @@ from dataclasses import replace
 from pptx.util import Emu
 
 from ..core.bbox import BBox
-from ..core.fit_text import FitResult, Span, fit_text
+from ..core.fit_text import WRAP_SAFETY, FitResult, Span, fit_text
 from ..core.pptx_shapes import add_shape
 from ..core.pptx_text import make_text_frame, write_fit_result, write_spans_paragraph
 from ..core.units import pt
@@ -42,13 +42,46 @@ class DataTable(Component):
 
     # -- shared geometry (measure and render use exactly these) -----------
 
-    @staticmethod
-    def _col_widths(data: DataTableSpec, width: int) -> list[int]:
-        """Normalize column fracs into integer widths that sum to `width`."""
+    def _col_widths(self, data: DataTableSpec, width: int,
+                    ctx: RenderContext | None = None) -> list[int]:
+        """Normalize column fracs into integer widths that sum to `width`.
+
+        With ctx and auto_widen_label_col (default), col 0 grows toward the
+        width its group labels need (2-line micro-bold estimate), capped at
+        +25%; the other columns shrink proportionally. Deterministic pure
+        math — measure(), row_offsets() and render() share it exactly.
+        """
         total = sum(c.frac for c in data.columns)
         ws = [round(width * c.frac / total) for c in data.columns]
         ws[-1] = width - sum(ws[:-1])  # absorb rounding into the last column
-        return ws
+        if (ctx is None or not data.auto_widen_label_col or len(ws) < 2
+                or not data.groups):
+            return ws
+        pad = ctx.theme.spacing(0.25)
+        family = ctx.font("body")
+        size = ctx.size("micro")
+        need = 0
+        for g in data.groups:
+            label = g.label.strip()
+            if not label:
+                continue
+            lw = ctx.measurer.span_width_emu(Span(label, bold=True),
+                                             family, size)
+            word = max((ctx.measurer.span_width_emu(Span(w, bold=True),
+                                                    family, size)
+                        for w in label.split()), default=0)
+            # a label gets two lines: need >= its widest word and roughly
+            # half its full width (1.1 wrap-inefficiency factor)
+            need = max(need, word, round(lw * 0.55))
+        need = round(need / WRAP_SAFETY) + 2 * pad
+        new0 = min(max(ws[0], need), round(ws[0] * 1.25))
+        if new0 <= ws[0]:
+            return ws
+        delta = new0 - ws[0]
+        rest = sum(ws[1:])
+        out = [new0] + [w - round(delta * w / rest) for w in ws[1:]]
+        out[-1] = width - sum(out[:-1])  # re-absorb rounding
+        return out
 
     def _header_fits(self, data: DataTableSpec, col_ws: list[int],
                      ctx: RenderContext) -> list[FitResult]:
@@ -73,7 +106,7 @@ class DataTable(Component):
     # -- public contract ---------------------------------------------------
 
     def measure(self, data: DataTableSpec, width: int, ctx: RenderContext) -> int:
-        col_ws = self._col_widths(data, width)
+        col_ws = self._col_widths(data, width, ctx)
         header_h = self._header_h(self._header_fits(data, col_ws, ctx), ctx)
         total_rows = sum(len(g.rows) for g in data.groups)
         return header_h + total_rows * self._row_h(ctx)
@@ -86,7 +119,7 @@ class DataTable(Component):
         offsets[-1] is the table bottom, so len == len(groups) + 1. Future
         slide-splitting cuts the table at these offsets only.
         """
-        col_ws = self._col_widths(data, width)
+        col_ws = self._col_widths(data, width, ctx)
         header_h = self._header_h(self._header_fits(data, col_ws, ctx), ctx)
         row_h = self._row_h(ctx)
         offsets = [header_h]
@@ -97,7 +130,7 @@ class DataTable(Component):
     def render(self, slide, data: DataTableSpec, bbox: BBox,
                ctx: RenderContext) -> int:
         theme = ctx.theme
-        col_ws = self._col_widths(data, bbox.w)
+        col_ws = self._col_widths(data, bbox.w, ctx)
         header_fits = self._header_fits(data, col_ws, ctx)
         header_h = self._header_h(header_fits, ctx)
         row_h = self._row_h(ctx)

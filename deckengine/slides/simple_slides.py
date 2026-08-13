@@ -26,11 +26,13 @@ class TitleSlide(SlideAssembler):
         add_shape(slide, SLIDE, ctx.theme, fill_role="primary_dark")
 
         if spec.date:
-            db = add_text_box(slide, BBox(SLIDE.w - inch(3.2), inch(0.35),
-                                          inch(2.8), inch(0.3)), align="right")
+            # top-LEFT so the deck logo (drawn top-right by deck_builder) has
+            # the corner to itself
+            db = add_text_box(slide, BBox(inch(1.1), inch(0.35),
+                                          inch(2.8), inch(0.3)), align="left")
             write_spans_paragraph(db.text_frame, [Span(spec.date)],
                                   ctx.size("small"), ctx.theme,
-                                  family=ctx.font("body"), align="right",
+                                  family=ctx.font("body"), align="left",
                                   default_color_role="inverse_ink")
 
         area = SLIDE.inset(left=inch(1.1), right=inch(1.1))
@@ -124,10 +126,7 @@ class SectionDivider(SlideAssembler):
 @register_slide("bullet_content")
 class BulletContent(SlideAssembler):
     def assemble(self, slide, spec: BulletContentSpec, ctx: RenderContext) -> None:
-        z = self.zones()
-        stack_into(slide, z["title"], ctx, [
-            item("section_header", SectionHeaderSpec(
-                title=spec.title, subtitle=spec.subtitle))])
+        z = self.render_title(slide, spec, ctx)
         stack_into(slide, z["body"].inset(top=ctx.theme.spacing(1)), ctx, [
             item("bullet_list", BulletListSpec(items=spec.bullets), flex=1.0)])
 
@@ -135,9 +134,7 @@ class BulletContent(SlideAssembler):
 @register_slide("exec_summary")
 class ExecSummary(SlideAssembler):
     def assemble(self, slide, spec: ExecSummarySpec, ctx: RenderContext) -> None:
-        z = self.zones()
-        stack_into(slide, z["title"], ctx, [
-            item("section_header", SectionHeaderSpec(title=spec.title))])
+        z = self.render_title(slide, spec, ctx)
         body = z["body"].inset(top=ctx.theme.spacing(1))
         items = []
         for i, sec in enumerate(spec.sections):

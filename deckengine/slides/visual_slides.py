@@ -20,11 +20,7 @@ from .base import SlideAssembler, register_slide
 
 
 def _title(self, slide, spec, ctx, rule=False):
-    z = self.zones(title_h=0.85 if not spec.subtitle else 1.1)
-    stack_into(slide, z["title"], ctx, [
-        item("section_header", SectionHeaderSpec(
-            title=spec.title, subtitle=spec.subtitle, rule=rule))])
-    return z
+    return self.render_title(slide, spec, ctx, rule=rule)
 
 
 def _footnote_item(spec):

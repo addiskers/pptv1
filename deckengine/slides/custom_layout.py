@@ -17,10 +17,7 @@ from .base import SlideAssembler, register_slide
 class CustomLayout(SlideAssembler):
     def assemble(self, slide, spec: CustomLayoutSpec,
                  ctx: RenderContext) -> None:
-        z = self.zones(title_h=0.85 if not spec.subtitle else 1.1)
-        stack_into(slide, z["title"], ctx, [
-            item("section_header", SectionHeaderSpec(
-                title=spec.title, subtitle=spec.subtitle, rule=False))])
+        z = self.render_title(slide, spec, ctx)
         body = z["body"]
         if spec.footnote:
             fn = TextBlockSpec(text=spec.footnote, size_role="micro",

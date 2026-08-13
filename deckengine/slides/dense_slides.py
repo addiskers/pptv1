@@ -17,10 +17,7 @@ from .base import SlideAssembler, register_slide
 class NColumnComparison(SlideAssembler):
     def assemble(self, slide, spec: NColumnComparisonSpec,
                  ctx: RenderContext) -> None:
-        z = self.zones(title_h=0.85 if not spec.subtitle else 1.1)
-        stack_into(slide, z["title"], ctx, [
-            item("section_header", SectionHeaderSpec(
-                title=spec.title, subtitle=spec.subtitle, rule=False))])
+        z = self.render_title(slide, spec, ctx)
         # summary band + footnote anchor to the BOTTOM of the body zone,
         # like the reference deck; the comparison grid gets the rest.
         bottom = []
@@ -45,10 +42,7 @@ class NColumnComparison(SlideAssembler):
 @register_slide("kpi_dashboard")
 class KpiDashboard(SlideAssembler):
     def assemble(self, slide, spec: KpiDashboardSpec, ctx: RenderContext) -> None:
-        z = self.zones(title_h=0.85)
-        stack_into(slide, z["title"], ctx, [
-            item("section_header", SectionHeaderSpec(title=spec.title,
-                                                     rule=False))])
+        z = self.render_title(slide, spec, ctx)
         items = []
         if spec.brace_group:
             items.append(item("brace_group", spec.brace_group, gap_before=0.8,
@@ -79,10 +73,7 @@ class KpiDashboard(SlideAssembler):
 @register_slide("data_deep_dive")
 class DataDeepDive(SlideAssembler):
     def assemble(self, slide, spec: DataDeepDiveSpec, ctx: RenderContext) -> None:
-        z = self.zones(title_h=0.85 if not spec.subtitle else 1.1)
-        stack_into(slide, z["title"], ctx, [
-            item("section_header", SectionHeaderSpec(
-                title=spec.title, subtitle=spec.subtitle, rule=False))])
+        z = self.render_title(slide, spec, ctx)
         body = z["body"]
         if spec.insights:
             zones = with_sidebar(body, side_frac=0.26)

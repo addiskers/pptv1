@@ -5,9 +5,10 @@ from abc import ABC, abstractmethod
 
 from pydantic import BaseModel
 
-from ..components.base import RenderContext
+from ..components.base import RenderContext, get_component
 from ..core.bbox import BBox
 from ..layout.zones import standard_zones
+from ..schema.components import SectionHeaderSpec
 
 
 class SlideAssembler(ABC):
@@ -16,6 +17,20 @@ class SlideAssembler(ABC):
 
     def zones(self, *, title_h: float = 1.0) -> dict[str, BBox]:
         return standard_zones(title_h=title_h)
+
+    def render_title(self, slide, spec, ctx: RenderContext, *,
+                     rule: bool = False) -> dict[str, BBox]:
+        """THE shared title block: section_header rendered directly INTO the
+        fixed title zone (fit shrinks to the 14pt floor, then ellipsizes and
+        reports). The body zone starts at title_h regardless of how the
+        title fit, so title/body overlap is structurally impossible.
+        """
+        subtitle = getattr(spec, "subtitle", None)
+        z = self.zones(title_h=0.85 if not subtitle else 1.1)
+        get_component("section_header").render(
+            slide, SectionHeaderSpec(title=spec.title, subtitle=subtitle,
+                                     rule=rule), z["title"], ctx)
+        return z
 
 
 _ASSEMBLERS: dict[str, SlideAssembler] = {}

@@ -61,8 +61,10 @@ def test_brace_is_line_only_and_spans_content():
     takeaway_w = round(bbox.w * data.takeaway_frac)
     assert brace.left + brace.width < bbox.x + bbox.w - takeaway_w
 
-    text = " ".join(r.text for s in slide.shapes if s.has_text_frame
-                    for p in s.text_frame.paragraphs for r in p.runs)
+    # runs concatenate within a paragraph (wrap tokens carry their spaces)
+    text = " ".join("".join(r.text for r in p.runs)
+                    for s in slide.shapes if s.has_text_frame
+                    for p in s.text_frame.paragraphs)
     assert "10.6 Mn" in text
     assert "Bihar" in text
 

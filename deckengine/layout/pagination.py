@@ -23,7 +23,8 @@ def _capacity_rows(spec: DataDeepDiveSpec, ctx: RenderContext) -> int:
     main = with_sidebar(body, side_frac=0.26)["main"] if spec.insights else body
     dt = get_component("data_table")
     header_h = dt._header_h(dt._header_fits(spec.table,
-                                            dt._col_widths(spec.table, main.w),
+                                            dt._col_widths(spec.table, main.w,
+                                                           ctx),
                                             ctx), ctx)
     row_h = dt._row_h(ctx)
     avail = main.h

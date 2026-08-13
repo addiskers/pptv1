@@ -23,6 +23,10 @@ from .fonts import FontRegistry, default_registry
 from .units import EMU_PER_PT, pt
 
 WRAP_SAFETY = 0.96  # wrap against 96% of writable width; PowerPoint must never wrap earlier
+# vertical slack: boxes AND the <a:spcPts> we dictate grow together by 2.5%,
+# so a viewer whose face renders a hair taller never clips descenders —
+# measure()==render() parity is unaffected (both sides use this pitch)
+LINE_HEADROOM = 1.025
 ELLIPSIS = "…"
 
 
@@ -110,7 +114,7 @@ class TextMeasurer:
         for s in spans or [Span("")]:
             path = self._path_for(s.font or family, s.bold, s.italic)
             best = max(best, self._line_pitch_em(path) * s.sized(base_size))
-        return pt(best * line_spacing)
+        return pt(best * line_spacing * LINE_HEADROOM)
 
     # -- wrapping ---------------------------------------------------------
 

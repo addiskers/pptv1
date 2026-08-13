@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from pathlib import Path
 
 from pptx import Presentation
@@ -70,6 +71,16 @@ def build_deck(spec: DeckSpec, out_path: str | Path) -> BuildReport:
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     prs.save(str(out_path))
+    if os.environ.get("DECKENGINE_EMBED_FONTS") == "1":
+        # a viewer without our fonts must never substitute-and-rewrap;
+        # embed whatever the registry resolved (real faces on Windows,
+        # metric clones on Linux)
+        from .embed_fonts import embed_fonts
+        try:
+            n = embed_fonts(out_path, warn=report.warn)
+            log.info("embedded %d font file(s) into %s", n, out_path.name)
+        except Exception as exc:  # embedding is best-effort, never fatal
+            report.warn(f"font embedding failed: {exc}")
     log.info("wrote %s (%d slides, %d warnings)", out_path, len(expanded),
              len(report.warnings))
     return report

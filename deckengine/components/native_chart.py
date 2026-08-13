@@ -22,9 +22,10 @@ from pptx.enum.chart import XL_CHART_TYPE, XL_LEGEND_POSITION
 from pptx.util import Emu, Pt
 
 from ..core.bbox import BBox
-from ..core.fit_text import Span
+from ..core.fit_text import Span, fit_text
 from ..core.pptx_shapes import add_hline, add_shape
-from ..core.pptx_text import add_text_box, make_text_frame, write_spans_paragraph
+from ..core.pptx_text import (add_text_box, make_text_frame,
+                              write_fit_result, write_spans_paragraph)
 from ..core.units import inch
 from ..render.xml_utils import add_point_data_labels, set_series_line_dash
 from ..schema.components import NativeChartSpec
@@ -64,16 +65,32 @@ class NativeChart(Component):
             series = [(nm, [v[i] for i in order]) for nm, v in series]
         return cats, series
 
-    def _annot_h(self, data: NativeChartSpec, ctx: RenderContext) -> int:
+    def _annot_fit(self, data: NativeChartSpec, width: int,
+                   ctx: RenderContext):
+        """Fit the annotation to its real strip width (<=2 lines). The strip
+        height DERIVES from this fit — the old fixed height was shorter than
+        one line for compact strips, so text silently overflowed the box."""
         if not data.annotation:
+            return None
+        sp = ctx.theme.spacing
+        size = ctx.size("micro") if data.style.compact else ctx.size("small")
+        cell_w = max(1, width - sp(0.35) - sp(0.4))
+        return fit_text([Span(data.annotation, bold=True)],
+                        BBox(0, 0, cell_w, 10_000_000), ctx.font("body"),
+                        max_size=size, min_size=6.5, max_lines=2,
+                        measurer=ctx.measurer)
+
+    def _annot_h(self, data: NativeChartSpec, width: int,
+                 ctx: RenderContext) -> int:
+        fit = self._annot_fit(data, width, ctx)
+        if fit is None:
             return 0
-        base = ctx.theme.spacing(2.4)
-        return base // 2 if data.style.compact else base
+        return fit.height_emu + ctx.theme.spacing(0.4) * 2
 
     def measure(self, data: NativeChartSpec, width: int,
                 ctx: RenderContext) -> int:
         natural = min(max(round(width * 0.48), inch(2.2)), inch(3.4))
-        return natural + self._annot_h(data, ctx)
+        return natural + self._annot_h(data, width, ctx)
 
     # -- render --------------------------------------------------------------
 
@@ -81,7 +98,7 @@ class NativeChart(Component):
                ctx: RenderContext) -> int:
         theme = ctx.theme
         st = data.style
-        annot_h = self._annot_h(data, ctx)
+        annot_h = self._annot_h(data, bbox.w, ctx)
         total = self.measure(data, bbox.w, ctx)
         if ctx.fill_hint and bbox.h > total:
             total = bbox.h  # charts fill their zone gracefully
@@ -111,17 +128,21 @@ class NativeChart(Component):
             self._draw_cagr_chip(slide, data, frame, series, ctx)
 
         if data.annotation:
+            # same fit that sized annot_h — measured wrap+shrink, never one
+            # over-wide line for PowerPoint to wrap on its own terms
+            fit = self._annot_fit(data, bbox.w, ctx)
+            if fit.truncated:
+                ctx.report.truncated(
+                    f"chart annotation: {data.annotation[:40]!r}")
             strip = BBox(bbox.x, bbox.y + chart_h + theme.spacing(0.4),
-                         bbox.w, annot_h - theme.spacing(0.4))
+                         bbox.w, max(1, annot_h - theme.spacing(0.4) * 2))
             bar, text = strip.take_left(theme.spacing(0.35))
             add_shape(slide, bar, theme, fill_role="accent")
-            size = ctx.size("micro") if st.compact else ctx.size("small")
             box = add_text_box(slide, text.inset(left=theme.spacing(0.4)),
                                anchor="middle")
-            write_spans_paragraph(box.text_frame,
-                                  [Span(data.annotation, bold=True)],
-                                  size, theme, family=ctx.font("body"),
-                                  default_color_role="ink")
+            write_fit_result(box.text_frame, fit, theme,
+                             family=ctx.font("body"),
+                             default_color_role="ink")
         return total
 
     # -- standard chart types -----------------------------------------------

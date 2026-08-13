@@ -8,7 +8,7 @@ breaks the measure()==render() contract. Every row shares one fixed height
 from __future__ import annotations
 
 from ..core.bbox import BBox
-from ..core.fit_text import Span
+from ..core.fit_text import Span, fit_text
 from ..core.pptx_shapes import add_shape
 from ..core.pptx_text import make_text_frame, write_spans_paragraph
 from ..core.units import pt, to_pt
@@ -16,7 +16,11 @@ from ..schema.components import MiniTableSpec
 from .base import Component, RenderContext, register
 
 _GRID_W_PT = 0.5
-_PAD_MULT = 0.3  # vertical cell padding, in theme spacing units
+_PAD_MULT = 0.3    # vertical cell padding, in theme spacing units
+_INSET_MULT = 0.25  # horizontal text inset inside each cell, each side
+_MIN_CELL = 6.0    # shrink floor for cell text before ellipsis
+_WIDEN_CAP = 1.25  # label col may grow to at most 1.25x its equal share
+_PROBE_H = 10_000_000
 
 
 @register("mini_table")
@@ -42,6 +46,31 @@ class MiniTable(Component):
             return [f / total for f in data.col_fracs]
         return [1.0] * n
 
+    def _fracs_for(self, data: MiniTableSpec, width: int,
+                   ctx: RenderContext) -> list[float]:
+        """Explicit col_fracs pass through; default equal widths auto-widen
+        the label column (col 0) toward its longest cell, capped at 1.25x
+        the equal share — kills the 'ha, Patan, Mehsana' clipping class."""
+        fracs = self._fracs(data)
+        n = len(data.headers)
+        if data.col_fracs is not None or n < 2 or width <= 0:
+            return fracs
+        inset = ctx.theme.spacing(_INSET_MULT)
+        size = ctx.size("micro")
+        family = ctx.font("body")
+        need = max(
+            ctx.measurer.span_width_emu(
+                Span(r[0] if r else "", bold=i == 0), family, size)
+            for i, r in enumerate([list(data.headers)]
+                                  + [list(r) for r in data.rows]))
+        equal = 1.0 / n
+        want = (need + 2 * inset) / width
+        first = min(max(equal, want), equal * _WIDEN_CAP)
+        if first <= equal:
+            return fracs
+        rest = (1.0 - first) / (n - 1)
+        return [first] + [rest] * (n - 1)
+
     # -- contract ----------------------------------------------------------
 
     def measure(self, data: MiniTableSpec, width: int, ctx: RenderContext) -> int:
@@ -53,7 +82,8 @@ class MiniTable(Component):
         size = ctx.size("micro")
         row_h = self._row_h(ctx)
         spacing_pt = to_pt(self._line_h(ctx))
-        fracs = self._fracs(data)
+        inset = ctx.theme.spacing(_INSET_MULT)
+        fracs = self._fracs_for(data, bbox.w, ctx)
         if data.col_fracs is not None and fracs == [1.0] * len(data.headers) \
                 and data.col_fracs != [1.0] * len(data.headers):
             ctx.report.warn(
@@ -79,9 +109,6 @@ class MiniTable(Component):
             cells = BBox(bbox.x, y, bbox.w, row_h).split_h(*fracs)
             for c, cell in enumerate(cells):
                 text = row[c] if c < len(row) else ""
-                span = Span(text, bold=is_header, color_role="ink")
-                if text and ctx.measurer.span_width_emu(span, family, size) > cell.w:
-                    tight_cells += 1
                 shape = add_shape(slide, cell, ctx.theme, shape="rect",
                                   fill_role="bg", line_role="grid",
                                   line_w_pt=_GRID_W_PT)
@@ -89,13 +116,28 @@ class MiniTable(Component):
                 # single-line cells by contract: never let PowerPoint re-wrap
                 # an overlong cell into a second line the layout didn't budget
                 tf.word_wrap = False
-                write_spans_paragraph(tf, [span], size, ctx.theme,
-                                      family=family, align=data.align,
-                                      line_spacing_pt=spacing_pt,
-                                      default_color_role="ink")
+                if not text:
+                    continue
+                tf.margin_left = inset
+                tf.margin_right = inset
+                # shrink -> ellipsize inside the cell; an overlong cell must
+                # never spill under its neighbour (the old word_wrap=False
+                # overflow was the evaluated deck's clipped-table bug)
+                fit = fit_text([Span(text, bold=is_header, color_role="ink")],
+                               BBox(0, 0, max(1, cell.w - 2 * inset),
+                                    _PROBE_H), family, max_size=size,
+                               min_size=_MIN_CELL, max_lines=1,
+                               measurer=ctx.measurer)
+                if fit.truncated:
+                    tight_cells += 1
+                    ctx.report.truncated(f"mini_table cell: {text[:40]!r}")
+                write_spans_paragraph(
+                    tf, fit.lines[0].spans if fit.lines else [], fit.size_pt,
+                    ctx.theme, family=family, align=data.align,
+                    line_spacing_pt=spacing_pt, default_color_role="ink")
             y += row_h
         if tight_cells:
             ctx.report.warn(
-                f"mini_table: {tight_cells} cell(s) wider than their column "
-                f"at micro size; kept single-line")
+                f"mini_table: {tight_cells} cell(s) ellipsized at the "
+                f"{_MIN_CELL}pt floor")
         return n_fit * row_h
