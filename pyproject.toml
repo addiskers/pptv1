@@ -18,8 +18,10 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8"]
 corpus = ["pypdfium2>=4"]
-# Linux/EC2 deploy: soffice preview path rasterizes PDF pages with pypdfium2.
-server = ["pypdfium2>=4"]
+# Linux/EC2 deploy: soffice preview path rasterizes PDF pages with pypdfium2;
+# python-multipart backs the /assets upload endpoint; openai for the default
+# provider (anthropic is a core dep already).
+server = ["pypdfium2>=4", "python-multipart>=0.0.9", "openai>=1.40"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
