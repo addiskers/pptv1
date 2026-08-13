@@ -1,1 +1,59 @@
-{"bg_image":null,"bg_image_opacity":0.12,"slide_type":"chart_slide","title":"Irrigation expansion has raised Gujarat’s agricultural resilience, with irrigated area outpacing rainfed area across the state’s core production base","subtitle":"Paired comparison dashboard showing that Gujarat’s cultivated system is anchored by a larger irrigated footprint than rainfed dependence, supporting more stable production and a stronger base for water-productivity intervention.","chart":{"kind":"native_chart","chart_type":"stacked_bar","categories":["Cultivated area"],"series":[{"name":"Irrigated area","values":[58.0]},{"name":"Rainfed area","values":[42.0]}],"sort":"none","highlight":"Cultivated area","annotation":"The cultivated base is majority irrigated, showing stronger production stability than a rainfed-led system.","value_suffix":"%","style":{"value_labels":true,"endpoint_labels":false,"highlight_series":"Irrigated area","forecast_from":null,"benchmark":null,"cagr_chip":false,"percent_100":true,"direction":"horizontal","compact":false}},"insights_heading":"Irrigation resilience evidence","insights":[{"text":"**Irrigated area** accounts for **58%** of cultivated area, exceeding the **42%** in rainfed area.","level":0},{"text":"The **58% / 42%** split shows Gujarat’s production base rests more on managed water access than on rainfall alone.","level":0},{"text":"This majority-irrigated footprint makes water-efficiency, crop-water productivity, and farmer-income interventions easier to scale through existing irrigation coverage.","level":0}],"footnote":"illustrative data"}
+{
+ "bg_image": null,
+ "bg_image_opacity": 0.12,
+ "slide_type": "chart_slide",
+ "title": "Irrigation expansion has raised Gujarat’s agricultural resilience, with irrigated area outpacing rainfed area across the state’s core production base",
+ "subtitle": "Paired comparison dashboard showing that Gujarat’s cultivated system is anchored by a larger irrigated footprint than rainfed dependence, supporting more stable production and a stronger base for water-productivity intervention.",
+ "chart": {
+  "kind": "native_chart",
+  "chart_type": "stacked_bar",
+  "categories": [
+   "Cultivated area"
+  ],
+  "series": [
+   {
+    "name": "Irrigated area",
+    "values": [
+     58.0
+    ]
+   },
+   {
+    "name": "Rainfed area",
+    "values": [
+     42.0
+    ]
+   }
+  ],
+  "sort": "none",
+  "highlight": "Cultivated area",
+  "annotation": "The cultivated base is majority irrigated, showing stronger production stability than a rainfed-led system.",
+  "value_suffix": "%",
+  "style": {
+   "value_labels": true,
+   "endpoint_labels": false,
+   "highlight_series": "Irrigated area",
+   "forecast_from": null,
+   "benchmark": null,
+   "cagr_chip": false,
+   "percent_100": true,
+   "direction": "horizontal",
+   "compact": false
+  }
+ },
+ "insights_heading": "Irrigation resilience evidence",
+ "insights": [
+  {
+   "text": "**Irrigated area** accounts for **58%** of cultivated area, exceeding the **42%** in rainfed area.",
+   "level": 0
+  },
+  {
+   "text": "The **58% / 42%** split shows Gujarat’s production base rests more on managed water access than on rainfall alone.",
+   "level": 0
+  },
+  {
+   "text": "This majority-irrigated footprint makes water-efficiency, crop-water productivity, and farmer-income interventions easier to scale through existing irrigation coverage.",
+   "level": 0
+  }
+ ],
+ "footnote": null
+}

@@ -54,14 +54,17 @@ def test_outline_prompt_teaches_and_review_polices(monkeypatch):
 
 def test_stage2_repairs_objective_chart_violation(monkeypatch):
     prompts = []
+    src = "Source: company filings 2025 [[src:official]]"
     bad = ChartSlideSpec(
         title="Revenue grew 3x from 2019 to 2025 across the portfolio",
         chart=_chart("line", ["2019", "2025"], [10, 30], sort="none"),
+        footnote=src,
     ).model_dump()
     good = ChartSlideSpec(
         title="Revenue grew 3x from 2019 to 2025 across the portfolio",
         chart=_chart("line", ["2019", "2021", "2023", "2025"],
                      [10, 14, 22, 30], sort="none"),
+        footnote=src,
     ).model_dump()
     responses = [bad, good]
 
@@ -79,7 +82,7 @@ def test_stage2_repairs_objective_chart_violation(monkeypatch):
 
 def test_non_chart_archetype_untouched(monkeypatch):
     clean = BulletContentSpec(
-        title="Five moves de-risk the launch over 18 months",
+        title="Five moves de-risk the launch over 18 [[src:est]] months",
         bullets=[{"text": "Secure supply first; the rest follows"}],
     ).model_dump()
     prompts = []

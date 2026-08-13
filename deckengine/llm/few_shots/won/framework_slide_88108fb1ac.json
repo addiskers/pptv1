@@ -1,1 +1,44 @@
-{"bg_image":null,"bg_image_opacity":0.12,"slide_type":"framework_slide","title":"Bihar can close its farm performance gap when **4** levers work together: productivity, diversification, market linkages, and delivery execution","subtitle":"The operating logic is cumulative rather than sequential: higher output matters only when farmers shift into higher-value crops, connect to stronger buyers, and receive services through reliable state and partner delivery systems.","pathway":{"kind":"chevron_pathway","steps":["Farm productivity","Higher-value diversification","Market linkages","Delivery execution"],"highlight_index":3},"blocks":[{"kind":"numbered_block","number":"1","title":"Farm productivity expands saleable output from the same land base","body":"Evidence focus: yield improvement, irrigation reliability, input quality, agronomy adoption, and lower production risk across Bihar’s core crop systems."},{"kind":"numbered_block","number":"2","title":"Higher-value diversification improves the crop mix, not just the crop yield","body":"Evidence focus: movement into horticulture and other higher-value crops, stronger gross returns per acre, and lower dependence on a narrow cereal base."},{"kind":"numbered_block","number":"3","title":"Market linkages raise realization by connecting production to stronger demand channels","body":"Evidence focus: aggregation, grading, storage, buyer access, logistics, and better alignment between what farmers grow and what markets reward."},{"kind":"numbered_block","number":"4","title":"Delivery execution turns priorities into repeatable farmer-level results","body":"Evidence focus: last-mile extension, program coordination, data-led targeting, partner accountability, and district-level execution that sustains adoption at scale."}],"footnote":"illustrative data"}
+{
+ "bg_image": null,
+ "bg_image_opacity": 0.12,
+ "slide_type": "framework_slide",
+ "title": "Bihar can close its farm performance gap when **4** levers work together: productivity, diversification, market linkages, and delivery execution",
+ "subtitle": "The operating logic is cumulative rather than sequential: higher output matters only when farmers shift into higher-value crops, connect to stronger buyers, and receive services through reliable state and partner delivery systems.",
+ "pathway": {
+  "kind": "chevron_pathway",
+  "steps": [
+   "Farm productivity",
+   "Higher-value diversification",
+   "Market linkages",
+   "Delivery execution"
+  ],
+  "highlight_index": 3
+ },
+ "blocks": [
+  {
+   "kind": "numbered_block",
+   "number": "1",
+   "title": "Farm productivity expands saleable output from the same land base",
+   "body": "Evidence focus: yield improvement, irrigation reliability, input quality, agronomy adoption, and lower production risk across Bihar’s core crop systems."
+  },
+  {
+   "kind": "numbered_block",
+   "number": "2",
+   "title": "Higher-value diversification improves the crop mix, not just the crop yield",
+   "body": "Evidence focus: movement into horticulture and other higher-value crops, stronger gross returns per acre, and lower dependence on a narrow cereal base."
+  },
+  {
+   "kind": "numbered_block",
+   "number": "3",
+   "title": "Market linkages raise realization by connecting production to stronger demand channels",
+   "body": "Evidence focus: aggregation, grading, storage, buyer access, logistics, and better alignment between what farmers grow and what markets reward."
+  },
+  {
+   "kind": "numbered_block",
+   "number": "4",
+   "title": "Delivery execution turns priorities into repeatable farmer-level results",
+   "body": "Evidence focus: last-mile extension, program coordination, data-led targeting, partner accountability, and district-level execution that sustains adoption at scale."
+  }
+ ],
+ "footnote": null
+}

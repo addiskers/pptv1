@@ -1,1 +1,44 @@
-{"bg_image":null,"bg_image_opacity":0.12,"slide_type":"framework_slide","title":"METL can reach statewide operational use by deploying the sisal monitoring platform in **4** phased steps from baseline mapping to action","subtitle":"A phased rollout turns the platform into an operating system: establish the sisal baseline first, then add monitoring, risk detection, and response workflows across the state.","pathway":{"kind":"chevron_pathway","steps":["Baseline acreage mapping","Condition monitoring","Risk alerting","Operational intervention"],"highlight_index":3},"blocks":[{"kind":"numbered_block","number":"1","title":"Baseline acreage mapping gives METL the statewide sisal reference layer","body":"Map where sisal sits across the state and organize the core geography for management. Evidence focus: parcel alignment, area delineation, district coverage, and a single baseline view."},{"kind":"numbered_block","number":"2","title":"Condition monitoring adds continuous crop performance visibility on top of the baseline","body":"Track how mapped sisal changes over time instead of relying on periodic field checks. Evidence focus: repeat satellite refresh, crop-condition trends, comparative views, and exception spotting."},{"kind":"numbered_block","number":"3","title":"Risk alerting converts condition signals into early-warning management triggers","body":"Flag where stress, weather exposure, or anomalous change needs attention before losses spread. Evidence focus: threshold-based alerts, hotspot identification, prioritization queues, and faster escalation."},{"kind":"numbered_block","number":"4","title":"Operational intervention closes the loop by directing state action to the highest-priority locations","body":"Use alerts to target inspections, advisory support, and follow-up across the state. Evidence focus: intervention workflows, field-team routing, case tracking, and outcome review in one platform."}],"footnote":"illustrative data"}
+{
+ "bg_image": null,
+ "bg_image_opacity": 0.12,
+ "slide_type": "framework_slide",
+ "title": "METL can reach statewide operational use by deploying the sisal monitoring platform in **4** phased steps from baseline mapping to action",
+ "subtitle": "A phased rollout turns the platform into an operating system: establish the sisal baseline first, then add monitoring, risk detection, and response workflows across the state.",
+ "pathway": {
+  "kind": "chevron_pathway",
+  "steps": [
+   "Baseline acreage mapping",
+   "Condition monitoring",
+   "Risk alerting",
+   "Operational intervention"
+  ],
+  "highlight_index": 3
+ },
+ "blocks": [
+  {
+   "kind": "numbered_block",
+   "number": "1",
+   "title": "Baseline acreage mapping gives METL the statewide sisal reference layer",
+   "body": "Map where sisal sits across the state and organize the core geography for management. Evidence focus: parcel alignment, area delineation, district coverage, and a single baseline view."
+  },
+  {
+   "kind": "numbered_block",
+   "number": "2",
+   "title": "Condition monitoring adds continuous crop performance visibility on top of the baseline",
+   "body": "Track how mapped sisal changes over time instead of relying on periodic field checks. Evidence focus: repeat satellite refresh, crop-condition trends, comparative views, and exception spotting."
+  },
+  {
+   "kind": "numbered_block",
+   "number": "3",
+   "title": "Risk alerting converts condition signals into early-warning management triggers",
+   "body": "Flag where stress, weather exposure, or anomalous change needs attention before losses spread. Evidence focus: threshold-based alerts, hotspot identification, prioritization queues, and faster escalation."
+  },
+  {
+   "kind": "numbered_block",
+   "number": "4",
+   "title": "Operational intervention closes the loop by directing state action to the highest-priority locations",
+   "body": "Use alerts to target inspections, advisory support, and follow-up across the state. Evidence focus: intervention workflows, field-team routing, case tracking, and outcome review in one platform."
+  }
+ ],
+ "footnote": null
+}

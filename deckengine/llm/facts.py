@@ -167,17 +167,11 @@ def verify_spec_numbers(spec_text: str, table: FactTable) -> list[str]:
     suspects = []
     for m in _NUM.finditer(spec_text):
         tok = m.group()
-        c = _canon(tok)
-        if c in wl:
+        if _canon(tok) in wl:
             continue
         window = spec_text[max(0, m.start() - 16):m.end() + 16]
-        risky_context = bool(_RISK_CONTEXT.search(window))
-        if not risky_context:
-            iv = _try_int(c)
-            if 0 <= iv <= _BENIGN_MAX:      # small counts
-                continue
-            if 1900 <= iv <= 2100:          # years
-                continue
+        if is_benign(tok, window):
+            continue
         suspects.append(tok)
     return sorted(set(suspects))
 
@@ -188,3 +182,13 @@ def _try_int(s: str) -> int:
         return int(f) if f == int(f) else -1
     except ValueError:
         return -1
+
+
+def is_benign(tok: str, context: str) -> bool:
+    """Small counts (0-12) and years are benign — UNLESS the surrounding
+    context smells of %/share/growth/CAGR, which is never benign. Shared by
+    verify_spec_numbers (CSV mode) and provenance checks (no-CSV mode)."""
+    if _RISK_CONTEXT.search(context):
+        return False
+    iv = _try_int(_canon(tok))
+    return (0 <= iv <= _BENIGN_MAX) or (1900 <= iv <= 2100)

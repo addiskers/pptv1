@@ -1,1 +1,44 @@
-{"bg_image":null,"bg_image_opacity":0.12,"slide_type":"framework_slide","title":"Demand stays durable because four end-market needs keep pulling temperature-controlled logistics capacity","subtitle":"Different demand pools reinforce the same requirement: reliable refrigerated transport and cold storage across food, pharma, modern retail, and quick-commerce flows.","pathway":{"kind":"chevron_pathway","steps":["Food loss reduction","Pharma compliance","Modern retail expansion","Quick-commerce service levels"],"highlight_index":3},"blocks":[{"kind":"numbered_block","number":"1","title":"Food loss reduction anchors a large, recurring cold-chain use case","body":"Perishable categories need controlled handling from harvest through distribution. Evidence focus: spoilage reduction, shelf-life protection, and broader reach into non-local markets."},{"kind":"numbered_block","number":"2","title":"Pharma compliance requires validated temperature control across lanes","body":"Vaccines, biologics, and specialty drugs require monitored storage and transport. Evidence focus: compliance-led demand, lower tolerance for excursions, and premium service requirements."},{"kind":"numbered_block","number":"3","title":"Modern retail expansion raises the need for scheduled replenishment","body":"Organized grocery and foodservice formats depend on dependable cold storage and store delivery. Evidence focus: higher SKU breadth, tighter replenishment cadence, and multi-city distribution."},{"kind":"numbered_block","number":"4","title":"Quick-commerce service levels intensify demand for proximate cold capacity","body":"Rapid delivery models need inventory positioned close to demand and moved in small, frequent drops. Evidence focus: urban node density, tighter service windows, and higher uptime expectations."}],"footnote":"illustrative data"}
+{
+ "bg_image": null,
+ "bg_image_opacity": 0.12,
+ "slide_type": "framework_slide",
+ "title": "Demand stays durable because four end-market needs keep pulling temperature-controlled logistics capacity",
+ "subtitle": "Different demand pools reinforce the same requirement: reliable refrigerated transport and cold storage across food, pharma, modern retail, and quick-commerce flows.",
+ "pathway": {
+  "kind": "chevron_pathway",
+  "steps": [
+   "Food loss reduction",
+   "Pharma compliance",
+   "Modern retail expansion",
+   "Quick-commerce service levels"
+  ],
+  "highlight_index": 3
+ },
+ "blocks": [
+  {
+   "kind": "numbered_block",
+   "number": "1",
+   "title": "Food loss reduction anchors a large, recurring cold-chain use case",
+   "body": "Perishable categories need controlled handling from harvest through distribution. Evidence focus: spoilage reduction, shelf-life protection, and broader reach into non-local markets."
+  },
+  {
+   "kind": "numbered_block",
+   "number": "2",
+   "title": "Pharma compliance requires validated temperature control across lanes",
+   "body": "Vaccines, biologics, and specialty drugs require monitored storage and transport. Evidence focus: compliance-led demand, lower tolerance for excursions, and premium service requirements."
+  },
+  {
+   "kind": "numbered_block",
+   "number": "3",
+   "title": "Modern retail expansion raises the need for scheduled replenishment",
+   "body": "Organized grocery and foodservice formats depend on dependable cold storage and store delivery. Evidence focus: higher SKU breadth, tighter replenishment cadence, and multi-city distribution."
+  },
+  {
+   "kind": "numbered_block",
+   "number": "4",
+   "title": "Quick-commerce service levels intensify demand for proximate cold capacity",
+   "body": "Rapid delivery models need inventory positioned close to demand and moved in small, frequent drops. Evidence focus: urban node density, tighter service windows, and higher uptime expectations."
+  }
+ ],
+ "footnote": null
+}

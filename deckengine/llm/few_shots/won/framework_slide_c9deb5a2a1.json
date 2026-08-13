@@ -1,1 +1,44 @@
-{"bg_image":null,"bg_image_opacity":0.12,"slide_type":"framework_slide","title":"Gujarat can raise farmer incomes by moving output through a **4-step** pathway from on-farm productivity to value-added market realization","subtitle":"This income pathway adds the missing operating lens after market access: income gains depend on improving production, reducing post-harvest loss, strengthening market linkage, and capturing value beyond raw output.","pathway":{"kind":"chevron_pathway","steps":["Productivity lift","Post-harvest handling","Market linkage","Value addition"],"highlight_index":3},"blocks":[{"kind":"numbered_block","number":"1","title":"Productivity lift increases the saleable surplus that enters the income chain","body":"Evidence focus: crop yield improvement, input-use efficiency, irrigation-backed stability, and higher marketable output from the same farm base."},{"kind":"numbered_block","number":"2","title":"Post-harvest handling protects value before produce reaches the market","body":"Evidence focus: grading, storage, drying, aggregation, and lower physical and quality loss between harvest and first sale."},{"kind":"numbered_block","number":"3","title":"Market linkage improves price realization by connecting farmers to stronger demand channels","body":"Evidence focus: mandi access, buyer diversity, collection networks, logistics reach, and better alignment between produce quality and end-market demand."},{"kind":"numbered_block","number":"4","title":"Value addition captures more of the consumer rupee than raw-produce sales alone","body":"Evidence focus: processing, packaging, branding, product differentiation, and local enterprise models that retain more value within the farm economy."}],"footnote":"illustrative data"}
+{
+ "bg_image": null,
+ "bg_image_opacity": 0.12,
+ "slide_type": "framework_slide",
+ "title": "Gujarat can raise farmer incomes by moving output through a **4-step** pathway from on-farm productivity to value-added market realization",
+ "subtitle": "This income pathway adds the missing operating lens after market access: income gains depend on improving production, reducing post-harvest loss, strengthening market linkage, and capturing value beyond raw output.",
+ "pathway": {
+  "kind": "chevron_pathway",
+  "steps": [
+   "Productivity lift",
+   "Post-harvest handling",
+   "Market linkage",
+   "Value addition"
+  ],
+  "highlight_index": 3
+ },
+ "blocks": [
+  {
+   "kind": "numbered_block",
+   "number": "1",
+   "title": "Productivity lift increases the saleable surplus that enters the income chain",
+   "body": "Evidence focus: crop yield improvement, input-use efficiency, irrigation-backed stability, and higher marketable output from the same farm base."
+  },
+  {
+   "kind": "numbered_block",
+   "number": "2",
+   "title": "Post-harvest handling protects value before produce reaches the market",
+   "body": "Evidence focus: grading, storage, drying, aggregation, and lower physical and quality loss between harvest and first sale."
+  },
+  {
+   "kind": "numbered_block",
+   "number": "3",
+   "title": "Market linkage improves price realization by connecting farmers to stronger demand channels",
+   "body": "Evidence focus: mandi access, buyer diversity, collection networks, logistics reach, and better alignment between produce quality and end-market demand."
+  },
+  {
+   "kind": "numbered_block",
+   "number": "4",
+   "title": "Value addition captures more of the consumer rupee than raw-produce sales alone",
+   "body": "Evidence focus: processing, packaging, branding, product differentiation, and local enterprise models that retain more value within the farm economy."
+  }
+ ],
+ "footnote": null
+}

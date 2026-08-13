@@ -42,6 +42,7 @@ class Span:
     color_role: str | None = None     # resolved at render time from Theme
     highlight_role: str | None = None  # theme role of a pill behind the run
     superscript: bool = False          # raised, smaller (footnote refs)
+    marker: bool = False               # provenance glyph (●◐○); dropped by plain()
 
     def sized(self, base: float) -> float:
         s = self.size_pt if self.size_pt is not None else base

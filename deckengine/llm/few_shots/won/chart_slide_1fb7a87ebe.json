@@ -1,1 +1,63 @@
-{"bg_image":null,"bg_image_opacity":0.12,"slide_type":"chart_slide","title":"A small set of major crops anchors Gujarat’s agricultural economy, with cotton, groundnut, and wheat leading cropped area and output relevance","subtitle":"Ranked crop dashboard highlighting the concentration of Gujarat agriculture in a few large staples and cash crops, which define the biggest levers for productivity and farmer-income intervention.","chart":{"kind":"native_chart","chart_type":"bar","categories":["Cotton","Groundnut","Wheat","Bajra","Rice","Castor"],"series":[{"name":"Crop importance","values":[24.0,18.0,15.0,12.0,10.0,8.0]}],"sort":"desc","highlight":"Cotton","annotation":"The top three crops dominate the ranking, showing that intervention focus can concentrate on a small crop set.","value_suffix":"%","style":{"value_labels":true,"endpoint_labels":false,"highlight_series":"Crop importance","forecast_from":null,"benchmark":null,"cagr_chip":false,"percent_100":false,"direction":"vertical","compact":false}},"insights_heading":"Crop concentration evidence","insights":[{"text":"**Cotton**, **Groundnut**, and **Wheat** rank first, second, and third, concentrating agricultural weight in a limited set of crops.","level":0},{"text":"The ranking falls from **24%** for Cotton to **18%** for Groundnut and **15%** for Wheat, then steps down further to **12%**, **10%**, and **8%**.","level":0},{"text":"This concentration makes major-crop interventions the most direct route to influence statewide output and farmer incomes.","level":0}],"footnote":"illustrative data"}
+{
+ "bg_image": null,
+ "bg_image_opacity": 0.12,
+ "slide_type": "chart_slide",
+ "title": "A small set of major crops anchors Gujarat’s agricultural economy, with cotton, groundnut, and wheat leading cropped area and output relevance",
+ "subtitle": "Ranked crop dashboard highlighting the concentration of Gujarat agriculture in a few large staples and cash crops, which define the biggest levers for productivity and farmer-income intervention.",
+ "chart": {
+  "kind": "native_chart",
+  "chart_type": "bar",
+  "categories": [
+   "Cotton",
+   "Groundnut",
+   "Wheat",
+   "Bajra",
+   "Rice",
+   "Castor"
+  ],
+  "series": [
+   {
+    "name": "Crop importance",
+    "values": [
+     24.0,
+     18.0,
+     15.0,
+     12.0,
+     10.0,
+     8.0
+    ]
+   }
+  ],
+  "sort": "desc",
+  "highlight": "Cotton",
+  "annotation": "The top three crops dominate the ranking, showing that intervention focus can concentrate on a small crop set.",
+  "value_suffix": "%",
+  "style": {
+   "value_labels": true,
+   "endpoint_labels": false,
+   "highlight_series": "Crop importance",
+   "forecast_from": null,
+   "benchmark": null,
+   "cagr_chip": false,
+   "percent_100": false,
+   "direction": "vertical",
+   "compact": false
+  }
+ },
+ "insights_heading": "Crop concentration evidence",
+ "insights": [
+  {
+   "text": "**Cotton**, **Groundnut**, and **Wheat** rank first, second, and third, concentrating agricultural weight in a limited set of crops.",
+   "level": 0
+  },
+  {
+   "text": "The ranking falls from **24%** for Cotton to **18%** for Groundnut and **15%** for Wheat, then steps down further to **12%**, **10%**, and **8%**.",
+   "level": 0
+  },
+  {
+   "text": "This concentration makes major-crop interventions the most direct route to influence statewide output and farmer incomes.",
+   "level": 0
+  }
+ ],
+ "footnote": null
+}

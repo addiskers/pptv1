@@ -1,1 +1,126 @@
-{"bg_image":null,"bg_image_opacity":0.12,"slide_type":"custom_layout","title":"The highest-priority interventions cluster in high-stress districts where water pressure coincides with weaker productivity or market access","subtitle":null,"root":{"kind":"rows","children":[{"kind":"section_header","title":"Priority sits in the overlap of **water stress** and **weaker farm economics**","subtitle":"Positioning districts on two system axes isolates where targeted productivity, water, and market interventions create the strongest return","rule":true,"accent_subtitle":true},{"kind":"cols","children":[{"kind":"matrix_2x2","x_label":"Productivity / market access","y_label":"Water stress","quadrants":[{"title":"Protect current strength","items":["High productivity","High market connectivity","Lower immediate stress"]},{"title":"Sustain and optimize","items":["High productivity","High water stress","Focus on efficiency"]},{"title":"Build economic lift","items":["Low productivity","Low market connectivity","Lower water urgency"]},{"title":"Intervene first","items":["High water stress","Low productivity","Low market connectivity","Highest-priority districts"]}],"highlight":3},{"kind":"brace_group","content":[{"kind":"text_block","text":"**Intervene first** = districts with high water stress plus weaker productivity or market links.","size_role":"small","font_role":"body","align":"left","color_role":"ink","max_lines":null},{"kind":"mini_table","headers":["Constraint pattern","Intervention"],"rows":[["High stress + low productivity","Water-use efficiency"],["High stress + weak market links","Improve market connectivity"],["High stress + both gaps","Integrated district package"]],"col_fracs":null,"align":"left"},{"kind":"text_block","text":"This placement adds a targeting lens to earlier district, irrigation, yield, and market slides by showing where constraints overlap rather than where each appears alone.","size_role":"small","font_role":"body","align":"left","color_role":"ink","max_lines":null}],"takeaway":"Districts in the bottom-right quadrant merit first-call intervention because water risk and weaker income conversion compound.","takeaway_frac":0.34}],"fracs":[0.62,0.38],"gap":0.8,"align":"top"}],"fracs":[0.16,0.84],"gap":0.8,"pin_last":false},"footnote":"Illustrative data"}
+{
+ "bg_image": null,
+ "bg_image_opacity": 0.12,
+ "slide_type": "custom_layout",
+ "title": "The highest-priority interventions cluster in high-stress districts where water pressure coincides with weaker productivity or market access",
+ "subtitle": null,
+ "root": {
+  "kind": "rows",
+  "children": [
+   {
+    "kind": "section_header",
+    "title": "Priority sits in the overlap of **water stress** and **weaker farm economics**",
+    "subtitle": "Positioning districts on two system axes isolates where targeted productivity, water, and market interventions create the strongest return",
+    "rule": true,
+    "accent_subtitle": true
+   },
+   {
+    "kind": "cols",
+    "children": [
+     {
+      "kind": "matrix_2x2",
+      "x_label": "Productivity / market access",
+      "y_label": "Water stress",
+      "quadrants": [
+       {
+        "title": "Protect current strength",
+        "items": [
+         "High productivity",
+         "High market connectivity",
+         "Lower immediate stress"
+        ]
+       },
+       {
+        "title": "Sustain and optimize",
+        "items": [
+         "High productivity",
+         "High water stress",
+         "Focus on efficiency"
+        ]
+       },
+       {
+        "title": "Build economic lift",
+        "items": [
+         "Low productivity",
+         "Low market connectivity",
+         "Lower water urgency"
+        ]
+       },
+       {
+        "title": "Intervene first",
+        "items": [
+         "High water stress",
+         "Low productivity",
+         "Low market connectivity",
+         "Highest-priority districts"
+        ]
+       }
+      ],
+      "highlight": 3
+     },
+     {
+      "kind": "brace_group",
+      "content": [
+       {
+        "kind": "text_block",
+        "text": "**Intervene first** = districts with high water stress plus weaker productivity or market links.",
+        "size_role": "small",
+        "font_role": "body",
+        "align": "left",
+        "color_role": "ink",
+        "max_lines": null
+       },
+       {
+        "kind": "mini_table",
+        "headers": [
+         "Constraint pattern",
+         "Intervention"
+        ],
+        "rows": [
+         [
+          "High stress + low productivity",
+          "Water-use efficiency"
+         ],
+         [
+          "High stress + weak market links",
+          "Improve market connectivity"
+         ],
+         [
+          "High stress + both gaps",
+          "Integrated district package"
+         ]
+        ],
+        "col_fracs": null,
+        "align": "left"
+       },
+       {
+        "kind": "text_block",
+        "text": "This placement adds a targeting lens to earlier district, irrigation, yield, and market slides by showing where constraints overlap rather than where each appears alone.",
+        "size_role": "small",
+        "font_role": "body",
+        "align": "left",
+        "color_role": "ink",
+        "max_lines": null
+       }
+      ],
+      "takeaway": "Districts in the bottom-right quadrant merit first-call intervention because water risk and weaker income conversion compound.",
+      "takeaway_frac": 0.34
+     }
+    ],
+    "fracs": [
+     0.62,
+     0.38
+    ],
+    "gap": 0.8,
+    "align": "top"
+   }
+  ],
+  "fracs": [
+   0.16,
+   0.84
+  ],
+  "gap": 0.8,
+  "pin_last": false
+ },
+ "footnote": null
+}

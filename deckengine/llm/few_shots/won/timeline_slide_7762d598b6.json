@@ -1,1 +1,59 @@
-{"bg_image":null,"bg_image_opacity":0.12,"slide_type":"timeline_slide","title":"The forum story should convert investors through **4** steps from Angola awareness to sector conviction, opportunity screening, and post-forum engagement","subtitle":"Illustrative investor journey that uses the forum as a conversion path rather than a one-off pitch, moving from country proof points to actionable next steps","timeline":{"kind":"timeline_row","milestones":[{"label":"Build Angola awareness","date":"Step 1","done":false},{"label":"Focus sector interest","date":"Step 2","done":false},{"label":"Screen live opportunities","date":"Step 3","done":false},{"label":"Launch follow-up pipeline","date":"Step 4","done":false}]},"phases":[{"kind":"numbered_block","number":"01","title":"Angola credibility comes first because investors need a country case before they assess any specific opportunity","body":"Open with the investment narrative that makes Angola legible to Indian capital, establishing why the market deserves attention before asking investors to evaluate sectors or assets."},{"kind":"numbered_block","number":"02","title":"Sector focus sharpens interest by narrowing the story from broad market potential to investable themes","body":"Move from the country case to a small set of priority sectors so investor attention concentrates on areas where Angola can present a differentiated fit for Indian participants."},{"kind":"numbered_block","number":"03","title":"Opportunity screening turns sector interest into real demand by attaching concrete deals to each priority theme","body":"Present investor-ready opportunities inside the selected sectors so forum conversations shift from thematic curiosity to active evaluation of specific entry points."},{"kind":"numbered_block","number":"04","title":"Structured follow-up converts forum momentum into a pipeline by defining the engagement path immediately after the event","body":"Close with a clear post-forum process for outreach, qualification, and progression so interest captured at the forum advances into a managed investment pipeline."}],"footnote":"illustrative data"}
+{
+ "bg_image": null,
+ "bg_image_opacity": 0.12,
+ "slide_type": "timeline_slide",
+ "title": "The forum story should convert investors through **4** steps from Angola awareness to sector conviction, opportunity screening, and post-forum engagement",
+ "subtitle": null,
+ "timeline": {
+  "kind": "timeline_row",
+  "milestones": [
+   {
+    "label": "Build Angola awareness",
+    "date": "Step 1",
+    "done": false
+   },
+   {
+    "label": "Focus sector interest",
+    "date": "Step 2",
+    "done": false
+   },
+   {
+    "label": "Screen live opportunities",
+    "date": "Step 3",
+    "done": false
+   },
+   {
+    "label": "Launch follow-up pipeline",
+    "date": "Step 4",
+    "done": false
+   }
+  ]
+ },
+ "phases": [
+  {
+   "kind": "numbered_block",
+   "number": "01",
+   "title": "Angola credibility comes first because investors need a country case before they assess any specific opportunity",
+   "body": "Open with the investment narrative that makes Angola legible to Indian capital, establishing why the market deserves attention before asking investors to evaluate sectors or assets."
+  },
+  {
+   "kind": "numbered_block",
+   "number": "02",
+   "title": "Sector focus sharpens interest by narrowing the story from broad market potential to investable themes",
+   "body": "Move from the country case to a small set of priority sectors so investor attention concentrates on areas where Angola can present a differentiated fit for Indian participants."
+  },
+  {
+   "kind": "numbered_block",
+   "number": "03",
+   "title": "Opportunity screening turns sector interest into real demand by attaching concrete deals to each priority theme",
+   "body": "Present investor-ready opportunities inside the selected sectors so forum conversations shift from thematic curiosity to active evaluation of specific entry points."
+  },
+  {
+   "kind": "numbered_block",
+   "number": "04",
+   "title": "Structured follow-up converts forum momentum into a pipeline by defining the engagement path immediately after the event",
+   "body": "Close with a clear post-forum process for outreach, qualification, and progression so interest captured at the forum advances into a managed investment pipeline."
+  }
+ ],
+ "footnote": null
+}

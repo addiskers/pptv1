@@ -1,1 +1,50 @@
-{"bg_image":null,"bg_image_opacity":0.12,"slide_type":"chart_slide","title":"India cold chain logistics is a **$12B** market growing at **14% CAGR**, providing the scale and momentum to support platform investment","subtitle":"Illustrative market growth trajectory showing that current scale and sustained expansion are both large enough to underwrite platform build-out.","chart":{"kind":"native_chart","chart_type":"line","categories":["2024","2025","2026","2027","2028"],"series":[{"name":"Market size","values":[12.0,14.0,16.0,18.0,21.0]}],"sort":"none","highlight":"2028","annotation":"The market expands from $12B in 2024 to $21B by 2028 at 14% CAGR.","value_suffix":"$B"},"insights_heading":"Scale and growth evidence","insights":[{"text":"The market starts at **$12B**, giving investors immediate scale rather than a niche entry point.","level":0},{"text":"Growth at **14% CAGR** supports multi-year capacity deployment and platform expansion.","level":0},{"text":"The trajectory reaches **$21B** by 2028, indicating a larger revenue pool for scaled operators.","level":0}],"footnote":"illustrative data"}
+{
+ "bg_image": null,
+ "bg_image_opacity": 0.12,
+ "slide_type": "chart_slide",
+ "title": "India cold chain logistics is a **$12B** market growing at **14% CAGR**, providing the scale and momentum to support platform investment",
+ "subtitle": "Current scale and sustained expansion are both large enough to underwrite platform build-out.",
+ "chart": {
+  "kind": "native_chart",
+  "chart_type": "line",
+  "categories": [
+   "2024",
+   "2025",
+   "2026",
+   "2027",
+   "2028"
+  ],
+  "series": [
+   {
+    "name": "Market size",
+    "values": [
+     12.0,
+     14.0,
+     16.0,
+     18.0,
+     21.0
+    ]
+   }
+  ],
+  "sort": "none",
+  "highlight": "2028",
+  "annotation": "The market expands from $12B in 2024 to $21B by 2028 at 14% CAGR.",
+  "value_suffix": "$B"
+ },
+ "insights_heading": "Scale and growth evidence",
+ "insights": [
+  {
+   "text": "The market starts at **$12B**, giving investors immediate scale rather than a niche entry point.",
+   "level": 0
+  },
+  {
+   "text": "Growth at **14% CAGR** supports multi-year capacity deployment and platform expansion.",
+   "level": 0
+  },
+  {
+   "text": "The trajectory reaches **$21B** by 2028, indicating a larger revenue pool for scaled operators.",
+   "level": 0
+  }
+ ],
+ "footnote": null
+}

@@ -1,1 +1,63 @@
-{"bg_image":null,"bg_image_opacity":0.12,"slide_type":"chart_slide","title":"Horticulture and cash crops broaden Gujarat’s agricultural value base, with fruits, vegetables, spices, and plantation crops adding weight beyond field crops","subtitle":"Illustrative horticulture and cash-crop mix showing that Gujarat’s agricultural platform is not limited to traditional field crops, but also includes sizable value pools across multiple higher-value crop segments.","chart":{"kind":"native_chart","chart_type":"bar","categories":["Vegetables","Fruits","Spices","Flowers","Plantation crops","Medicinal crops"],"series":[{"name":"Relative value-base contribution","values":[26.0,22.0,18.0,12.0,10.0,8.0]}],"sort":"desc","highlight":"Vegetables","annotation":"Multiple horticulture and cash-crop segments carry meaningful weight, expanding Gujarat’s value base beyond field crops alone.","value_suffix":"%","style":{"value_labels":true,"endpoint_labels":false,"highlight_series":"Relative value-base contribution","forecast_from":null,"benchmark":null,"cagr_chip":false,"percent_100":false,"direction":"vertical","compact":false}},"insights_heading":"Value-base diversification evidence","insights":[{"text":"**Vegetables** lead at **26%**, followed by **Fruits** at **22%** and **Spices** at **18%**, showing material scale across core horticulture segments.","level":0},{"text":"The ranking continues through **Flowers** at **12%**, **Plantation crops** at **10%**, and **Medicinal crops** at **8%**.","level":0},{"text":"This spread across six segments shows Gujarat’s agricultural value base extends beyond traditional field-crop systems into broader market-linked crop categories.","level":0}],"footnote":"illustrative data"}
+{
+ "bg_image": null,
+ "bg_image_opacity": 0.12,
+ "slide_type": "chart_slide",
+ "title": "Horticulture and cash crops broaden Gujarat’s agricultural value base, with fruits, vegetables, spices, and plantation crops adding weight beyond field crops",
+ "subtitle": "Gujarat’s agricultural platform is not limited to traditional field crops, but also includes sizable value pools across multiple higher-value crop segments.",
+ "chart": {
+  "kind": "native_chart",
+  "chart_type": "bar",
+  "categories": [
+   "Vegetables",
+   "Fruits",
+   "Spices",
+   "Flowers",
+   "Plantation crops",
+   "Medicinal crops"
+  ],
+  "series": [
+   {
+    "name": "Relative value-base contribution",
+    "values": [
+     26.0,
+     22.0,
+     18.0,
+     12.0,
+     10.0,
+     8.0
+    ]
+   }
+  ],
+  "sort": "desc",
+  "highlight": "Vegetables",
+  "annotation": "Multiple horticulture and cash-crop segments carry meaningful weight, expanding Gujarat’s value base beyond field crops alone.",
+  "value_suffix": "%",
+  "style": {
+   "value_labels": true,
+   "endpoint_labels": false,
+   "highlight_series": "Relative value-base contribution",
+   "forecast_from": null,
+   "benchmark": null,
+   "cagr_chip": false,
+   "percent_100": false,
+   "direction": "vertical",
+   "compact": false
+  }
+ },
+ "insights_heading": "Value-base diversification evidence",
+ "insights": [
+  {
+   "text": "**Vegetables** lead at **26%**, followed by **Fruits** at **22%** and **Spices** at **18%**, showing material scale across core horticulture segments.",
+   "level": 0
+  },
+  {
+   "text": "The ranking continues through **Flowers** at **12%**, **Plantation crops** at **10%**, and **Medicinal crops** at **8%**.",
+   "level": 0
+  },
+  {
+   "text": "This spread across six segments shows Gujarat’s agricultural value base extends beyond traditional field-crop systems into broader market-linked crop categories.",
+   "level": 0
+  }
+ ],
+ "footnote": null
+}

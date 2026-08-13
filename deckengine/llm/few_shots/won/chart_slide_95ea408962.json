@@ -1,1 +1,74 @@
-{"bg_image":null,"bg_image_opacity":0.12,"slide_type":"chart_slide","title":"Time-series satellite monitoring shows sisal condition shifts earlier, letting METL spot stress before conventional reporting cycles close the gap","subtitle":"Illustrative crop-condition trend showing that continuous imagery produces an earlier signal of decline than periodic field reporting, enabling faster intervention on stressed sisal areas.","chart":{"kind":"native_chart","chart_type":"line","categories":["Month 1","Month 2","Month 3","Month 4","Month 5","Month 6"],"series":[{"name":"Satellite condition index","values":[82.0,81.0,76.0,69.0,67.0,66.0]},{"name":"Conventional reporting signal","values":[82.0,82.0,81.0,78.0,71.0,67.0]}],"sort":"none","highlight":"Month 3","annotation":"The satellite signal turns down by Month 3, while conventional reporting lags and shows the sharper decline later.","value_suffix":"","style":{"value_labels":true,"endpoint_labels":false,"highlight_series":"Satellite condition index","forecast_from":null,"benchmark":null,"cagr_chip":false,"percent_100":false,"direction":"vertical","compact":false}},"insights_heading":"Early-warning evidence","insights":[{"text":"The satellite condition index falls from **82** in Month 1 to **76** by Month 3, surfacing deterioration before the conventional signal moves materially.","level":0},{"text":"Conventional reporting stays at **82**, **82**, and **81** through Month 3, delaying visibility into the same emerging stress pattern.","level":0},{"text":"By Month 6, both signals converge near **66** and **67**, showing that earlier satellite detection changes timing of action rather than the underlying field reality.","level":0}],"footnote":"illustrative data"}
+{
+ "bg_image": null,
+ "bg_image_opacity": 0.12,
+ "slide_type": "chart_slide",
+ "title": "Time-series satellite monitoring shows sisal condition shifts earlier, letting METL spot stress before conventional reporting cycles close the gap",
+ "subtitle": "Continuous imagery produces an earlier signal of decline than periodic field reporting, enabling faster intervention on stressed sisal areas.",
+ "chart": {
+  "kind": "native_chart",
+  "chart_type": "line",
+  "categories": [
+   "Month 1",
+   "Month 2",
+   "Month 3",
+   "Month 4",
+   "Month 5",
+   "Month 6"
+  ],
+  "series": [
+   {
+    "name": "Satellite condition index",
+    "values": [
+     82.0,
+     81.0,
+     76.0,
+     69.0,
+     67.0,
+     66.0
+    ]
+   },
+   {
+    "name": "Conventional reporting signal",
+    "values": [
+     82.0,
+     82.0,
+     81.0,
+     78.0,
+     71.0,
+     67.0
+    ]
+   }
+  ],
+  "sort": "none",
+  "highlight": "Month 3",
+  "annotation": "The satellite signal turns down by Month 3, while conventional reporting lags and shows the sharper decline later.",
+  "value_suffix": "",
+  "style": {
+   "value_labels": true,
+   "endpoint_labels": false,
+   "highlight_series": "Satellite condition index",
+   "forecast_from": null,
+   "benchmark": null,
+   "cagr_chip": false,
+   "percent_100": false,
+   "direction": "vertical",
+   "compact": false
+  }
+ },
+ "insights_heading": "Early-warning evidence",
+ "insights": [
+  {
+   "text": "The satellite condition index falls from **82** in Month 1 to **76** by Month 3, surfacing deterioration before the conventional signal moves materially.",
+   "level": 0
+  },
+  {
+   "text": "Conventional reporting stays at **82**, **82**, and **81** through Month 3, delaying visibility into the same emerging stress pattern.",
+   "level": 0
+  },
+  {
+   "text": "By Month 6, both signals converge near **66** and **67**, showing that earlier satellite detection changes timing of action rather than the underlying field reality.",
+   "level": 0
+  }
+ ],
+ "footnote": null
+}

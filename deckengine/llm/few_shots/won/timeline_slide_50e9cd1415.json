@@ -1,1 +1,59 @@
-{"bg_image":null,"bg_image_opacity":0.12,"slide_type":"timeline_slide","title":"METL can build continuous sisal oversight in **4** stages that move from acreage mapping to risk alerts and targeted intervention","subtitle":"Illustrative operating sequence for a statewide satellite monitoring platform, structured as a management cycle rather than a technical build plan","timeline":{"kind":"timeline_row","milestones":[{"label":"Map sisal acreage","date":"Stage 1","done":false},{"label":"Track condition","date":"Stage 2","done":false},{"label":"Flag risk early","date":"Stage 3","done":false},{"label":"Direct intervention","date":"Stage 4","done":false}]},"phases":[{"kind":"numbered_block","number":"01","title":"Acreage mapping creates the statewide sisal baseline METL needs before any ongoing oversight begins","body":"Build the first statewide layer that shows where sisal sits, how plots are distributed, and which areas require regular review."},{"kind":"numbered_block","number":"02","title":"Condition monitoring turns the acreage baseline into recurring visibility on crop performance across mapped sisal areas","body":"Track crop condition over time from the same mapped footprint so METL sees changes in field status continuously, not through periodic field checks."},{"kind":"numbered_block","number":"03","title":"Risk alerting converts condition signals into early warnings that isolate where sisal stress is emerging","body":"Flag anomalies and deteriorating zones early so review shifts to priority areas instead of relying on state teams to discover issues in the field."},{"kind":"numbered_block","number":"04","title":"Directed intervention closes the loop by sending action to the highest-priority sisal areas identified by the platform","body":"Use mapped acreage, condition trends, and risk flags in one workflow to target inspections, support, and follow-up where intervention is most urgent."}],"footnote":"illustrative data"}
+{
+ "bg_image": null,
+ "bg_image_opacity": 0.12,
+ "slide_type": "timeline_slide",
+ "title": "METL can build continuous sisal oversight in **4** stages that move from acreage mapping to risk alerts and targeted intervention",
+ "subtitle": null,
+ "timeline": {
+  "kind": "timeline_row",
+  "milestones": [
+   {
+    "label": "Map sisal acreage",
+    "date": "Stage 1",
+    "done": false
+   },
+   {
+    "label": "Track condition",
+    "date": "Stage 2",
+    "done": false
+   },
+   {
+    "label": "Flag risk early",
+    "date": "Stage 3",
+    "done": false
+   },
+   {
+    "label": "Direct intervention",
+    "date": "Stage 4",
+    "done": false
+   }
+  ]
+ },
+ "phases": [
+  {
+   "kind": "numbered_block",
+   "number": "01",
+   "title": "Acreage mapping creates the statewide sisal baseline METL needs before any ongoing oversight begins",
+   "body": "Build the first statewide layer that shows where sisal sits, how plots are distributed, and which areas require regular review."
+  },
+  {
+   "kind": "numbered_block",
+   "number": "02",
+   "title": "Condition monitoring turns the acreage baseline into recurring visibility on crop performance across mapped sisal areas",
+   "body": "Track crop condition over time from the same mapped footprint so METL sees changes in field status continuously, not through periodic field checks."
+  },
+  {
+   "kind": "numbered_block",
+   "number": "03",
+   "title": "Risk alerting converts condition signals into early warnings that isolate where sisal stress is emerging",
+   "body": "Flag anomalies and deteriorating zones early so review shifts to priority areas instead of relying on state teams to discover issues in the field."
+  },
+  {
+   "kind": "numbered_block",
+   "number": "04",
+   "title": "Directed intervention closes the loop by sending action to the highest-priority sisal areas identified by the platform",
+   "body": "Use mapped acreage, condition trends, and risk flags in one workflow to target inspections, support, and follow-up where intervention is most urgent."
+  }
+ ],
+ "footnote": null
+}

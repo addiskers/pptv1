@@ -28,6 +28,7 @@ from .facts import FactTable, verify_spec_numbers
 from .format_rules import (check_outline_formats, check_slide_format,
                            decision_table_text)
 from .exemplar_retrieval import select_exemplars
+from .provenance import check_slide_markers
 from .story import REVIEW_PROMPT, Outline, check_outline
 from .style_priors import prior_block
 from .writing import check_slide_writing
@@ -45,7 +46,8 @@ SYSTEM = """You write slide specs for DeckEngine, a consulting-grade deck engine
 Hard rules:
 - Titles are full-sentence takeaways ("X raised incomes 5% above state average"), never labels ("Results"). Keep titles under 160 characters. A title carries a verb and, when the facts allow, a number.
 - Prefer stats, tables and comparisons over prose (assertion-evidence style): every body element is EVIDENCE for the title claim, not commentary about it.
-- Use ONLY numbers given in the FACTS block, with their display strings verbatim. Never compute, extrapolate or invent a number. If no FACTS block is given, use round illustrative numbers and mark the footnote 'illustrative data'.
+- With a FACTS block: use ONLY those numbers, display strings verbatim. Never compute, extrapolate or invent a number.
+- WITHOUT a FACTS block: use the best real-world figures you actually know for this topic — named programs, real market sizes, real years. EVERY figure carries a provenance marker immediately after it: [[src:official]] for published/verified numbers, [[src:recon]] for numbers you reconstructed from known anchors, [[src:est]] for your own estimates. When unsure which tier applies, use [[src:est]]. The word "illustrative" is BANNED — a deck of placeholders has no argument. Chart series and table cells cannot carry markers; instead end that slide's footnote with the source, e.g. "Source: FAOSTAT 2025 [[src:official]]".
 - Rich text markup: **bold** for emphasis on numbers/leads. *Italics* only for defined terms, at most twice per slide — italicising for tone is a machine tell.
 - Writing craft: never hedge (may/might/could/potentially — state it or cut it). No exclamation marks. Never open a line with Additionally/Furthermore/Moreover. Vary sentence rhythm: a short punch, then longer support.
 - Keep text tight: this engine renders at consulting density; long text gets shrunk then truncated.
@@ -253,6 +255,18 @@ def generate_slide(archetype: str, intent: str, prompt: str,
                 continue
             if suspects:
                 log.warning("unverified numbers survived repairs: %s", suspects)
+        else:
+            # no-CSV mode: every figure must carry its provenance marker
+            mproblems = check_slide_markers(slide)
+            if mproblems and attempt < MAX_REPAIRS:
+                attempt_prompt = (base_prompt +
+                                  "\n\nProvenance problems — fix ALL of them "
+                                  "while keeping the same claims and layout:\n" +
+                                  "\n".join(f"- {p}" for p in mproblems) +
+                                  "\nEmit the full JSON again.")
+                continue
+            if mproblems:
+                log.warning("marker problems survived repairs: %s", mproblems)
         wproblems = check_slide_writing(slide)
         if wproblems and attempt < MAX_REPAIRS:
             attempt_prompt = (base_prompt +

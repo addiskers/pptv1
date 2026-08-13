@@ -7,16 +7,21 @@ from deckengine.schema.slide_types import BulletContentSpec
 
 def slide_a() -> dict:
     return BulletContentSpec(
-        title="Metros drive 58% of demand at accessible price points",
-        bullets=[{"text": "Six corridors hold **58%** of national volume"}],
+        title="Metros drive 58% [[src:recon]] of demand at accessible "
+              "price points",
+        bullets=[{"text": "Six corridors hold **58%** [[src:recon]] of "
+                          "national volume"}],
     ).model_dump()
 
 
 def slide_b() -> dict:
     return BulletContentSpec(
-        title="Metros drive 58% of demand at accessible price points",
-        bullets=[{"text": "Six corridors hold **58%** of national volume"},
-                 {"text": "Corridor payback runs under **14 months**"}],
+        title="Metros drive 58% [[src:recon]] of demand at accessible "
+              "price points",
+        bullets=[{"text": "Six corridors hold **58%** [[src:recon]] of "
+                          "national volume"},
+                 {"text": "Corridor payback runs under **14 months** "
+                          "[[src:est]]"}],
     ).model_dump()
 
 

@@ -15,9 +15,10 @@ def hedgy_slide() -> BulletContentSpec:
 
 def clean_slide() -> BulletContentSpec:
     return BulletContentSpec(
-        title="The commuter segment leads volume growth at 35% CAGR",
+        title="The commuter segment leads volume growth at 35% [[src:est]] CAGR",
         bullets=[
-            {"text": "Sales grew **3x** in two years; margins expanded 4pp"},
+            {"text": "Sales grew **3x** in two years; margins expanded "
+                     "4pp [[src:est]]"},
             {"text": "Unit economics turned positive across all six metros"},
         ])
 
