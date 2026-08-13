@@ -189,6 +189,10 @@ class DeckMeta(BaseModel):
     date: str | None = Field(default=None, max_length=40)
     footer_org: str | None = Field(default=None, max_length=80)
     confidentiality: str | None = Field(default=None, max_length=60)
+    # brand logo asset (name under assets/ or an absolute path); rendered
+    # aspect-contained in the top-right corner of every slide. Missing asset
+    # warns + skips — a logo never blocks a render.
+    logo: str | None = Field(default=None, max_length=300)
 
 
 class DeckSpec(BaseModel):

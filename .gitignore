@@ -10,3 +10,6 @@ assets/cache_faded/
 assets/cache_crop/
 # corpus-derived data (client-confidential source material) — never committed
 corpus/work/
+
+# runtime user uploads (logos) - never committed
+assets/uploads/

@@ -12,7 +12,8 @@ import tempfile
 import uuid
 from pathlib import Path
 
-from fastapi import BackgroundTasks, FastAPI, Header, HTTPException
+from fastapi import (BackgroundTasks, FastAPI, File, Header, HTTPException,
+                     UploadFile)
 from fastapi.responses import FileResponse, HTMLResponse
 from pydantic import BaseModel
 
@@ -61,6 +62,23 @@ def list_themes() -> list[dict]:
     return out
 
 
+@app.post("/assets")
+async def upload_asset(file: UploadFile = File(...),
+                      x_api_key: str | None = Header(default=None)) -> dict:
+    """Store an uploaded image (e.g. a brand logo) under assets/uploads/ and
+    return its asset name to drop into a spec's meta.logo or the generate
+    request. resolve_asset() finds it by that name at render time."""
+    _check_key(x_api_key)
+    import re
+    from ..core.assets import ASSETS_DIR
+    raw = Path(file.filename or "logo.png").name
+    safe = re.sub(r"[^A-Za-z0-9._-]", "_", raw) or "logo.png"
+    dest_dir = ASSETS_DIR / "uploads"
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    (dest_dir / safe).write_bytes(await file.read())
+    return {"asset": f"uploads/{safe}"}
+
+
 def _check_key(x_api_key: str | None) -> None:
     expected = os.environ.get("DECKENGINE_API_KEY")
     if expected and x_api_key != expected:
@@ -75,6 +93,7 @@ class GenerateFromPrompt(BaseModel):
     prompt: str
     csv_text: str | None = None
     theme: str = "consulting_navy"
+    logo: str | None = None  # asset name from POST /assets -> meta.logo
     auto_approve: bool = False  # True: skip the outline gate (CLI behavior)
 
 
@@ -271,8 +290,11 @@ def _run_outline(job_id: str, req: GenerateFromPrompt) -> None:
 def _run_generate(job_id: str, req: GenerateFromPrompt, outline) -> None:
     try:
         from ..llm.spec_generator import generate_deck_spec
+        from ..schema.slide_types import DeckMeta
+        meta = (DeckMeta(title=req.prompt[:150], logo=req.logo)
+                if req.logo else None)
         spec = generate_deck_spec(req.prompt, csv_text=req.csv_text,
-                                  theme=req.theme, outline=outline)
+                                  theme=req.theme, meta=meta, outline=outline)
         _run_render(job_id, spec)
     except Exception as e:  # noqa: BLE001
         _JOBS[job_id] = {"status": "error", "error": str(e)}

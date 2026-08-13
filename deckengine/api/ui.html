@@ -285,6 +285,14 @@
           <label>Brand theme</label>
           <div class="themes" id="themes"></div>
         </div>
+        <div class="field">
+          <label>Brand logo — optional</label>
+          <div class="dropzone" id="logozone">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+            <div id="lz-text">Drop a logo or click to upload<br><span style="font-size:12px">PNG with transparency looks best · top-right of every slide</span></div>
+          </div>
+          <input type="file" id="logofile" accept="image/*" hidden>
+        </div>
       </div>
 
       <div class="toggle-row">
@@ -383,6 +391,7 @@
 <script>
 const $ = id => document.getElementById(id);
 let csvText = null, currentJob = null, selectedTheme = 'consulting_navy', pollTimer = null;
+let logoAsset = null;
 
 const EXAMPLES = [
   "Market entry strategy for an EV two-wheeler brand in Southeast Asia",
@@ -407,6 +416,12 @@ const EXAMPLES = [
   dz.ondragleave = () => dz.classList.remove('drag');
   dz.ondrop = e => { e.preventDefault(); dz.classList.remove('drag'); if (e.dataTransfer.files[0]) readCsv(e.dataTransfer.files[0]); };
   fi.onchange = e => { if (e.target.files[0]) readCsv(e.target.files[0]); };
+  const lz = $('logozone'), lf = $('logofile');
+  lz.onclick = () => lf.click();
+  lz.ondragover = e => { e.preventDefault(); lz.classList.add('drag'); };
+  lz.ondragleave = () => lz.classList.remove('drag');
+  lz.ondrop = e => { e.preventDefault(); lz.classList.remove('drag'); if (e.dataTransfer.files[0]) uploadLogo(e.dataTransfer.files[0]); };
+  lf.onchange = e => { if (e.target.files[0]) uploadLogo(e.target.files[0]); };
   $('prompt').addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') generate();
   });
@@ -455,6 +470,26 @@ function clearCsv(e) {
   $('dz-text').innerHTML = 'Drop a CSV or click to upload<br><span style="font-size:12px">every number in the deck will trace to it</span>';
 }
 
+async function uploadLogo(f) {
+  const lz = $('logozone');
+  $('lz-text').innerHTML = '<span class="fname">uploading ' + f.name + '…</span>';
+  try {
+    const fd = new FormData(); fd.append('file', f);
+    const r = await fetch('/assets', {method:'POST', body: fd});
+    if (!r.ok) throw new Error(await r.text());
+    logoAsset = (await r.json()).asset;
+    lz.classList.add('has-file');
+    $('lz-text').innerHTML = '<span class="fname">' + f.name + '</span>' +
+      '<a class="clear" onclick="clearLogo(event)">remove</a>';
+  } catch (e) { logoAsset = null; toast('Logo upload failed: ' + e.message, true);
+    $('lz-text').innerHTML = 'Drop a logo or click to upload<br><span style="font-size:12px">PNG with transparency looks best · top-right of every slide</span>'; }
+}
+function clearLogo(e) {
+  e.stopPropagation(); logoAsset = null; $('logofile').value = '';
+  $('logozone').classList.remove('has-file');
+  $('lz-text').innerHTML = 'Drop a logo or click to upload<br><span style="font-size:12px">PNG with transparency looks best · top-right of every slide</span>';
+}
+
 function show(stage) {
   ['compose','progress','gate','result'].forEach(s => $(s).classList.toggle('hidden', s !== stage));
   if (stage !== 'compose') $(stage).scrollIntoView({behavior:'smooth', block:'start'});
@@ -488,7 +523,7 @@ async function generate() {
     'outline', []);
   try {
     const res = await fetch('/generate', {method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({prompt, csv_text: csvText, theme: selectedTheme, auto_approve: !review})});
+      body: JSON.stringify({prompt, csv_text: csvText, theme: selectedTheme, logo: logoAsset, auto_approve: !review})});
     if (!res.ok) throw new Error(await res.text());
     poll((await res.json()).job_id);
   } catch (e) { fail(e.message); }
@@ -498,6 +533,7 @@ async function renderSpec() {
   let spec;
   try { spec = JSON.parse($('spec').value); }
   catch (e) { return toast('Spec is not valid JSON: ' + e.message, true); }
+  if (logoAsset) { spec.meta = spec.meta || {}; spec.meta.logo = logoAsset; }
   progress('Rendering deck…', 'Deterministic layout — measuring text, placing components.', 'render', ['outline','slides']);
   try {
     const res = await fetch('/render', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({spec})});
