@@ -43,6 +43,8 @@ class Span:
     highlight_role: str | None = None  # theme role of a pill behind the run
     superscript: bool = False          # raised, smaller (footnote refs)
     marker: bool = False               # provenance glyph (●◐○); dropped by plain()
+    caps: bool = False                 # render small-caps (a:rPr cap="all")
+    spc_pts: float = 0.0               # letter-spacing in points (a:rPr spc)
 
     def sized(self, base: float) -> float:
         s = self.size_pt if self.size_pt is not None else base
@@ -104,8 +106,13 @@ class TextMeasurer:
         return units / upem * size_pt
 
     def span_width_emu(self, span: Span, family: str, base_size: float) -> int:
-        w = self.width_pt(span.text, span.font or family, span.sized(base_size),
+        # caps renders uppercase glyphs; spc adds tracking after each glyph —
+        # both must be measured exactly as PowerPoint will draw them
+        text = span.text.upper() if span.caps else span.text
+        w = self.width_pt(text, span.font or family, span.sized(base_size),
                           bold=span.bold, italic=span.italic)
+        if span.spc_pts:
+            w += span.spc_pts * len(text)
         return round(w * EMU_PER_PT)
 
     def line_height_emu(self, spans: list[Span], family: str, base_size: float,

@@ -30,6 +30,9 @@ class Theme:
     color_grid: str
     color_inverse_ink: str
     color_highlight: str = "F2D024"  # pill behind emphasised numbers (yellow)
+    # semantic mid-tier between negative and positive (moderate/watch/mixed);
+    # class default so the 11 theme JSONs need no edits
+    color_warning: str = "B45309"
     badge_palette: dict[str, str] = field(default_factory=dict)
     heatmap_scale: list[str] = field(default_factory=list)  # low -> high
 
@@ -42,6 +45,7 @@ class Theme:
     size_body: float = 10.0
     size_small: float = 9.0
     size_micro: float = 7.5
+    size_kicker: float = 8.5  # small-caps eyebrow line above the title
 
     unit: int = inch(0.1)  # base spacing unit; all gaps are multiples
 

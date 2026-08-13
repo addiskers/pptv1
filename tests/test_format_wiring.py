@@ -83,7 +83,16 @@ def test_stage2_repairs_objective_chart_violation(monkeypatch):
 def test_non_chart_archetype_untouched(monkeypatch):
     clean = BulletContentSpec(
         title="Five moves de-risk the launch over 18 [[src:est]] months",
-        bullets=[{"text": "Secure supply first; the rest follows"}],
+        bullets=[
+            {"text": "Secure supply first: locked cell contracts cover the "
+                     "first 40,000 [[src:est]] units, so no later move "
+                     "depends on spot pricing or allocation luck."},
+            {"text": "Then land the anchor fleet accounts, stand up the "
+                     "service network in the two launch metros, publish the "
+                     "warranty terms, and only then open retail — each step "
+                     "de-risks the next and none requires new capital "
+                     "before the fleet revenue arrives."},
+        ],
     ).model_dump()
     prompts = []
 

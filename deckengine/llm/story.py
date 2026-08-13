@@ -23,6 +23,12 @@ class OutlineSlide(BaseModel):
         max_length=220,
         description="The one-sentence assertion this slide proves. Becomes the "
                     "slide title. Never a label like 'Market Overview'.")
+    section: str | None = Field(
+        default=None, max_length=40,
+        description="2-4 word section tag (e.g. 'THE OPPORTUNITY'), constant "
+                    "across consecutive slides of one act, changing at "
+                    "dividers. Rendered as the small-caps kicker above each "
+                    "title. Null on title/divider slides.")
 
 
 class Outline(BaseModel):

@@ -40,6 +40,10 @@ class BgImage(SpeakerNotes):
     and skip — never block a render."""
     bg_image: str | None = Field(default=None, max_length=260)
     bg_image_opacity: float = Field(default=0.12, gt=0.02, le=0.5)
+    # small-caps eyebrow above the title: the deck section this slide
+    # belongs to. Flows from the outline (constant within a section) —
+    # copied in deterministically, never invented per slide.
+    kicker: str | None = Field(default=None, max_length=40)
 
 
 class TitleSlideSpec(SpeakerNotes):

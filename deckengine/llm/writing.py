@@ -24,6 +24,11 @@ _ITALIC_RE = re.compile(r"(?<!\*)\*(?!\*)[^*]+\*(?!\*)")
 
 _MAX_BODY_HEDGES = 2
 _MAX_ITALIC_SPANS = 3
+# under this many words, a dense body archetype reads as an empty slide
+# (the winning deck averaged ~164 words/slide; sparse = machine tell)
+_SPARSE_FLOOR = 60
+_DENSE_BODY = frozenset({"bullet_content", "exec_summary",
+                         "n_column_comparison", "framework_slide"})
 
 # non-prose fields: enums, roles, asset names, icon vocab, codes
 _SKIP_KEYS = frozenset({
@@ -84,4 +89,12 @@ def check_slide_writing(slide: BaseModel) -> list[str]:
 
     if "!" in joined:
         problems.append("exclamation mark — consulting prose never exclaims")
+
+    if getattr(slide, "slide_type", "") in _DENSE_BODY:
+        words = len(plain(joined).split())
+        if words < _SPARSE_FLOOR:
+            problems.append(
+                f"only {words} words on a dense body slide — a sparse slide "
+                "reads as an empty argument; add evidence FROM THE FACTS "
+                "block (or marked real figures), never filler")
     return problems

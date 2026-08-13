@@ -25,7 +25,8 @@ from pydantic import BaseModel, ValidationError
 
 from ..schema.slide_types import DeckMeta, DeckSpec, SlideSpec
 from .facts import FactTable, verify_spec_numbers
-from .format_rules import (check_outline_formats, check_slide_format,
+from .format_rules import (check_outline_chart_density,
+                           check_outline_formats, check_slide_format,
                            decision_table_text)
 from .exemplar_retrieval import select_exemplars
 from .provenance import (append_legend_once, check_slide_markers,
@@ -53,6 +54,9 @@ Hard rules:
 - Rich text markup: **bold** for emphasis on numbers/leads. *Italics* only for defined terms, at most twice per slide — italicising for tone is a machine tell.
 - Writing craft: never hedge (may/might/could/potentially — state it or cut it). No exclamation marks. Never open a line with Additionally/Furthermore/Moreover. Vary sentence rhythm: a short punch, then longer support.
 - Keep text tight: this engine renders at consulting density; long text gets shrunk then truncated.
+- WORD BUDGET: dense body slides carry 140-180 words of real evidence (a winning deck averages ~164); dividers under 25. Under ~60 words reads as an empty slide; over 200 gets shrunk. Fill with evidence, never filler.
+- SEMANTIC COLOUR: name chart series/categories with meaning-bearing words when the data has a health scale — the engine colours Overdrawn/Critical red, Moderate/Watch amber, Healthy/Safe green automatically.
+- The subtitle is a STANDFIRST: one lede sentence that ADDS mechanism or so-what beyond the title — never a restatement of it.
 - Every slide includes "notes": 2-3 DIRECTIVE speaker sentences (max 350 chars) — what to say, what to point at, what question to expect. Never a restatement of the slide text.
 - Respect every field constraint in the schema exactly."""
 
@@ -121,7 +125,11 @@ def generate_outline(prompt: str, facts: FactTable | None) -> Outline:
          "Emit the outline as a CLAIM CHAIN: a one-sentence governing_thought "
          "(the deck's answer), plus one entry per slide with slide_type and "
          "claim — the full-sentence assertion that slide proves (it becomes "
-         "the slide title; never a label). Read in sequence, the claims must "
+         "the slide title; never a label). Give every BODY slide a 'section' "
+         "tag: 2-4 words naming the act it belongs to (e.g. 'THE "
+         "OPPORTUNITY', 'WHAT IT TAKES') — identical across consecutive "
+         "slides of one act, changing only at section boundaries; null on "
+         "title and divider slides. Read in sequence, the claims must "
          "prove the governing thought. VARY THE VISUAL RHYTHM so the deck "
          "never reads as stamped from a fixed set of molds: never more than "
          "two consecutive slides of the same slide_type, and use custom_layout "
@@ -131,7 +139,12 @@ def generate_outline(prompt: str, facts: FactTable | None) -> Outline:
          "of two charts, a table braced to its takeaway). Use custom_layout "
          "ALWAYS for prioritisation 2x2s, funnels, option scorecards or "
          "image-led slides: the matrix_2x2, funnel, harvey_balls and "
-         "image_block components live only inside custom_layout trees. Open "
+         "image_block components live only inside custom_layout trees. "
+         "CHART DENSITY: the best decks CHART their data — put a native "
+         "chart on at least 60% of data-bearing body slides (chart_slide, "
+         "or a chart-embedding custom_layout such as an evidence pair or a "
+         "chart + drivers split). When variety demands a different look, "
+         "rotate the chart's HOME, never drop the chart. Open "
          "with a title slide; close with an exec_summary or kpi_dashboard "
          "when it fits.\n"
          + ("" if facts else
@@ -144,7 +157,8 @@ def generate_outline(prompt: str, facts: FactTable | None) -> Outline:
     outline = Outline.model_validate(_structured_call("emit_outline", schema, p))
 
     def _problems(o: Outline) -> list[str]:
-        return check_outline(o) + check_outline_formats(o, facts)
+        return (check_outline(o) + check_outline_formats(o, facts)
+                + check_outline_chart_density(o))
 
     problems = _problems(outline)
     review = REVIEW_PROMPT
@@ -448,6 +462,10 @@ def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
         if facts:
             # CSV facts are official by construction — mark their displays
             slide = inject_fact_markers(slide, facts)
+        # section tag -> kicker, copied deterministically from the outline
+        # (constant within a section; slides never invent their own)
+        if item.section and hasattr(slide, "kicker"):
+            slide.kicker = item.section.strip()[:40] or None
         slides.append(slide)
         title = getattr(slide, "title", None) or item.claim
         prior.append(f"[{item.slide_type}] {title}")

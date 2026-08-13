@@ -24,12 +24,19 @@ class SlideAssembler(ABC):
         fixed title zone (fit shrinks to the 14pt floor, then ellipsizes and
         reports). The body zone starts at title_h regardless of how the
         title fit, so title/body overlap is structurally impossible.
+        With a kicker (section eyebrow) the zone grows 0.18in — kicker-gated,
+        so kicker-less decks keep their exact geometry.
         """
         subtitle = getattr(spec, "subtitle", None)
-        z = self.zones(title_h=0.85 if not subtitle else 1.1)
+        kicker = (getattr(spec, "kicker", None) or "").strip() or None
+        title_h = 0.85 if not subtitle else 1.1
+        if kicker:
+            title_h += 0.18
+        z = self.zones(title_h=title_h)
         get_component("section_header").render(
             slide, SectionHeaderSpec(title=spec.title, subtitle=subtitle,
-                                     rule=rule), z["title"], ctx)
+                                     kicker=kicker, rule=rule),
+            z["title"], ctx)
         return z
 
 

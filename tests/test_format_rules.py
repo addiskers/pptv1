@@ -242,7 +242,8 @@ def test_slide_lint_line_and_donut():
     good = ChartSlideSpec(
         title="Premium takes half the pool",
         chart=_chart(chart_type="donut", value_suffix="%",
-                     series=[_series([47, 33, 20])]))
+                     series=[_series([47, 33, 20])]),
+        footnote="Source: registry 2025 [[src:official]]")
     assert check_slide_format(good, None) == []
 
 
@@ -266,7 +267,8 @@ def test_slide_lint_stacked_series_ranking_highlight():
     sorted_ok = ChartSlideSpec(
         title="**Alpha leads** the market on volume",
         chart=_chart(categories=list("ABCDE"),
-                     series=[_series([5, 4, 3, 2, 1])], sort="desc"))
+                     series=[_series([5, 4, 3, 2, 1])], sort="desc"),
+        footnote="Source: registry 2025 [[src:official]]")
     assert check_slide_format(sorted_ok, None) == []
     ghost = ChartSlideSpec(
         title="Revenue held steady across segments",

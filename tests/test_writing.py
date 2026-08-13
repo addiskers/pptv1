@@ -17,9 +17,15 @@ def clean_slide() -> BulletContentSpec:
     return BulletContentSpec(
         title="The commuter segment leads volume growth at 35% [[src:est]] CAGR",
         bullets=[
-            {"text": "Sales grew **3x** in two years; margins expanded "
-                     "4pp [[src:est]]"},
-            {"text": "Unit economics turned positive across all six metros"},
+            {"text": "Sales grew **3x** in two years across the six largest "
+                     "metros; margins expanded 4pp [[src:est]] on firmer "
+                     "pricing and a leaner dealer cost base."},
+            {"text": "Unit economics turned positive in every metro cohort "
+                     "during the final two quarters, and service revenue now "
+                     "covers the full cost of the field network."},
+            {"text": "Dealer additions run at the fastest pace in the "
+                     "network's history, with waiting lists across eight of "
+                     "the ten priority districts."},
         ])
 
 
@@ -51,7 +57,16 @@ def test_clean_slide_passes():
 def test_bold_never_counted_as_italics():
     s = BulletContentSpec(
         title="Margins expanded 4pp on **$2.1B** of revenue",
-        bullets=[{"text": "**bold** **bold** **bold** **bold** **bold**"}])
+        bullets=[
+            {"text": "**Bold** numbers carry the argument here: **$2.1B** "
+                     "of revenue booked across the year, an operating "
+                     "margin that widened every quarter, and **cash** "
+                     "conversion holding above the plan line."},
+            {"text": "**Four** plants ran at full utilisation through the "
+                     "period and **two** more come online next year, which "
+                     "keeps the cost curve moving in the right direction "
+                     "without new capital."},
+        ])
     assert check_slide_writing(s) == []
 
 

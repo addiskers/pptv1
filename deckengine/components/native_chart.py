@@ -23,6 +23,7 @@ from pptx.util import Emu, Pt
 
 from ..core.bbox import BBox
 from ..core.fit_text import Span, fit_text
+from ..core.semantic_roles import rag_map
 from ..core.pptx_shapes import add_hline, add_shape
 from ..core.pptx_text import (add_text_box, make_text_frame,
                               write_fit_result, write_spans_paragraph)
@@ -253,11 +254,17 @@ class NativeChart(Component):
 
         plot_names = ([series[0][0], series[0][0] + " (forecast)"]
                       if forecast else [nm for nm, _ in series])
+        # semantic colour by series NAME (red=stress/green=healthy) — only
+        # when >=2 names match >=2 distinct buckets; explicit highlight wins
+        series_rag = (rag_map([nm for nm, _ in series])
+                      if len(series) > 1 and highlight_ser is None else None)
         for si, plot_series in enumerate(chart.series):
             nm = plot_names[si] if si < len(plot_names) else ""
             base_nm = nm.replace(" (forecast)", "")
             if highlight_ser is not None:
                 role = "accent" if base_nm == highlight_ser else _MUTE_ROLE
+            elif series_rag and base_nm in series_rag:
+                role = series_rag[base_nm]
             else:
                 role = _SERIES_ROLES[si % len(_SERIES_ROLES)]
             hexc = RGBColor.from_string(theme.color(role))
@@ -295,6 +302,20 @@ class NativeChart(Component):
                 pts[i].format.fill.fore_color.rgb = RGBColor.from_string(
                     theme.color(role))
             return
+        if data.chart_type == "bar":
+            # category RAG: labels like 'Overdrawn'/'Moderate'/'Healthy'
+            # colour by MEANING (>=2 labels across >=2 buckets; the
+            # explicit highlight keeps its accent point)
+            cat_rag = rag_map(list(cats))
+            if cat_rag:
+                for i, cat in enumerate(cats):
+                    role = "accent" if i == hi_idx else cat_rag.get(cat)
+                    if role is None:
+                        continue
+                    pts[i].format.fill.solid()
+                    pts[i].format.fill.fore_color.rgb = RGBColor.from_string(
+                        theme.color(role))
+                return
         if data.chart_type in ("bar", "donut") and hi_idx >= 0:
             pts[hi_idx].format.fill.solid()
             pts[hi_idx].format.fill.fore_color.rgb = RGBColor.from_string(
@@ -361,6 +382,11 @@ class NativeChart(Component):
             lo, hi = self._axis_bounds(data)
             va.minimum_scale = lo
             va.maximum_scale = hi
+        elif data.chart_type in ("bar", "stacked_bar") and all(
+                v >= 0 for s in data.series for v in s.values):
+            # truncated bar axes lie about magnitude: pin zero explicitly
+            # so no viewer 'optimises' the scale
+            va.minimum_scale = 0.0
         ca = chart.category_axis
         ca.format.line.color.rgb = RGBColor.from_string(theme.color("grid"))
         ca.tick_labels.font.size = Pt(max(6.0, theme.size_micro))

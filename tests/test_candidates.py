@@ -5,12 +5,19 @@ from deckengine.llm import spec_generator as sg
 from deckengine.schema.slide_types import BulletContentSpec
 
 
+_BULLET_A = ("Six corridors hold **58%** [[src:recon]] of national volume, "
+             "and the top three alone clear more units each month than the "
+             "rest of the country combined; corridor demand has doubled "
+             "since the price reset, dealer throughput per outlet runs "
+             "**2x** the non-corridor average, and inventory turns clear in "
+             "under nine days with waiting lists across eight districts.")
+
+
 def slide_a() -> dict:
     return BulletContentSpec(
         title="Metros drive 58% [[src:recon]] of demand at accessible "
               "price points",
-        bullets=[{"text": "Six corridors hold **58%** [[src:recon]] of "
-                          "national volume"}],
+        bullets=[{"text": _BULLET_A}],
     ).model_dump()
 
 
@@ -18,10 +25,10 @@ def slide_b() -> dict:
     return BulletContentSpec(
         title="Metros drive 58% [[src:recon]] of demand at accessible "
               "price points",
-        bullets=[{"text": "Six corridors hold **58%** [[src:recon]] of "
-                          "national volume"},
+        bullets=[{"text": _BULLET_A},
                  {"text": "Corridor payback runs under **14 months** "
-                          "[[src:est]]"}],
+                          "[[src:est]], against 20 [[src:est]] or more "
+                          "everywhere else in the network."}],
     ).model_dump()
 
 

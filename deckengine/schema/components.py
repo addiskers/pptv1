@@ -54,6 +54,9 @@ class SectionHeaderSpec(BaseModel):
     kind: Literal["section_header"] = "section_header"
     # caps must be >= every slide-level title/subtitle cap (assemblers feed
     # slide fields straight into this component)
+    # small-caps eyebrow line above the title (constant within a deck
+    # section; flows from the outline, never invented per slide)
+    kicker: PlainStr | None = Field(default=None, max_length=40)
     title: RichStr = Field(max_length=300)
     subtitle: RichStr | None = Field(default=None, max_length=500)
     rule: bool = True

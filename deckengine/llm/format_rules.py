@@ -334,6 +334,8 @@ _VARIANT_HINTS = (
     "mutes the rest to gray",
     "- 'bridge/walk from X to Y': chart_type='waterfall' (signed steps, "
     "opening + closing totals)",
+    "- charts embed in custom_layout (evidence pair, chart+drivers): "
+    "style.compact",
 )
 
 
@@ -365,6 +367,33 @@ def check_outline_formats(outline,
             f"slide {i + 1} ({s.slide_type}): the claim asserts "
             f"{rule.when} — suggest {rule.then}")
     return out
+
+
+_CHART_CAPABLE = frozenset({"chart_slide", "custom_layout", "data_deep_dive",
+                            "kpi_dashboard"})
+_DENSITY_FLOOR = 0.6
+
+
+def check_outline_chart_density(outline) -> list[str]:
+    """Elite decks chart their data (winner: 23 native charts in 21 slides;
+    ours had 5 in 24). Suggest when under 60% of data-bearing body slides
+    can even carry a chart."""
+    body = [s for s in outline.slides
+            if s.slide_type not in TITLE_EXEMPT
+            and s.slide_type != "exec_summary"]
+    if len(body) < 3:
+        return []
+    visual = [s for s in body if s.slide_type in _CHART_CAPABLE]
+    ratio = len(visual) / len(body)
+    if ratio >= _DENSITY_FLOOR:
+        return []
+    return [
+        f"only {len(visual)} of {len(body)} body slides can carry a chart "
+        f"({ratio:.0%}): chart at least 60% of data-bearing slides — convert "
+        "number-citing bullet/framework slides to chart_slide or a "
+        "chart-embedding custom_layout (evidence pair / chart + drivers); "
+        "satisfy visual variety by rotating the chart's HOME, never by "
+        "dropping the chart"]
 
 
 # -- lint: objective data-shape violations on a built slide -------------------
@@ -448,6 +477,16 @@ def check_slide_format(slide, facts: FactTable | None = None) -> list[str]:
     problems: list[str] = []
     for c in charts:
         problems.extend(_chart_problems(c, slide.title))
+    # every chart needs visible provenance: chart.source or a source footnote
+    if charts:
+        foot = (getattr(slide, "footnote", None) or "").lower()
+        has_src = ("source" in foot or "[[src:" in foot
+                   or any((c.get("source") or "").strip() for c in charts))
+        if not has_src:
+            problems.append(
+                "chart has no visible provenance: set chart.source to "
+                "'Source: <best-known source, year> [[src:official]]' (or "
+                "recon/est to match), or end the footnote with one")
     return problems
 
 

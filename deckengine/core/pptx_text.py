@@ -118,10 +118,14 @@ def _write_spans(p, spans: list[Span], base_size: float, theme: Theme,
         f.name = span.font or family
         f.color.rgb = RGBColor.from_string(
             theme.color(span.color_role or default_color_role))
-        if span.superscript or span.highlight_role:
+        if span.superscript or span.highlight_role or span.caps or span.spc_pts:
             rpr = r._r.get_or_add_rPr()
             if span.superscript:
                 # baseline in thousandths of a percent (30% raise)
                 rpr.set("baseline", "30000")
+            if span.caps:
+                rpr.set("cap", "all")   # attribute — no child-order hazard
+            if span.spc_pts:
+                rpr.set("spc", str(int(span.spc_pts * 100)))  # 1/100 pt
             if span.highlight_role:
                 _set_highlight(rpr, theme.color(span.highlight_role))
