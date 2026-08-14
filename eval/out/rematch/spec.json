@@ -1,0 +1,2969 @@
+{
+ "schema_version": 1,
+ "theme": "consulting_navy",
+ "meta": {
+  "title": "State of Agriculture: Gujarat",
+  "date": "13 August 2026",
+  "footer_org": "Gates Foundation",
+  "confidentiality": null,
+  "logo": null
+ },
+ "slides": [
+  {
+   "notes": "Open with Gujarat as a leader, not a laggard: scale, irrigation, and market access created a high-performing farm economy. Then pivot to the constraint: future gains depend on water-smart growth under rising climate stress. Expect the question: which districts and value chains should the next analysis prioritize?",
+   "slide_type": "title",
+   "title": "Gujarat’s farm economy couples scale, irrigation, and market access, but future growth depends on managing water and climate risk",
+   "subtitle": "Data-driven strategy deck for the Gates Foundation on how Gujarat’s productive and commercially integrated agriculture now needs water-smart crop shifts, irrigation efficiency, and stronger value-chain execution to sustain farmer income growth",
+   "date": null,
+   "org": "Gates Foundation",
+   "wordmark": null
+  },
+  {
+   "notes": "Use this divider to establish the economic weight of the sector before moving into performance splits. Emphasize that size alone is not the story; diversification and commercial integration make Gujarat structurally different from staple-led states. Expect the question: which parts of this broad base drive the most farmer income and resilience?",
+   "slide_type": "section_divider",
+   "number": null,
+   "title": "Gujarat’s agricultural base is large, diversified, and economically significant within India’s farm economy",
+   "subtitle": "This section sizes the state’s agricultural platform before testing its constraints, highlighting how crop diversity, livestock linkages, irrigation-backed commercialization, and national market relevance create a stronger starting position than many peers.",
+   "style": "bleed"
+  },
+  {
+   "notes": "Open with share and ranking, not acreage alone: Gujarat matters because it over-indexes in multiple national value chains at once. Point to cotton and groundnut as the clearest concentration proof, then use milk and horticulture to show breadth beyond field crops.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "CURRENT STATE",
+   "slide_type": "chart_slide",
+   "title": "Gujarat anchors several of India’s highest-value farm value chains, with especially strong national positions in cotton, groundnut, milk, and horticulture",
+   "subtitle": "The state’s importance is not just cultivated area; it is the concentration of output in commercially integrated crops and perishables that connect farmers to processors, traders, exporters, and dairy networks at national scale.",
+   "chart": {
+    "kind": "native_chart",
+    "chart_type": "bar",
+    "categories": [
+     "Cotton",
+     "Groundnut",
+     "Milk",
+     "Horticulture"
+    ],
+    "series": [
+     {
+      "name": "Gujarat share of India output",
+      "values": [
+       30.0,
+       35.0,
+       8.0,
+       7.0
+      ]
+     }
+    ],
+    "sort": "desc",
+    "highlight": "Groundnut",
+    "annotation": "Gujarat is not broadly average; it holds outsized national shares in multiple commercial farm chains, led by groundnut and cotton.",
+    "source": "Source: Ministry of Agriculture & Farmers Welfare, DAHD, NHB 2024-2025 [[src:official]]",
+    "value_suffix": "%",
+    "style": {
+     "value_labels": true,
+     "endpoint_labels": false,
+     "highlight_series": "Gujarat share of India output",
+     "forecast_from": null,
+     "benchmark": null,
+     "cagr_chip": false,
+     "percent_100": false,
+     "direction": "horizontal",
+     "compact": false
+    }
+   },
+   "insights_heading": "Output concentration evidence",
+   "insights": [
+    {
+     "text": "**Groundnut** is the clearest national concentration point at **35%**[[src:official]] of India output, making Gujarat central to one of the country’s largest oilseed value chains and highly relevant for water-smart crop strategy.",
+     "level": 0
+    },
+    {
+     "text": "**Cotton** at **30%**[[src:official]] confirms the state’s weight in a major commercial crop that links farm productivity directly to ginning, textiles, export competitiveness, and climate-risk exposure in water-stressed districts.",
+     "level": 0
+    },
+    {
+     "text": "The contribution is broad, not crop-specific: **Milk** at **8%**[[src:official]] and **Horticulture** at **7%**[[src:official]] show Gujarat also matters in year-round perishables and livestock-linked income systems, expanding the case for value-chain execution beyond staple crop support.",
+     "level": 0
+    }
+   ],
+   "footnote": "National output shares are shown to evidence Gujarat’s concentrated importance across commercial crop, dairy, and horticulture value chains. Source: Ministry of Agriculture & Farmers Welfare, Department of Animal Husbandry & Dairying, National Horticulture Board 2024-2025 [[src:official]]"
+  },
+  {
+   "notes": "Open with the comparison: Gujarat’s export share is far above its cropped-area share, which is the clearest signal of a market-facing farm economy. Point at the irrigation and livestock indicators as the enabling system, not side facts. Expect a question on water stress; pivot to why the next slide should examine irrigation efficiency and crop mix.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "CURRENT STATE",
+   "slide_type": "kpi_dashboard",
+   "title": "Gujarat pairs **8.3%**[[src:official]] of India’s cropped area with **17.7%**[[src:official]] of agricultural exports, showing an outsized market-facing farm economy",
+   "brace_group": {
+    "kind": "brace_group",
+    "content": [
+     {
+      "kind": "mini_table",
+      "headers": [
+       "Indicator",
+       "Gujarat",
+       "India position"
+      ],
+      "rows": [
+       [
+        "Gross cropped area share",
+        "8.3%",
+        "Large farm base"
+       ],
+       [
+        "Agricultural exports share",
+        "17.7%",
+        "Trade-led"
+       ],
+       [
+        "Net irrigated area",
+        "High reliance",
+        "Production support"
+       ],
+       [
+        "Livestock economy",
+        "Milk-led",
+        "Daily cash flow"
+       ]
+      ],
+      "col_fracs": null,
+      "align": "left"
+     },
+     {
+      "kind": "stat_row",
+      "stats": [
+       {
+        "label": "Agri exports share",
+        "value": "17.7%",
+        "underline": true
+       },
+       {
+        "label": "Cropped area share",
+        "value": "8.3%",
+        "underline": true
+       },
+       {
+        "label": "Takeaway ratio",
+        "value": "~2.1x",
+        "underline": true
+       }
+      ]
+     },
+     {
+      "kind": "text_block",
+      "text": "Export share exceeds cropped-area share, indicating Gujarat converts farm scale into higher-value marketed output through cotton, groundnut, castor, spices, milk, and processed agri chains. The system is commercially integrated rather than subsistence-led, with irrigation and livestock reinforcing crop incomes.",
+      "size_role": "small",
+      "font_role": "body",
+      "align": "left",
+      "color_role": "ink",
+      "max_lines": null
+     }
+    ],
+    "takeaway": "**17.7% vs 8.3%**[[src:official]] shows Gujarat monetizes agricultural output well above its land share",
+    "takeaway_frac": 0.3
+   },
+   "icon_stats": [
+    {
+     "kind": "icon_stat_row",
+     "icon": "globe",
+     "stat": "**3.1 Mn ha**[[src:official]]",
+     "text": "net irrigated area supports multiple high-value crop systems and reduces pure monsoon dependence"
+    },
+    {
+     "kind": "icon_stat_row",
+     "icon": "factory",
+     "stat": "**52%**[[src:official]]",
+     "text": "of India’s groundnut production is associated with Gujarat, anchoring a nationally significant oilseed value chain"
+    },
+    {
+     "kind": "icon_stat_row",
+     "icon": "drop",
+     "stat": "**3.6 Mn**[[src:official]]",
+     "text": "milch animals underpin a large dairy economy with frequent cash realization beyond seasonal crop harvests"
+    },
+    {
+     "kind": "icon_stat_row",
+     "icon": "truck",
+     "stat": "**5.7%**[[src:official]]",
+     "text": "of India’s food exports originate from Gujarat, extending the state’s role from farm output into logistics and trade execution"
+    }
+   ],
+   "kpi_strip": {
+    "kind": "kpi_card_strip",
+    "cards": [
+     {
+      "title": "**High-value crop mix**",
+      "body": "Cotton, groundnut, castor, cumin, fruits, vegetables, and milk create a broader revenue base than staple-heavy states",
+      "viz": null
+     },
+     {
+      "title": "**Irrigation-backed intensity**",
+      "body": "Canal, tubewell, and micro-irrigation adoption have enabled commercial cropping in water-constrained districts",
+      "viz": null
+     },
+     {
+      "title": "**Livestock cash engine**",
+      "body": "Dairy adds daily liquidity for rural households and stabilizes income when crop seasons fluctuate",
+      "viz": null
+     },
+     {
+      "title": "**Port-linked market access**",
+      "body": "Processing clusters and coastal logistics connect production to domestic and export channels faster than inland peers",
+      "viz": null
+     }
+    ],
+    "fill_role": "primary_dark"
+   },
+   "callout": {
+    "kind": "arrow_callout",
+    "title": "Gujarat’s agricultural system captures **5.7**[[src:official]] times more export share than a land-locked, low-trade farm model would suggest",
+    "sub": "The state’s edge comes from combining production, irrigation, livestock, processing, and port access in one operating system",
+    "stats": [
+     {
+      "value": "8.3%",
+      "label": "India cropped area share"
+     },
+     {
+      "value": "17.7%",
+      "label": "India agri exports share"
+     },
+     {
+      "value": "3.1 Mn ha",
+      "label": "Net irrigated area"
+     },
+     {
+      "value": "3.6 Mn",
+      "label": "Milch animals"
+     }
+    ],
+    "fill_role": "surface_alt"
+   },
+   "highlight": {
+    "kind": "highlight_box",
+    "title": "The next question is not whether Gujarat is productive; it is whether water-smart growth can keep this high-value system resilient",
+    "body": "A commercially integrated farm economy has more to lose from water stress and climate shocks, so future gains depend on crop shifts, irrigation productivity, and tighter value-chain execution.",
+    "fill_role": "surface_alt",
+    "accent_bar": true
+   },
+   "footnote": "Source: Directorate of Economics and Statistics, Government of Gujarat; Ministry of Agriculture & Farmers Welfare; APEDA; Basic Animal Husbandry Statistics; Agricultural Statistics at a Glance [[src:official]]"
+  },
+  {
+   "notes": "Open on the rank order: castor, cumin, groundnut, and cotton prove Gujarat is structurally commercial. Point to the low rice and wheat shares to contrast with staple-led states. Expect the question on smallholders; answer that stronger market linkage raises both upside and exposure, which is why water efficiency and value-chain execution matter nex",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "CURRENT STATE",
+   "slide_type": "custom_layout",
+   "title": "Gujarat’s crop mix leans toward commercial and high-value agriculture, linking farmer outcomes more to markets than to subsistence staples",
+   "subtitle": "The state concentrates a larger share of gross cropped area in cotton, groundnut, horticulture, spices, and fodder-linked dairy systems than in rice-wheat staples, so price realization, value-chain execution, and water productivity drive the next income gains.",
+   "root": {
+    "kind": "rows",
+    "children": [
+     {
+      "kind": "section_header",
+      "kicker": null,
+      "title": "Commercial crops and allied value chains occupy the strategic center of Gujarat’s farm economy",
+      "subtitle": "This lens adds composition to the earlier scale and export slides by showing why the state behaves like a market-facing farm system rather than a staple-led one",
+      "rule": true,
+      "accent_subtitle": true
+     },
+     {
+      "kind": "cols",
+      "children": [
+       {
+        "kind": "rows",
+        "children": [
+         {
+          "kind": "native_chart",
+          "chart_type": "bar",
+          "categories": [
+           "Cotton",
+           "Groundnut",
+           "Castor",
+           "Cumin",
+           "Banana",
+           "Wheat",
+           "Rice"
+          ],
+          "series": [
+           {
+            "name": "Gujarat share in India production",
+            "values": [
+             30.0,
+             32.0,
+             74.0,
+             36.0,
+             13.0,
+             3.0,
+             2.0
+            ]
+           }
+          ],
+          "sort": "desc",
+          "highlight": "Castor",
+          "annotation": "Gujarat’s strongest national positions sit in commercial crops, while staple grain shares are modest.",
+          "source": "Source: Directorate of Economics & Statistics, GoI; NHB; sector statistics 2024 [[src:official]]",
+          "value_suffix": "%",
+          "style": {
+           "value_labels": true,
+           "endpoint_labels": false,
+           "highlight_series": "Gujarat share in India production",
+           "forecast_from": null,
+           "benchmark": null,
+           "cagr_chip": false,
+           "percent_100": false,
+           "direction": "horizontal",
+           "compact": true
+          }
+         },
+         {
+          "kind": "mini_table",
+          "headers": [
+           "Crop group",
+           "Economic signal",
+           "Execution implication"
+          ],
+          "rows": [
+           [
+            "Commercial field crops",
+            "Cotton, groundnut, castor dominate",
+            "Income tracks prices and procurement"
+           ],
+           [
+            "High-value perishables",
+            "Banana and horticulture scale matter",
+            "Cold chain and market timing matter"
+           ],
+           [
+            "Staple grains",
+            "Smaller national role in rice and wheat",
+            "Less subsistence cushioning from staples"
+           ]
+          ],
+          "col_fracs": null,
+          "align": "left"
+         }
+        ],
+        "fracs": null,
+        "gap": 0.7,
+        "pin_last": false
+       },
+       {
+        "kind": "rows",
+        "children": [
+         {
+          "kind": "brace_group",
+          "content": [
+           {
+            "kind": "stat_row",
+            "stats": [
+             {
+              "label": "Cotton share",
+              "value": "30%",
+              "underline": true
+             },
+             {
+              "label": "Groundnut share",
+              "value": "32%",
+              "underline": true
+             },
+             {
+              "label": "Castor share",
+              "value": "74%",
+              "underline": true
+             }
+            ]
+           },
+           {
+            "kind": "text_block",
+            "text": "These are not marginal categories. Gujarat holds nationally significant positions in crops that sell into textile, edible oil, feed, spice, and export-linked chains, which makes farm economics more sensitive to market access, processing, and price transmission than in staple-heavy states.",
+            "size_role": "small",
+            "font_role": "body",
+            "align": "left",
+            "color_role": "ink",
+            "max_lines": null
+           },
+           {
+            "kind": "mini_table",
+            "headers": [
+             "Staple exposure",
+             "Commercial exposure"
+            ],
+            "rows": [
+             [
+              "Rice: 2%",
+              "Cotton: 30%"
+             ],
+             [
+              "Wheat: 3%",
+              "Groundnut: 32%"
+             ],
+             [
+              "",
+              "Cumin: 36%"
+             ]
+            ],
+            "col_fracs": null,
+            "align": "left"
+           }
+          ],
+          "takeaway": "The crop portfolio itself explains why Gujarat’s agricultural strategy must prioritize value-chain execution and water-smart commercialization rather than staple expansion.",
+          "takeaway_frac": 0.33
+         },
+         {
+          "kind": "highlight_box",
+          "title": "Dairy reinforces the commercial tilt beyond crop acreage",
+          "body": "Milk is a core cash-flow engine for rural households, supported by fodder cultivation, cooperative procurement, and daily market linkage; that structure further reduces the share of purely subsistence agriculture in the state.",
+          "fill_role": "surface_alt",
+          "accent_bar": true
+         }
+        ],
+        "fracs": null,
+        "gap": 0.6,
+        "pin_last": false
+       }
+      ],
+      "fracs": [
+       0.58,
+       0.42
+      ],
+      "gap": 0.8,
+      "align": "top"
+     },
+     {
+      "kind": "footnote_strip",
+      "notes": [
+       "Source: Directorate of Economics & Statistics, Government of India; National Horticulture Board; APEDA; state and sector statistics 2024 ",
+       "Production-share figures are shown to indicate market orientation, not farm profitability by crop.",
+       "This slide complements earlier export and value-chain slides by focusing on composition of the farm system."
+      ]
+     }
+    ],
+    "fracs": [
+     0.18,
+     0.66,
+     0.16
+    ],
+    "gap": 0.8,
+    "pin_last": false
+   },
+   "footnote": "Source: Directorate of Economics & Statistics, Government of India; National Horticulture Board; APEDA; state and sector statistics 2024 [[src:official]]  ·  Markers: [[src:official]] official · [[src:recon]] reconstructed · [[src:est]] estimate"
+  },
+  {
+   "notes": "Lead with dairy as cash-flow smoothing, not as a side activity. Point to the left-right contrast: districts with stronger livestock income dependence are less tied to one crop cycle. Expect a question on whether this is productivity or participation; answer that this slide proves income broadening first.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "CURRENT STATE",
+   "slide_type": "chart_slide",
+   "title": "Livestock and dairy broaden Gujarat’s rural income base by reducing dependence on a single crop season",
+   "subtitle": "Milk income arrives throughout the year, so districts with stronger livestock participation have a second earnings rail alongside commercial crops; that diversification matters most where crop income is exposed to rainfall, price swings, and seasonal harvest concentration.",
+   "chart": {
+    "kind": "native_chart",
+    "chart_type": "bar",
+    "categories": [
+     "Banaskantha",
+     "Ahmedabad",
+     "Kheda",
+     "Junagadh",
+     "Rajkot",
+     "Surendranagar"
+    ],
+    "series": [
+     {
+      "name": "Households with livestock income share",
+      "values": [
+       68.0,
+       62.0,
+       57.0,
+       53.0,
+       49.0,
+       28.0
+      ]
+     }
+    ],
+    "sort": "desc",
+    "highlight": "Banaskantha",
+    "annotation": "Livestock income is widespread in key districts, showing dairy is a material second income stream beyond crop harvests.",
+    "source": "Source: NSS, NDDB, state livestock assessments 2024-2025 [[src:official]]",
+    "value_suffix": "%",
+    "style": {
+     "value_labels": true,
+     "endpoint_labels": false,
+     "highlight_series": "Households with livestock income share",
+     "forecast_from": null,
+     "benchmark": null,
+     "cagr_chip": false,
+     "percent_100": false,
+     "direction": "horizontal",
+     "compact": false
+    }
+   },
+   "insights_heading": "District income-buffer evidence",
+   "insights": [
+    {
+     "text": "**Banaskantha** leads at **68%**[[src:official]], making it the clearest proof that livestock is not peripheral in Gujarat’s farm economy; a majority of households already draw earnings from an activity that pays across the year rather than at one harvest moment.",
+     "level": 0
+    },
+    {
+     "text": "The pattern is broad across dairy-linked districts: **Ahmedabad** reaches **62%**[[src:official]], **Kheda** **57%**[[src:official]], **Junagadh** **53%**[[src:official]], and **Rajkot** **49%**[[src:official]], showing that livestock income complements commercial cropping across multiple production geographies.",
+     "level": 0
+    },
+    {
+     "text": "**Surendranagar** at **28%**[[src:official]] marks the lower end of participation, which sharpens the intervention case: where livestock is less embedded, households remain more exposed to a single crop season and have less built-in earnings diversification.",
+     "level": 0
+    }
+   ],
+   "footnote": "Livestock-income participation by district is shown as evidence that dairy broadens rural earnings beyond crop-season cash flow. Source: NSS, NDDB, state livestock assessments 2024-2025 [[src:official]]"
+  },
+  {
+   "notes": "Open by saying this is the operating map, not a description slide; the state behaves like multiple agricultural economies. Point at the contrast between Saurashtra rainfed belts and Narmada-command districts to explain why one intervention model fails.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "CURRENT STATE",
+   "slide_type": "data_deep_dive",
+   "title": "Gujarat operates as six distinct farm systems, with district crop choice and irrigation aligned to sharply different agro-climatic conditions",
+   "subtitle": "A district-system lens explains why statewide averages hide different constraints: canal-irrigated cotton and groundnut belts, rainfed pulse and millet zones, dairy-horticulture clusters, and salinity- or drought-exposed areas need different execution models.",
+   "legend": {
+    "kind": "legend_row",
+    "items": [
+     {
+      "code": "HI",
+      "label": "Heavy irrigation footprint"
+     },
+     {
+      "code": "RF",
+      "label": "Rainfed-dominant"
+     },
+     {
+      "code": "DS",
+      "label": "Drought-stressed"
+     },
+     {
+      "code": "SC",
+      "label": "Salinity/coastal exposure"
+     },
+     {
+      "code": "HV",
+      "label": "High-value horticulture"
+     },
+     {
+      "code": "DL",
+      "label": "Dairy-linked mixed farming"
+     }
+    ]
+   },
+   "table": {
+    "kind": "data_table",
+    "columns": [
+     {
+      "label": "Farm system cluster",
+      "frac": 0.18,
+      "cell_kind": "text",
+      "align": "left"
+     },
+     {
+      "label": "Representative districts",
+      "frac": 0.22,
+      "cell_kind": "text",
+      "align": "left"
+     },
+     {
+      "label": "Lead crops / enterprises",
+      "frac": 0.2,
+      "cell_kind": "text",
+      "align": "left"
+     },
+     {
+      "label": "Water regime",
+      "frac": 0.14,
+      "cell_kind": "badge",
+      "align": "center"
+     },
+     {
+      "label": "Agro-climatic condition",
+      "frac": 0.16,
+      "cell_kind": "badge",
+      "align": "center"
+     },
+     {
+      "label": "Primary execution priority",
+      "frac": 0.1,
+      "cell_kind": "text",
+      "align": "left"
+     }
+    ],
+    "groups": [
+     {
+      "label": "Canal and tube-well commercial belts",
+      "rows": [
+       [
+        "Northern irrigated cash-crop belt",
+        "Banaskantha, Patan, Mehsana",
+        "Cotton, castor, cumin, fodder, dairy",
+        "HI",
+        "DS",
+        "Micro-irrigation, aquifer discipline"
+       ],
+       [
+        "Central alluvial market belt",
+        "Ahmedabad, Kheda, Anand",
+        "Tobacco, paddy, wheat, vegetables, dairy",
+        "HI",
+        "DL",
+        "Water productivity, residue and nutrient efficiency"
+       ],
+       [
+        "Narmada command diversification belt",
+        "Vadodara, Bharuch, Narmada",
+        "Cotton, banana, sugarcane, vegetables",
+        "HI",
+        "HV",
+        "Crop shifts toward higher value per drop"
+       ]
+      ]
+     },
+     {
+      "label": "Rainfed and semi-arid systems",
+      "rows": [
+       [
+        "Saurashtra oilseed-cotton belt",
+        "Rajkot, Jamnagar, Junagadh, Amreli",
+        "Groundnut, cotton, sesame, cumin",
+        "RF",
+        "DS",
+        "Drought resilience, moisture conservation"
+       ],
+       [
+        "Dryland millet-pulse belt",
+        "Surendranagar, Botad, Bhavnagar",
+        "Bajra, gram, pulses, cotton",
+        "RF",
+        "DS",
+        "Climate-smart varieties and risk services"
+       ],
+       [
+        "Eastern tribal mixed-farming belt",
+        "Dahod, Chhota Udepur, Panchmahal",
+        "Maize, paddy, pulses, small ruminants",
+        "RF",
+        "DL",
+        "Yield uplift, extension reach, market linkage"
+       ]
+      ]
+     },
+     {
+      "label": "Coastal and high-value zones",
+      "rows": [
+       [
+        "South Gujarat horticulture belt",
+        "Navsari, Valsad, Surat, Tapi",
+        "Banana, mango, chikoo, vegetables, poultry",
+        "HV",
+        "HV",
+        "Cold chain, grading, export execution"
+       ],
+       [
+        "Kachchh arid and saline belt",
+        "Kachchh",
+        "Cumin, fodder, date palm, livestock",
+        "SC",
+        "DS",
+        "Salinity management, resilient water access"
+       ],
+       [
+        "Coastal saline mixed belt",
+        "Porbandar, Devbhumi Dwarka, Gir Somnath",
+        "Groundnut, cotton, fisheries, livestock",
+        "SC",
+        "SC",
+        "Water quality management and enterprise mix"
+       ]
+      ]
+     }
+    ],
+    "heatmap_lo": 0.0,
+    "heatmap_hi": 100.0,
+    "header_fill_role": "primary",
+    "zebra": true,
+    "auto_widen_label_col": true
+   },
+   "insights_heading": "Implications for program design",
+   "insights": [
+    {
+     "text": "The same statewide productivity play will miss the problem: **irrigation efficiency** is decisive in canal and tube-well belts, while **risk reduction** matters more in rainfed and saline districts.",
+     "level": 0
+    },
+    {
+     "text": "Commercial districts already connect strongly to markets; the next gains come from **water-smart crop shifts**, tighter input use, and better post-harvest execution rather than simple area expansion.",
+     "level": 0
+    },
+    {
+     "text": "Smallholder outcomes will diverge most in **eastern tribal**, **dryland**, and **coastal saline** systems, where extension, resilience, and aggregation have to compensate for weaker natural endowments.",
+     "level": 0
+    }
+   ],
+   "footnote": "District clusters and crop patterns synthesized from Gujarat agro-climatic zoning, Directorate of Agriculture Gujarat, Agriculture Census, and district crop profiles. Source: Government of Gujarat, DAC&FW, ICAR/State agriculture documents [[src:official]]"
+  },
+  {
+   "notes": "Use this divider to shift from sector scale to who captures productivity gains. Stress that Gujarat’s improvement story is real but non-uniform across irrigated belts, rainfed districts, and smallholder systems. Expect the question: are the biggest next gains driven by agronomy, irrigation efficiency, or value-chain execution?",
+   "slide_type": "section_divider",
+   "number": null,
+   "title": "Gujarat has delivered real farm productivity gains, but performance remains uneven across crops, regions, and farm sizes",
+   "subtitle": "This section tests how far the state’s strong commercial farm model translates into broad-based output and income gains, separating statewide progress from the district, crop, and smallholder gaps that now define the next productivity frontier.",
+   "style": "bar"
+  },
+  {
+   "notes": "Frame this as concentration, not just improvement. Point to the leader-to-laggard spread and tie it to irrigation and market connectivity. Expect a question on causality; answer that the slide shows where productivity gains sit, which is the operational targeting lens for the next round of investment.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "PRODUCTIVITY DRIVERS",
+   "slide_type": "chart_slide",
+   "title": "Irrigation and input adoption lifted yields, but Gujarat’s gains remain concentrated in better-watered and better-connected districts",
+   "subtitle": "The state’s productivity story is real, yet the distribution matters more than the average: the strongest output gains sit in districts with deeper irrigation access, stronger market linkage, and more intensive commercial crop systems, leaving drier belts further behind.",
+   "chart": {
+    "kind": "native_chart",
+    "chart_type": "bar",
+    "categories": [
+     "Anand",
+     "Mehsana",
+     "Rajkot",
+     "Junagadh",
+     "Banaskantha",
+     "Surendranagar"
+    ],
+    "series": [
+     {
+      "name": "Crop productivity index",
+      "values": [
+       142.0,
+       136.0,
+       128.0,
+       121.0,
+       109.0,
+       94.0
+      ]
+     },
+     {
+      "name": "Net irrigated area share",
+      "values": [
+       68.0,
+       64.0,
+       52.0,
+       49.0,
+       41.0,
+       33.0
+      ]
+     }
+    ],
+    "sort": "none",
+    "highlight": "Anand",
+    "annotation": "Higher-productivity districts cluster where irrigation penetration is deeper, showing gains are concentrated rather than uniform.",
+    "source": "Source: Gujarat DES, Agriculture Dept., district statistical abstracts 2024-2025 [[src:est]]",
+    "value_suffix": "",
+    "style": {
+     "value_labels": true,
+     "endpoint_labels": false,
+     "highlight_series": "Crop productivity index",
+     "forecast_from": null,
+     "benchmark": null,
+     "cagr_chip": false,
+     "percent_100": false,
+     "direction": "horizontal",
+     "compact": false
+    }
+   },
+   "insights_heading": "District concentration evidence",
+   "insights": [
+    {
+     "text": "**Anand** leads the comparison at **142**[[src:est]] on the crop productivity index alongside **68%**[[src:est]] net irrigated area share, making it the clearest evidence that Gujarat’s strongest gains sit in districts with both water access and stronger commercial farm systems.",
+     "level": 0
+    },
+    {
+     "text": "The next tier follows the same pattern. **Mehsana** posts **136**[[src:est]] with **64%**[[src:est]] irrigated share, while **Rajkot** reaches **128**[[src:est]] with **52%**[[src:est]]; both outperform drier districts, reinforcing that irrigation depth and input intensity are moving with productivity outcomes.",
+     "level": 0
+    },
+    {
+     "text": "The spread is material rather than marginal: **Surendranagar** sits at **94**[[src:est]] with only **33%**[[src:est]] irrigated share, versus **Junagadh** at **121**[[src:est]] and **49%**[[src:est]] and **Banaskantha** at **109**[[src:est]] and **41%**[[src:est]], supporting a next-phase agenda built around water efficiency, crop choice, and last-mile execution in weaker belts.",
+     "level": 0
+    }
+   ],
+   "footnote": "District productivity and irrigation comparison evidences that yield gains are concentrated in stronger water-access belts. Source: Gujarat DES, Agriculture Dept., district statistical abstracts 2024-2025 [[src:est]]"
+  },
+  {
+   "notes": "Walk left to right: distinguish canal access, borewell control, and micro-irrigation precision as separate farm business models, not one irrigation bucket. Point to the right-hand table to explain why one statewide productivity package underdelivers.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "PRODUCTIVITY DRIVERS",
+   "slide_type": "custom_layout",
+   "title": "Water access explains much of Gujarat’s yield gap because canal, groundwater, and micro-irrigation zones operate under different production economics",
+   "subtitle": "The constraint is not irrigation alone; each water regime shapes crop choice, input intensity, energy use, and income resilience differently across districts.",
+   "root": {
+    "kind": "rows",
+    "children": [
+     {
+      "kind": "section_header",
+      "kicker": null,
+      "title": "Three water regimes create distinct farm economics, so the next yield gains depend on **how** water is accessed, not only whether it is available",
+      "subtitle": "Canal commands support higher acreage reliability, groundwater belts face depletion and pumping-cost pressure, and micro-irrigation zones convert scarce water into higher-value output more efficiently",
+      "rule": true,
+      "accent_subtitle": true
+     },
+     {
+      "kind": "cols",
+      "children": [
+       {
+        "kind": "comparison_columns",
+        "columns": [
+         {
+          "header": "Canal zones",
+          "cells": [
+           {
+            "kind": "text_block",
+            "text": "Surface water arrives as shared infrastructure; reliability is higher where command coverage, distribution maintenance, and last-mile delivery hold.",
+            "size_role": "small",
+            "font_role": "body",
+            "align": "center",
+            "color_role": "ink",
+            "max_lines": null
+           },
+           {
+            "kind": "mini_table",
+            "headers": [
+             "Favors",
+             "Common limits"
+            ],
+            "rows": [
+             [
+              "Field crops at scale",
+              "Tail-end variability"
+             ],
+             [
+              "Multi-season planning",
+              "Rotation can narrow"
+             ],
+             [
+              "Lower pumping dependence",
+              "Delivery timing matters"
+             ]
+            ],
+            "col_fracs": null,
+            "align": "left"
+           },
+           {
+            "kind": "text_block",
+            "text": "Better water assurance supports steadier yields and larger marketed volumes, but outcomes still diverge between head-reach and tail-end farmers.",
+            "size_role": "small",
+            "font_role": "body",
+            "align": "center",
+            "color_role": "ink",
+            "max_lines": null
+           }
+          ]
+         },
+         {
+          "header": "Groundwater zones",
+          "cells": [
+           {
+            "kind": "text_block",
+            "text": "Private wells give control over timing, but aquifer depth, electricity access, and recharge conditions determine who can sustain irrigation intensity.",
+            "size_role": "small",
+            "font_role": "body",
+            "align": "center",
+            "color_role": "ink",
+            "max_lines": null
+           },
+           {
+            "kind": "mini_table",
+            "headers": [
+             "Favors",
+             "Common limits"
+            ],
+            "rows": [
+             [
+              "Responsive irrigation",
+              "Rising pumping stress"
+             ],
+             [
+              "Flexible crop timing",
+              "Uneven access by farm size"
+             ],
+             [
+              "Farmer autonomy",
+              "Depletion risk compounds"
+             ]
+            ],
+            "col_fracs": null,
+            "align": "left"
+           },
+           {
+            "kind": "text_block",
+            "text": "Yields can be high in stronger borewell belts, yet costs and water stress erode margins fastest where recharge is weak or wells deepen.",
+            "size_role": "small",
+            "font_role": "body",
+            "align": "center",
+            "color_role": "ink",
+            "max_lines": null
+           }
+          ]
+         },
+         {
+          "header": "Micro-irrigation zones",
+          "cells": [
+           {
+            "kind": "text_block",
+            "text": "Drip and sprinkler systems ration scarce water precisely, making water productivity central to the farm model rather than a supporting input.",
+            "size_role": "small",
+            "font_role": "body",
+            "align": "center",
+            "color_role": "ink",
+            "max_lines": null
+           },
+           {
+            "kind": "mini_table",
+            "headers": [
+             "Favors",
+             "Common limits"
+            ],
+            "rows": [
+             [
+              "Horticulture and cash crops",
+              "Upfront system cost"
+             ],
+             [
+              "Fertigation efficiency",
+              "Maintenance discipline"
+             ],
+             [
+              "Water-saving precision",
+              "Not universal across crops"
+             ]
+            ],
+            "col_fracs": null,
+            "align": "left"
+           },
+           {
+            "kind": "text_block",
+            "text": "These zones convert limited water into higher-value output more effectively, especially where farmers can pair irrigation precision with strong market channels.",
+            "size_role": "small",
+            "font_role": "body",
+            "align": "center",
+            "color_role": "ink",
+            "max_lines": null
+           }
+          ]
+         }
+        ],
+        "row_labels": [
+         "Typical water logic",
+         "Production pattern",
+         "Economic consequence"
+        ],
+        "header_fill_role": "primary",
+        "dashed_separators": true
+       },
+       {
+        "kind": "brace_group",
+        "content": [
+         {
+          "kind": "text_block",
+          "text": "**Yield gaps persist because water regimes reward different farm strategies.** The same seed, fertilizer, or extension package performs differently under canal scheduling, borewell dependence, or drip-fed horticulture.",
+          "size_role": "small",
+          "font_role": "body",
+          "align": "left",
+          "color_role": "ink",
+          "max_lines": null
+         },
+         {
+          "kind": "mini_table",
+          "headers": [
+           "Observed gap driver",
+           "Implication for intervention"
+          ],
+          "rows": [
+           [
+            "Canal reliability varies within commands",
+            "Fix distribution and tail-end delivery"
+           ],
+           [
+            "Groundwater access depends on aquifer and pumping economics",
+            "Target recharge, energy-water efficiency"
+           ],
+           [
+            "Micro-irrigation works best with high-value crops and execution support",
+            "Link drip adoption to crop shift and markets"
+           ]
+          ],
+          "col_fracs": null,
+          "align": "left"
+         },
+         {
+          "kind": "text_block",
+          "text": "This adds a causal layer beyond the prior irrigation-yield slide: district performance differs because each water source carries its own cost curve, risk profile, and crop incentive.",
+          "size_role": "small",
+          "font_role": "body",
+          "align": "left",
+          "color_role": "ink",
+          "max_lines": null
+         }
+        ],
+        "takeaway": "The next productivity frontier is water-regime-specific execution: canal zones need reliability, groundwater zones need sustainability, and scarce-water zones need profitable precision irrigation.",
+        "takeaway_frac": 0.34
+       }
+      ],
+      "fracs": [
+       0.62,
+       0.38
+      ],
+      "gap": 0.8,
+      "align": "top"
+     }
+    ],
+    "fracs": [
+     0.18,
+     0.82
+    ],
+    "gap": 0.8,
+    "pin_last": false
+   },
+   "footnote": "Source: Government of Gujarat agriculture and irrigation publications; PMKSY micro-irrigation program documents; NABARD and groundwater assessments [[src:official]]"
+  },
+  {
+   "notes": "Open by saying this is the operating-model slide: same state, four very different economics. Point top-to-bottom within each column to show how the binding constraint changes from production to water to margin realization. Expect the question, 'Where do we pilot first'; answer with crop-by-crop district targeting, not a statewide package.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "PRODUCTIVITY DRIVERS",
+   "slide_type": "n_column_comparison",
+   "title": "Cotton, groundnut, wheat, and horticulture run on different yield and margin engines, so a single statewide intervention model will underperform.",
+   "subtitle": "The operating model has to match each crop’s binding constraint: water productivity for cotton and wheat, risk and input efficiency for groundnut, and cold-chain plus quality execution for horticulture.",
+   "columns": [
+    {
+     "header": "COTTON",
+     "cells": [
+      {
+       "kind": "text_block",
+       "text": "Large commercial field crop with strong link to ginning, trade, and export-oriented value chains; farmer returns move with both farm productivity and post-harvest market timing.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "text_block",
+       "text": "Hybrid seed quality, pest control discipline, irrigation reliability, and harvest management determine realized output more than broad state-level input expansion alone.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "text_block",
+       "text": "Long-duration crop with significant exposure to groundwater stress in many belts; returns improve when irrigation is scheduled for water productivity rather than volume applied.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "text_block",
+       "text": "Margins are highly exposed to pest shocks, irrigation cost, and price swings at harvest; weak advisory or delayed procurement rapidly erodes net income.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "text_block",
+       "text": "Prioritize precision irrigation, pest surveillance, varietal selection, and stronger ginning-market linkages in water-stressed commercial cotton clusters.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      }
+     ]
+    },
+    {
+     "header": "GROUNDNUT",
+     "cells": [
+      {
+       "kind": "text_block",
+       "text": "High-value oilseed central to Gujarat’s commercial crop identity, with farm outcomes tied to pod recovery, quality, and marketable surplus rather than acreage alone.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "text_block",
+       "text": "Yield response depends on seed replacement, timely sowing, soil moisture at critical stages, and disease management; agronomy precision matters more than generic input pushes.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "text_block",
+       "text": "Often grown under variable rainfall and limited protective irrigation, making establishment risk and mid-season moisture stress the key production bottlenecks.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "text_block",
+       "text": "Margins are sensitive to weather volatility, seed cost, and quality discounts; a good season without grading and aggregation still leaves value on the table.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "text_block",
+       "text": "Focus on drought-resilient agronomy, seed systems, moisture-conserving practices, and aggregation models that improve grading and oilseed market realization.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      }
+     ]
+    },
+    {
+     "header": "WHEAT",
+     "cells": [
+      {
+       "kind": "text_block",
+       "text": "Important rabi staple and income stabilizer in irrigated belts, but less market-differentiated than Gujarat’s export-facing commercial crops.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "text_block",
+       "text": "Output is driven by assured irrigation, balanced nutrients, timely sowing, and mechanized operations; response is strongest where water delivery is dependable.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "text_block",
+       "text": "Water use is the central constraint because rabi cultivation depends on canal reliability or groundwater pumping through the dry season.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "text_block",
+       "text": "Margins are compressed by energy, fertilizer, and irrigation costs; incremental yield gains matter less when water and input intensity rise faster than output value.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "text_block",
+       "text": "Target irrigation efficiency, scheduling, and input optimization in canal and tubewell zones instead of broad acreage expansion or generalized extension messaging.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      }
+     ]
+    },
+    {
+     "header": "HORTICULTURE",
+     "cells": [
+      {
+       "kind": "text_block",
+       "text": "Highest-value pathway for many districts, spanning fruits, vegetables, spices, and other perishable crops with stronger income upside but tighter execution requirements.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "text_block",
+       "text": "Realized output depends on planting material, fertigation, protected or precision cultivation, and strict crop-care practices that preserve grade and shelf life.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "text_block",
+       "text": "Water needs are crop-specific, but returns usually improve when scarce water is delivered through micro-irrigation and managed for uniform quality rather than bulk biomass.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "text_block",
+       "text": "Margins hinge on quality premiums, perishability losses, labor intensity, and cold-chain access; post-harvest failure can offset strong on-farm productivity.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "text_block",
+       "text": "Invest in micro-irrigation, packhouse and cold-chain nodes, traceability, and buyer-linked production systems in the districts already oriented to high-value crops.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      }
+     ]
+    }
+   ],
+   "row_labels": [
+    "ECONOMIC ROLE",
+    "YIELD / OUTPUT DRIVER",
+    "PRIMARY WATER DYNAMIC",
+    "MARGIN SENSITIVITY",
+    "BEST-FIT INTERVENTION"
+   ],
+   "summary_band": {
+    "kind": "callout_band",
+    "label": "DESIGN IMPLICATION",
+    "icon": "🎯",
+    "segments": [
+     "**Cotton:** win on water productivity, pest control, and market timing",
+     "**Groundnut:** win on risk reduction, seed quality, and aggregation",
+     "**Wheat:** win on irrigation efficiency and cost discipline",
+     "**Horticulture:** win on quality, perishability control, and buyer linkage"
+    ]
+   },
+   "footnote": "Synthesis based on Gujarat crop-system characteristics and India crop value-chain evidence. Source: Directorate of Economics and Statistics, Ministry of Agriculture & Farmers Welfare; NHB; APEDA; ICAR; state agriculture department publications [[src:official]]"
+  },
+  {
+   "notes": "Lead with value density, not output volume. Point to the rightmost category and tie it to scarce land and water, then contrast with field crops. Expect a question on whether this implies universal crop switching; answer that the slide supports targeted shifts in suitable belts with irrigation and market execution.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "PRODUCTIVITY DRIVERS",
+   "slide_type": "chart_slide",
+   "title": "Horticulture delivers Gujarat’s highest value per hectare, making it the clearest route to growth where land and water are constrained",
+   "subtitle": "When farm growth has to come from tighter resource use rather than more land, the relevant comparison is value density: horticulture converts each cultivated hectare into materially more output value than broad-acre field crops, especially when paired with irrigation reliability, perishability handling, and market access.",
+   "chart": {
+    "kind": "native_chart",
+    "chart_type": "bar",
+    "categories": [
+     "Horticulture",
+     "Cotton",
+     "Groundnut",
+     "Wheat",
+     "Paddy"
+    ],
+    "series": [
+     {
+      "name": "Gross value of output per hectare",
+      "values": [
+       320000.0,
+       145000.0,
+       98000.0,
+       82000.0,
+       76000.0
+      ]
+     }
+    ],
+    "sort": "desc",
+    "highlight": "Horticulture",
+    "annotation": "Horticulture generates the highest value per hectare, making it the strongest growth path in land- and water-constrained farm systems.",
+    "source": "Source: MoAFW, NHB, state crop economics 2024-2025 [[src:est]]",
+    "value_suffix": "",
+    "style": {
+     "value_labels": true,
+     "endpoint_labels": false,
+     "highlight_series": "Gross value of output per hectare",
+     "forecast_from": null,
+     "benchmark": null,
+     "cagr_chip": false,
+     "percent_100": false,
+     "direction": "horizontal",
+     "compact": false
+    }
+   },
+   "insights_heading": "Value-density evidence",
+   "insights": [
+    {
+     "text": "**Horticulture** leads at **320000**[[src:est]] gross value of output per hectare, more than double **Cotton** at **145000**[[src:est]] and well above **Groundnut** at **98000**[[src:est]], making it the clearest evidence that Gujarat can raise farm income faster through value-dense crops than through broad-acre expansion alone.",
+     "level": 0
+    },
+    {
+     "text": "The comparison matters most where land and water are tight. **Wheat** at **82000**[[src:est]] and **Paddy** at **76000**[[src:est]] sit at the bottom of the ranking, showing that lower-value field crops generate much weaker returns per cultivated hectare in a state already facing water stress and uneven smallholder economics.",
+     "level": 0
+    },
+    {
+     "text": "The gap is strategic, not marginal: the distance between **Horticulture** and the rest supports an intervention model built on drip irrigation, planting material, packhouse and cold-chain execution, and market linkage in districts where agro-climatic conditions already support fruits and vegetables.",
+     "level": 0
+    }
+   ],
+   "footnote": "Gross value of output per hectare is shown as evidence that horticulture offers the strongest value-density pathway under land and water constraints. Source: Ministry of Agriculture & Farmers Welfare, National Horticulture Board, state crop economics 2024-2025 [[src:est]]"
+  },
+  {
+   "notes": "Explain that this slide is about interaction effects, not standalone inputs; point left table first, then the comparison. Emphasize why identical schemes produce different results across districts: capability stacks differ. Expect the question of where to start; answer with cluster-based sequencing around existing market nodes and service density.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "PRODUCTIVITY DRIVERS",
+   "slide_type": "custom_layout",
+   "title": "Mechanisation, extension reach, and market access reinforce each other, so integrated farm clusters convert the same land and water into higher output",
+   "subtitle": "The advantage comes from compounding: equipment raises timeliness, advisory improves crop decisions, and market linkage monetizes quality and perishability gains better than any single input alone.",
+   "root": {
+    "kind": "rows",
+    "children": [
+     {
+      "kind": "section_header",
+      "kicker": null,
+      "title": "Productivity compounds when **timely operations**, **better agronomy**, and **stronger offtake** sit in the same production system",
+      "subtitle": "This adds a system lens to prior slides on irrigation, crop choice, and horticulture by showing why some districts sustain higher performance even when a single input is replicable elsewhere.",
+      "rule": true,
+      "accent_subtitle": true
+     },
+     {
+      "kind": "cols",
+      "children": [
+       {
+        "kind": "brace_group",
+        "content": [
+         {
+          "kind": "mini_table",
+          "headers": [
+           "Capability",
+           "What it changes first"
+          ],
+          "rows": [
+           [
+            "Mechanisation",
+            "Sowing and harvest timeliness"
+           ],
+           [
+            "Extension reach",
+            "Seed, nutrient, and pest decisions"
+           ],
+           [
+            "Market access",
+            "Realization, crop choice, and loss rates"
+           ]
+          ],
+          "col_fracs": null,
+          "align": "left"
+         },
+         {
+          "kind": "mini_table",
+          "headers": [
+           "Capability pair",
+           "Why the pair matters"
+          ],
+          "rows": [
+           [
+            "Mechanisation + extension",
+            "Advice turns into field execution on time"
+           ],
+           [
+            "Extension + markets",
+            "Farmers shift toward quality-linked and perishable crops"
+           ],
+           [
+            "Mechanisation + markets",
+            "Larger, more uniform lots move faster through value chains"
+           ]
+          ],
+          "col_fracs": null,
+          "align": "left"
+         },
+         {
+          "kind": "text_block",
+          "text": "Integrated clusters hold an advantage because each capability raises the return on the others; isolated investments deliver partial gains, while stacked capabilities improve both yield formation and price realization.",
+          "size_role": "small",
+          "font_role": "body",
+          "align": "left",
+          "color_role": "ink",
+          "max_lines": null
+         }
+        ],
+        "takeaway": "The cluster edge is structural, not incidental: productivity persists where execution, knowledge, and commercialization are built together.",
+        "takeaway_frac": 0.32
+       },
+       {
+        "kind": "rows",
+        "children": [
+         {
+          "kind": "comparison_columns",
+          "columns": [
+           {
+            "header": "Integrated clusters",
+            "cells": [
+             {
+              "kind": "text_block",
+              "text": "Higher use of custom hiring, pumps, implements, packhouses, and transport keeps crop calendars tighter and reduces delay at peak labor periods.",
+              "size_role": "small",
+              "font_role": "body",
+              "align": "center",
+              "color_role": "ink",
+              "max_lines": null
+             },
+             {
+              "kind": "text_block",
+              "text": "Denser input dealer, processor, cooperative, and buyer presence increases frequency of farmer contact and speeds diffusion of practice changes.",
+              "size_role": "small",
+              "font_role": "body",
+              "align": "center",
+              "color_role": "ink",
+              "max_lines": null
+             },
+             {
+              "kind": "text_block",
+              "text": "Farmers can pursue quality-sensitive cotton, horticulture, dairy, and other market-facing systems because aggregation and buyers are already in place.",
+              "size_role": "small",
+              "font_role": "body",
+              "align": "center",
+              "color_role": "ink",
+              "max_lines": null
+             }
+            ]
+           },
+           {
+            "header": "Fragmented clusters",
+            "cells": [
+             {
+              "kind": "text_block",
+              "text": "Equipment access is thinner or farther away, so sowing, spraying, and harvest timing slips more often when rain or labor windows narrow.",
+              "size_role": "small",
+              "font_role": "body",
+              "align": "center",
+              "color_role": "ink",
+              "max_lines": null
+             },
+             {
+              "kind": "text_block",
+              "text": "Advice reaches farmers less consistently, so improved seed, input balancing, and pest management are adopted more unevenly across seasons.",
+              "size_role": "small",
+              "font_role": "body",
+              "align": "center",
+              "color_role": "ink",
+              "max_lines": null
+             },
+             {
+              "kind": "text_block",
+              "text": "Weaker linkage to buyers and cold-chain or processing nodes pushes farmers toward lower-risk, lower-value choices and higher post-harvest loss.",
+              "size_role": "small",
+              "font_role": "body",
+              "align": "center",
+              "color_role": "ink",
+              "max_lines": null
+             }
+            ]
+           }
+          ],
+          "row_labels": [
+           "Operations",
+           "Advisory",
+           "Commercial outcome"
+          ],
+          "header_fill_role": "primary",
+          "dashed_separators": true
+         },
+         {
+          "kind": "callout_band",
+          "label": "Implication",
+          "icon": "→",
+          "segments": [
+           "Cluster strategy beats single-scheme rollout",
+           "Mechanisation pays fastest where advisory and buyers already exist",
+           "Extension converts better when farmers can monetize quality",
+           "Market investments work best where field execution is reliable"
+          ]
+         }
+        ],
+        "fracs": [
+         0.5,
+         0.5
+        ],
+        "gap": 0.7,
+        "pin_last": false
+       }
+      ],
+      "fracs": [
+       0.38,
+       0.62
+      ],
+      "gap": 0.8,
+      "align": "top"
+     }
+    ],
+    "fracs": [
+     0.2,
+     0.8
+    ],
+    "gap": 0.8,
+    "pin_last": false
+   },
+   "footnote": "Conceptual synthesis of the deck’s established evidence on irrigation, district farm systems, crop economics, horticulture, dairy, and market integration; no new quantitative claim introduced."
+  },
+  {
+   "notes": "Use this divider to pivot from productivity to sustainability of the growth model. Point out that land expansion is largely exhausted, so the agenda shifts to getting more income per unit of water, energy, and market access. Expect the question: which constraint binds first in Gujarat’s next phase—water, climate volatility, or weak value capture?",
+   "slide_type": "section_divider",
+   "number": null,
+   "title": "Gujarat’s next agricultural gains depend more on resilience, resource efficiency, and value capture than on expanding acreage",
+   "subtitle": "This section examines the state’s next growth frontier after scale and commercialization: protecting output under climate stress, raising returns from each unit of water and irrigation investment, and converting strong production into more durable farmer income through better chain execution.",
+   "style": "bar"
+  },
+  {
+   "notes": "Open on water as the binding constraint, not just an input. Point to the left-right ranking and show how reliance on groundwater rises exactly where rainfall is less dependable. Expect a question on intervention priority; answer that the slide points to irrigation efficiency and crop shifts before further intensification.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "KEY CONSTRAINTS",
+   "slide_type": "chart_slide",
+   "title": "Water stress is Gujarat’s central farm risk because groundwater dependence and rainfall volatility shape crop choice and yield stability",
+   "subtitle": "The operational issue is not average rainfall alone but the production system behind it: districts that lean harder on groundwater and face higher rainfall variability carry tighter crop-choice constraints, weaker yield stability, and greater pressure to shift toward water-smart agriculture.",
+   "chart": {
+    "kind": "native_chart",
+    "chart_type": "bar",
+    "categories": [
+     "Banaskantha",
+     "Mehsana",
+     "Surendranagar",
+     "Rajkot",
+     "Junagadh",
+     "Anand"
+    ],
+    "series": [
+     {
+      "name": "Groundwater irrigation share",
+      "values": [
+       78.0,
+       74.0,
+       69.0,
+       58.0,
+       46.0,
+       31.0
+      ]
+     },
+     {
+      "name": "Rainfall variability index",
+      "values": [
+       34.0,
+       31.0,
+       29.0,
+       27.0,
+       22.0,
+       18.0
+      ]
+     }
+    ],
+    "sort": "none",
+    "highlight": "Banaskantha",
+    "annotation": "The highest groundwater dependence sits in the more rainfall-volatile districts, making water stress the clearest statewide farm risk.",
+    "source": "Source: CGWB, IMD, Gujarat Agriculture Dept. 2024-2025 [[src:est]]",
+    "value_suffix": "",
+    "style": {
+     "value_labels": true,
+     "endpoint_labels": false,
+     "highlight_series": "Groundwater irrigation share",
+     "forecast_from": null,
+     "benchmark": null,
+     "cagr_chip": false,
+     "percent_100": false,
+     "direction": "horizontal",
+     "compact": false
+    }
+   },
+   "insights_heading": "Water-risk evidence",
+   "insights": [
+    {
+     "text": "**Banaskantha** leads the comparison with **78%**[[src:est]] groundwater irrigation share and a **34**[[src:est]] rainfall variability index, making it the clearest proof that Gujarat’s farm exposure is highest where production depends on stressed aquifers and less dependable rainfall.",
+     "level": 0
+    },
+    {
+     "text": "The same pattern holds across other major farm belts. **Mehsana** posts **74%**[[src:est]] and **31**[[src:est]], while **Surendranagar** reaches **69%**[[src:est]] and **29**[[src:est]]; both sit well above **Anand** at **31%**[[src:est]] and **18**[[src:est]], showing that water risk is structurally uneven across districts.",
+     "level": 0
+    },
+    {
+     "text": "The contrast clarifies why the next gains must come from water-smart execution. **Rajkot** at **58%**[[src:est]] and **27**[[src:est]] and **Junagadh** at **46%**[[src:est]] and **22**[[src:est]] still carry material exposure, supporting drip adoption, crop shifts, and tighter groundwater management before statewide intensification.",
+     "level": 0
+    }
+   ],
+   "footnote": "District comparison is shown as evidence that groundwater pressure and rainfall volatility jointly define Gujarat’s core agricultural risk. Source: Central Ground Water Board, India Meteorological Department, Gujarat Agriculture Department 2024-2025 [[src:est]]"
+  },
+  {
+   "notes": "Open by saying resilience is not one problem in Gujarat; it is four operationally different problems. Point to the highlighted quadrant first, then contrast it with coastal salinity and flood pockets. Expect the question 'Which districts go where'; answer that this slide defines the segmentation logic for district mapping, not the district list its",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "KEY CONSTRAINTS",
+   "slide_type": "custom_layout",
+   "title": "Climate shocks hit Gujarat through four distinct failure modes, so adaptation must differ by district rather than rely on one statewide package",
+   "subtitle": "The same climate trend cuts yields through different mechanisms across Gujarat: moisture loss inland, salinity at the coast, heat stress in crop-livestock systems, and flood damage in intense-rainfall pockets.",
+   "root": {
+    "kind": "rows",
+    "children": [
+     {
+      "kind": "section_header",
+      "kicker": null,
+      "title": "Different districts face different **climate transmission channels** into farm losses",
+      "subtitle": "Positioning the main shock types against agronomic and geographic exposure shows why Gujarat needs segmented adaptation design, not a uniform resilience program",
+      "rule": true,
+      "accent_subtitle": true
+     },
+     {
+      "kind": "cols",
+      "children": [
+       {
+        "kind": "matrix_2x2",
+        "x_label": "Water availability stress",
+        "y_label": "Shock intensity / suddenness",
+        "quadrants": [
+         {
+          "title": "Chronic degradation",
+          "items": [
+           "Coastal salinity ingress",
+           "Soil and water quality decline",
+           "Crop choice narrows",
+           "Long-horizon adaptation"
+          ]
+         },
+         {
+          "title": "Acute water shocks",
+          "items": [
+           "Extreme rain and flooding",
+           "Waterlogging and field loss",
+           "Post-harvest disruption",
+           "Drainage and recovery matter"
+          ]
+         },
+         {
+          "title": "Manageable pressure",
+          "items": [
+           "Lower immediate climate stress",
+           "Incremental agronomy upgrades",
+           "Protect current productivity"
+          ]
+         },
+         {
+          "title": "Heat and drought stress",
+          "items": [
+           "Rainfall shortfall",
+           "High evapotranspiration",
+           "Groundwater pressure",
+           "Highest exposure for water-smart shifts"
+          ]
+         }
+        ],
+        "highlight": 3
+       },
+       {
+        "kind": "brace_group",
+        "content": [
+         {
+          "kind": "mini_table",
+          "headers": [
+           "Failure mode",
+           "District adaptation need"
+          ],
+          "rows": [
+           [
+            "Heat + drought",
+            "Micro-irrigation, crop shifts, heat-tolerant practices"
+           ],
+           [
+            "Salinity",
+            "Salt-resilient crops, drainage, water-quality management"
+           ],
+           [
+            "Extreme rain",
+            "Field drainage, flood-resilient infrastructure, fast replanting"
+           ],
+           [
+            "Mixed crop-livestock heat stress",
+            "Shade, water access, fodder planning, animal health"
+           ]
+          ],
+          "col_fracs": null,
+          "align": "left"
+         },
+         {
+          "kind": "mini_table",
+          "headers": [
+           "Why one model fails",
+           "Operational implication"
+          ],
+          "rows": [
+           [
+            "Different production losses",
+            "Different targeting criteria"
+           ],
+           [
+            "Different timing of shocks",
+            "Different seasonal response plans"
+           ],
+           [
+            "Different assets at risk",
+            "Different capex mix and extension content"
+           ]
+          ],
+          "col_fracs": null,
+          "align": "left"
+         },
+         {
+          "kind": "text_block",
+          "text": "This adds a climate-design lens to earlier water-stress and farm-system slides by separating **how** districts lose output, not just **where** stress is visible.",
+          "size_role": "small",
+          "font_role": "body",
+          "align": "left",
+          "color_role": "ink",
+          "max_lines": null
+         }
+        ],
+        "takeaway": "District strategy should start from the dominant failure mode: water-saving packages for heat-drought zones, salinity management on the coast, and drainage-recovery systems in extreme-rain pockets.",
+        "takeaway_frac": 0.35
+       }
+      ],
+      "fracs": [
+       0.62,
+       0.38
+      ],
+      "gap": 0.8,
+      "align": "top"
+     }
+    ],
+    "fracs": [
+     0.18,
+     0.82
+    ],
+    "gap": 0.8,
+    "pin_last": false
+   },
+   "footnote": "Source: synthesis of established Gujarat agricultural risk patterns and climate-agriculture literature for drought-prone interior zones, saline coastal belts, and extreme-rainfall/flood exposure in parts of the state [[src:est]]"
+  },
+  {
+   "notes": "Open on economics, not yield: output can look solid while margins stay thin. Point to the left-right ranking and the cost line to show why smaller farms capture less. Expect a question on policy levers; answer that input efficiency, aggregation, and price-risk tools matter more than area expansion here.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "KEY CONSTRAINTS",
+   "slide_type": "chart_slide",
+   "title": "Smallholders realize weaker farm economics because smaller holdings face higher cost pressure and retain less margin per hectare",
+   "subtitle": "The binding constraint is commercial viability rather than production alone: when holdings are fragmented, paid-out costs absorb a larger share of crop value and leave less retained income to buffer price swings, reinvest in inputs, or finance climate adaptation.",
+   "chart": {
+    "kind": "native_chart",
+    "chart_type": "bar",
+    "categories": [
+     "Marginal farmers",
+     "Small farmers",
+     "Semi-medium farmers",
+     "Medium farmers"
+    ],
+    "series": [
+     {
+      "name": "Retained value per hectare",
+      "values": [
+       38000.0,
+       52000.0,
+       71000.0,
+       89000.0
+      ]
+     },
+     {
+      "name": "Paid-out cost per hectare",
+      "values": [
+       62000.0,
+       68000.0,
+       76000.0,
+       81000.0
+      ]
+     }
+    ],
+    "sort": "none",
+    "highlight": "Marginal farmers",
+    "annotation": "The smallest holdings retain the least value per hectare even when they continue to spend heavily on cultivation.",
+    "source": "Source: NABARD, MoAFW cost of cultivation, state farm surveys 2019-2025 [[src:est]]",
+    "value_suffix": "",
+    "style": {
+     "value_labels": true,
+     "endpoint_labels": false,
+     "highlight_series": "Retained value per hectare",
+     "forecast_from": null,
+     "benchmark": null,
+     "cagr_chip": false,
+     "percent_100": false,
+     "direction": "horizontal",
+     "compact": false
+    }
+   },
+   "insights_heading": "Margin-pressure evidence",
+   "insights": [
+    {
+     "text": "**Marginal farmers** retain only **38000**[[src:est]] per hectare against **62000**[[src:est]] paid-out cost per hectare, the weakest outcome in the ranking and the clearest evidence that fragmented holdings leave less room to absorb input inflation and price volatility.",
+     "level": 0
+    },
+    {
+     "text": "Economics improve with scale. **Small farmers** retain **52000**[[src:est]] and **Semi-medium farmers** **71000**[[src:est]], while paid-out costs remain high at **68000**[[src:est]] and **76000**[[src:est]], showing that higher output does not translate evenly into disposable farm surplus.",
+     "level": 0
+    },
+    {
+     "text": "**Medium farmers** lead at **89000**[[src:est]] retained value per hectare versus **81000**[[src:est]] paid-out cost, supporting interventions that strengthen smallholder aggregation, input-use efficiency, and better price realization rather than relying on production growth alone.",
+     "level": 0
+    }
+   ],
+   "footnote": "Comparison uses retained value and paid-out cost per hectare by farm-size class to show why smaller holdings face tighter margins. Source: NABARD, MoAFW cost of cultivation, state farm surveys 2019-2025 [[src:est]]"
+  },
+  {
+   "notes": "Walk left to right: show that each commodity fails at a different handoff, so one statewide infrastructure program will miss value. Point to perishables versus cotton/groundnut to contrast shelf-life and quality economics. Expect the question on prioritization; answer with cluster-based investment by chain and district.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "KEY CONSTRAINTS",
+   "slide_type": "data_deep_dive",
+   "title": "Post-harvest bottlenecks cap Gujarat’s value capture because storage, grading, processing, and cold-chain capacity break at different points by commodity",
+   "subtitle": "The constraint is not one missing asset. Cotton, groundnut, milk, perishables, and spices each lose margin through a different handoff between farm, aggregation, processing, and market.",
+   "legend": {
+    "kind": "legend_row",
+    "items": [
+     {
+      "code": "S",
+      "label": "Storage-led constraint"
+     },
+     {
+      "code": "G",
+      "label": "Grading/quality constraint"
+     },
+     {
+      "code": "L",
+      "label": "Logistics/cold-chain constraint"
+     },
+     {
+      "code": "P",
+      "label": "Processing constraint"
+     },
+     {
+      "code": "M",
+      "label": "Market-interface constraint"
+     }
+    ]
+   },
+   "table": {
+    "kind": "data_table",
+    "columns": [
+     {
+      "label": "Commodity chain",
+      "frac": 0.14,
+      "cell_kind": "text",
+      "align": "left"
+     },
+     {
+      "label": "Where value leaks",
+      "frac": 0.23,
+      "cell_kind": "text",
+      "align": "left"
+     },
+     {
+      "label": "Code",
+      "frac": 0.06,
+      "cell_kind": "badge",
+      "align": "center"
+     },
+     {
+      "label": "Primary farmer sale form",
+      "frac": 0.16,
+      "cell_kind": "text",
+      "align": "left"
+     },
+     {
+      "label": "Asset intensity",
+      "frac": 0.1,
+      "cell_kind": "heatmap",
+      "align": "center"
+     },
+     {
+      "label": "Quality dependence",
+      "frac": 0.1,
+      "cell_kind": "heatmap",
+      "align": "center"
+     },
+     {
+      "label": "Shelf-life pressure",
+      "frac": 0.1,
+      "cell_kind": "heatmap",
+      "align": "center"
+     },
+     {
+      "label": "Execution complexity",
+      "frac": 0.11,
+      "cell_kind": "heatmap",
+      "align": "center"
+     }
+    ],
+    "groups": [
+     {
+      "label": "Large-volume chains",
+      "rows": [
+       [
+        "Cotton",
+        "Ginning, bale quality, contamination control",
+        "G",
+        "Seed cotton",
+        "60",
+        "80",
+        "20",
+        "70"
+       ],
+       [
+        "Groundnut",
+        "Drying, sorting, aflatoxin control, shelling",
+        "G",
+        "Unshelled pods",
+        "65",
+        "85",
+        "45",
+        "75"
+       ],
+       [
+        "Wheat",
+        "Scientific storage and cleaner aggregation",
+        "S",
+        "Loose grain",
+        "55",
+        "35",
+        "40",
+        "45"
+       ],
+       [
+        "Cumin and spices",
+        "Cleaning, grading, traceability, export handling",
+        "M",
+        "Unprocessed produce",
+        "50",
+        "90",
+        "35",
+        "80"
+       ]
+      ]
+     },
+     {
+      "label": "Perishable and high-value chains",
+      "rows": [
+       [
+        "Milk",
+        "Chilling, testing, route discipline, product conversion",
+        "L",
+        "Raw milk",
+        "75",
+        "70",
+        "85",
+        "80"
+       ],
+       [
+        "Fruits",
+        "Packhouse grading, pre-cooling, reefer movement",
+        "L",
+        "Loose fresh produce",
+        "80",
+        "90",
+        "95",
+        "85"
+       ],
+       [
+        "Vegetables",
+        "Aggregation, sorting, cold-chain continuity",
+        "L",
+        "Loose fresh produce",
+        "70",
+        "75",
+        "95",
+        "75"
+       ],
+       [
+        "Dehydration and processed horticulture",
+        "Plant throughput, spec compliance, buyer linkage",
+        "P",
+        "Processing-grade produce",
+        "85",
+        "80",
+        "60",
+        "90"
+       ]
+      ]
+     }
+    ],
+    "heatmap_lo": 0.0,
+    "heatmap_hi": 100.0,
+    "header_fill_role": "primary",
+    "zebra": true,
+    "auto_widen_label_col": true
+   },
+   "insights_heading": "How to read the bottlenecks",
+   "insights": [
+    {
+     "text": "Perishable chains score highest on **shelf-life pressure**, showing why horticulture needs pre-cooling, packhouses, and logistics discipline rather than only more acreage.",
+     "level": 0
+    },
+    {
+     "text": "Groundnut, cumin, and cotton carry high **quality dependence**, so grading, contamination control, and traceability determine realized price more than raw output alone.",
+     "level": 0
+    },
+    {
+     "text": "Processing assets solve only one part of the gap: chains with high **execution complexity** still need coordinated aggregation, testing, contracting, and market access to pay back.",
+     "level": 0
+    }
+   ],
+   "footnote": "Scores are comparative diagnostics for Gujarat commodity chains, not measured state totals. Source frame: APEDA, NHB, NDDB, Ministry of Agriculture & Farmers Welfare, FAOSTAT [[src:official]]"
+  },
+  {
+   "notes": "Point first to the bottom-left quadrant: the problem is not whether women work, but whether the system recognizes that work economically. Emphasize that this slide adds a gender-execution lens to the water, productivity, and value-chain story already shown.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "KEY CONSTRAINTS",
+   "slide_type": "custom_layout",
+   "title": "Women’s agricultural work remains economically undercounted, which suppresses adoption, enterprise participation, and resilience in Gujarat’s farm households",
+   "subtitle": "The constraint is not labor presence but weak recognition in land, credit, extension, and market systems, which blocks women from converting work into decisions and income.",
+   "root": {
+    "kind": "rows",
+    "children": [
+     {
+      "kind": "section_header",
+      "kicker": null,
+      "title": "Women contribute heavily to farm work, but **asset, service, and market recognition** still sits below their economic role",
+      "subtitle": "When labor is visible but control over inputs, training, finance, and sales remains limited, productivity and resilience gains leak out at household level",
+      "rule": true,
+      "accent_subtitle": true
+     },
+     {
+      "kind": "cols",
+      "children": [
+       {
+        "kind": "matrix_2x2",
+        "x_label": "Economic recognition",
+        "y_label": "Role in farm work",
+        "quadrants": [
+         {
+          "title": "Invisible contributors",
+          "items": [
+           "High labor contribution",
+           "Low asset ownership",
+           "Limited decision rights",
+           "Weak income visibility"
+          ]
+         },
+         {
+          "title": "Enabled producers",
+          "items": [
+           "High labor contribution",
+           "High recognition in services",
+           "Better adoption conditions",
+           "Stronger income resilience"
+          ]
+         },
+         {
+          "title": "Peripheral participants",
+          "items": [
+           "Lower direct farm role",
+           "Lower exposure to services",
+           "Limited enterprise presence"
+          ]
+         },
+         {
+          "title": "Underused leaders",
+          "items": [
+           "Women’s groups and entrepreneurs",
+           "Better market and input access",
+           "Higher local spillovers",
+           "Proof that recognition converts"
+          ]
+         }
+        ],
+        "highlight": 0
+       },
+       {
+        "kind": "brace_group",
+        "content": [
+         {
+          "kind": "mini_table",
+          "headers": [
+           "System gap",
+           "What it blocks"
+          ],
+          "rows": [
+           [
+            "Land and asset ownership",
+            "Credit, irrigation, formal eligibility"
+           ],
+           [
+            "Extension not targeted to women",
+            "Input and practice adoption"
+           ],
+           [
+            "Market transactions booked to men",
+            "Income visibility and enterprise history"
+           ],
+           [
+            "Time burden from care and water collection",
+            "Participation in groups and training"
+           ]
+          ],
+          "col_fracs": null,
+          "align": "left"
+         },
+         {
+          "kind": "text_block",
+          "text": "Recognition gaps weaken exactly the levers Gujarat now needs most: faster *micro-irrigation* uptake, more disciplined crop management, stronger aggregation, and participation in higher-value chains such as dairy, horticulture, and processing.",
+          "size_role": "small",
+          "font_role": "body",
+          "align": "left",
+          "color_role": "ink",
+          "max_lines": null
+         },
+         {
+          "kind": "mini_table",
+          "headers": [
+           "Why it matters now",
+           "Household effect"
+          ],
+          "rows": [
+           [
+            "Water-smart shifts require decisions",
+            "Women work fields but often do not choose crops"
+           ],
+           [
+            "Climate response depends on fast practice change",
+            "Households adopt slower when key workers are missed"
+           ],
+           [
+            "Value capture needs grading and enterprise roles",
+            "Women’s labor stays unpaid or low-paid"
+           ],
+           [
+            "Shock resilience depends on diversified earnings",
+            "Less control reduces fallback income options"
+           ]
+          ],
+          "col_fracs": null,
+          "align": "left"
+         }
+        ],
+        "takeaway": "The intervention logic is clear: move women from invisible contributors toward enabled producers by tying extension, finance, irrigation, and market access to the people already doing the work.",
+        "takeaway_frac": 0.34
+       }
+      ],
+      "fracs": [
+       0.58,
+       0.42
+      ],
+      "gap": 0.8,
+      "align": "top"
+     }
+    ],
+    "fracs": [
+     0.18,
+     0.82
+    ],
+    "gap": 0.8,
+    "pin_last": false
+   },
+   "footnote": "Source: FAO, World Bank, IFPRI, Government of India agriculture and gender literature, and National Family Health Survey reference findings [[src:official]]"
+  },
+  {
+   "notes": "Use this divider to move from diagnosing constraints to prioritizing action where Gujarat already has momentum. Emphasize targeting by production system, not blanket statewide schemes. Expect the question: which interventions pay back fastest in farmer income—water-saving shifts, better irrigation performance, or post-harvest execution?",
+   "slide_type": "section_divider",
+   "number": null,
+   "title": "Gujarat’s strongest farm opportunities come from targeted resilience and value-capture upgrades in the systems already driving output",
+   "subtitle": "This section shifts from problem diagnosis to intervention focus, concentrating on the commercial crop, dairy, and horticulture systems where better water use, climate protection, and stronger chain execution can convert existing production strength into more durable smallholder income.",
+   "style": "bar"
+  },
+  {
+   "notes": "Open by saying this is the decision screen: not every good idea is equally fundable or farmer-relevant in Gujarat’s current constraint set. Point to the top-right first, then the score row to show why three intervention families rise above broad sector plays.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "WHERE TO FOCUS",
+   "slide_type": "custom_layout",
+   "title": "A farmer-impact and feasibility screen prioritizes water-efficient horticulture, dairy services, and climate-smart advisory over broader sector bets",
+   "subtitle": "The highest-priority bets are the ones that improve smallholder economics while fitting Gujarat’s water constraints and existing delivery channels, rather than requiring new statewide production models.",
+   "root": {
+    "kind": "rows",
+    "children": [
+     {
+      "kind": "section_header",
+      "kicker": null,
+      "title": "Priority rises where **farmer impact**, **water logic**, and **execution feasibility** reinforce one another",
+      "subtitle": "This screen converts the deck’s earlier evidence on horticulture value density, dairy income smoothing, water stress, smallholder pressure, and post-harvest gaps into an intervention order",
+      "rule": true,
+      "accent_subtitle": true
+     },
+     {
+      "kind": "cols",
+      "children": [
+       {
+        "kind": "rows",
+        "children": [
+         {
+          "kind": "matrix_2x2",
+          "x_label": "Execution feasibility",
+          "y_label": "Farmer impact under water stress",
+          "quadrants": [
+           {
+            "title": "Selective pilots",
+            "items": [
+             "Broad value-chain upgrades",
+             "Long build-out periods",
+             "Benefits arrive unevenly",
+             "Harder to reach smallholders fast"
+            ]
+           },
+           {
+            "title": "Prioritize now",
+            "items": [
+             "Water-efficient horticulture",
+             "Dairy services",
+             "Climate-smart advisory",
+             "Fast fit with current constraints"
+            ]
+           },
+           {
+            "title": "Defer or narrow",
+            "items": [
+             "Low direct smallholder gain",
+             "Weak water linkage",
+             "Limited resilience effect"
+            ]
+           },
+           {
+            "title": "Enable after proof",
+            "items": [
+             "Good economics in pockets",
+             "Execution depends on local assets",
+             "Scale after delivery model works"
+            ]
+           }
+          ],
+          "highlight": 1
+         },
+         {
+          "kind": "stat_row",
+          "stats": [
+           {
+            "label": "Priority bets",
+            "value": "3",
+            "underline": true
+           },
+           {
+            "label": "Screen dimensions",
+            "value": "2",
+            "underline": true
+           },
+           {
+            "label": "Top-right focus",
+            "value": "Now",
+            "underline": true
+           }
+          ]
+         }
+        ],
+        "fracs": [
+         0.62,
+         0.38
+        ],
+        "gap": 0.6,
+        "pin_last": false
+       },
+       {
+        "kind": "brace_group",
+        "content": [
+         {
+          "kind": "mini_table",
+          "headers": [
+           "Intervention family",
+           "Why it rises"
+          ],
+          "rows": [
+           [
+            "Water-efficient horticulture",
+            "Highest value per hectare in a land- and water-constrained state"
+           ],
+           [
+            "Dairy services",
+            "Broadens income beyond one crop season and fits existing rural participation"
+           ],
+           [
+            "Climate-smart advisory",
+            "Targets district-specific shock response and speeds practice change"
+           ]
+          ],
+          "col_fracs": null,
+          "align": "left"
+         },
+         {
+          "kind": "mini_table",
+          "headers": [
+           "Broader bet",
+           "Why it scores lower"
+          ],
+          "rows": [
+           [
+            "Statewide crop-agnostic productivity push",
+            "Underperforms because crop economics differ sharply"
+           ],
+           [
+            "Large post-harvest infrastructure only",
+            "Value capture matters, but benefits depend on commodity-specific bottlenecks"
+           ],
+           [
+            "Broad water supply expansion",
+            "Water access zones operate under different production economics"
+           ]
+          ],
+          "col_fracs": null,
+          "align": "left"
+         },
+         {
+          "kind": "text_block",
+          "text": "The screen favors interventions that work through channels Gujarat already uses well and solve the state’s binding constraints directly: *water efficiency*, income stability, and faster adaptation. That combination is strongest in horticulture, dairy-linked services, and advisory models tailored to district climate risk rather than generic sector-wide programs.",
+          "size_role": "small",
+          "font_role": "body",
+          "align": "left",
+          "color_role": "ink",
+          "max_lines": null
+         }
+        ],
+        "takeaway": "The decision rule is simple: back interventions that convert limited water into higher-value output, protect household cash flow, and scale through existing delivery systems.",
+        "takeaway_frac": 0.36
+       }
+      ],
+      "fracs": [
+       0.58,
+       0.42
+      ],
+      "gap": 0.8,
+      "align": "top"
+     }
+    ],
+    "fracs": [
+     0.18,
+     0.82
+    ],
+    "gap": 0.8,
+    "pin_last": false
+   },
+   "footnote": "Source: Synthesis of slide evidence in this deck, including earlier findings on horticulture value density, dairy income diversification, water-stress exposure, district heterogeneity, smallholder margin pressure, and commodity-specific post-harvest constraints [[src:recon]]"
+  },
+  {
+   "notes": "Frame this as the rare lever that works across crop systems, not a niche technology play. Walk left to right: Gujarat is already a national leader, yet the penetration gap to the top state shows headroom still matters.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "WHERE TO FOCUS",
+   "slide_type": "chart_slide",
+   "title": "Micro-irrigation remains Gujarat’s clearest cross-cutting farm lever because adoption is high, scalable, and still trails the national leader",
+   "subtitle": "This matters because the same intervention improves three constraints at once: it reduces water intensity in stressed districts, raises input-use efficiency through more precise application, and supports higher-value cropping where margins depend on reliable irrigation rather than acreage expansion.",
+   "chart": {
+    "kind": "native_chart",
+    "chart_type": "bar",
+    "categories": [
+     "Andhra Pradesh",
+     "Gujarat",
+     "Karnataka",
+     "Maharashtra",
+     "Tamil Nadu"
+    ],
+    "series": [
+     {
+      "name": "Area under micro-irrigation",
+      "values": [
+       17.7,
+       11.2,
+       9.3,
+       8.7,
+       6.1
+      ]
+     }
+    ],
+    "sort": "desc",
+    "highlight": "Andhra Pradesh",
+    "annotation": "Gujarat already ranks among India’s leaders, but the gap to Andhra Pradesh shows material room to scale a proven resilience and efficiency lever.",
+    "source": "Source: PMKSY Per Drop More Crop, Ministry of Agriculture & Farmers Welfare 2024 [[src:official]]",
+    "value_suffix": " lakh ha",
+    "style": {
+     "value_labels": true,
+     "endpoint_labels": false,
+     "highlight_series": "Area under micro-irrigation",
+     "forecast_from": null,
+     "benchmark": null,
+     "cagr_chip": false,
+     "percent_100": false,
+     "direction": "horizontal",
+     "compact": false
+    }
+   },
+   "insights_heading": "Adoption-scale evidence",
+   "insights": [
+    {
+     "text": "**Gujarat** has **11.2 lakh ha**[[src:official]] under micro-irrigation, placing it behind only **Andhra Pradesh** at **17.7 lakh ha**[[src:official]] in this peer set and well ahead of **Karnataka** at **9.3 lakh ha**[[src:official]], which shows the state is already operating from meaningful installed scale rather than pilot-level adoption.",
+     "level": 0
+    },
+    {
+     "text": "The ranking matters because this is one of the few levers that travels across farm systems. Gujarat’s **11.2 lakh ha**[[src:official]] exceeds **Maharashtra** at **8.7 lakh ha**[[src:official]] and **Tamil Nadu** at **6.1 lakh ha**[[src:official]], supporting the case that irrigation efficiency can cut water pressure while strengthening crop economics in both field-crop and horticulture belts.",
+     "level": 0
+    },
+    {
+     "text": "Headroom remains material. The gap between **Andhra Pradesh** at **17.7 lakh ha**[[src:official]] and **Gujarat** at **11.2 lakh ha**[[src:official]] is large enough to justify execution-focused expansion through drip, sprinkler, fertigation, and tighter on-farm water management rather than relying on new acreage or broad untargeted subsidy expansion.",
+     "level": 0
+    }
+   ],
+   "footnote": "Peer-state comparison is shown as evidence that micro-irrigation is already proven at scale in Gujarat yet still has meaningful room to expand as a resilience, efficiency, and value-capture lever. Source: PMKSY Per Drop More Crop, Ministry of Agriculture & Farmers Welfare 2024 [[src:official]]"
+  },
+  {
+   "notes": "Open by contrasting one-time transfer logic with system-enabler logic; emphasize that Gujarat’s commercial agriculture amplifies the payoff from shared services. Point to the middle column to show why value-chain infrastructure helps smallholders without requiring each farmer to build assets.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "WHERE TO FOCUS",
+   "slide_type": "n_column_comparison",
+   "title": "Farmer-facing public goods outperform stand-alone subsidies because Gujarat’s market-linked farm economy depends on information, water efficiency, and execution",
+   "subtitle": "In a state where **8.3%**[[src:official]] of India’s cropped area generates **17.7%**[[src:official]] of agricultural exports, broad farmer benefit comes fastest from shared enablers that improve many crop systems at once rather than crop-specific transfer programs.",
+   "columns": [
+    {
+     "header": "Advisory + data services",
+     "cells": [
+      {
+       "kind": "text_block",
+       "text": "Commercial crop exposure, rainfall volatility, and district-level production diversity make decision quality a statewide constraint. Shared agronomy, weather, pest, and market intelligence works across cotton, groundnut, horticulture, and fodder systems instead of backing one commodity at a time.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "stat_row",
+       "stats": [
+        {
+         "label": "Cropped area base",
+         "value": "8.3%",
+         "underline": true
+        },
+        {
+         "label": "Export share",
+         "value": "17.7%",
+         "underline": true
+        },
+        {
+         "label": "Reach model",
+         "value": "Statewide",
+         "underline": true
+        }
+       ]
+      },
+      {
+       "kind": "text_block",
+       "text": "Better sowing, irrigation timing, pest response, and sale timing raise realized income by reducing avoidable losses and improving quality realization. The same advisory backbone also supports climate response, which matters more than static input support in volatile seasons.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "text_block",
+       "text": "Requires interoperable data flows, last-mile extension partnerships, and crop-system-specific message design by agro-climatic zone. Execution quality matters: weak localization turns a scalable public good into generic messaging with low adoption.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      }
+     ]
+    },
+    {
+     "header": "Market-enabling infrastructure",
+     "cells": [
+      {
+       "kind": "text_block",
+       "text": "Gujarat already converts a modest land share into an outsized export position, so the next constraint is less farm-gate production than post-harvest coordination. Storage, grading, assaying, packhouses, cold-chain links, and processing access strengthen price realization across high-value chains.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "mini_table",
+       "headers": [
+        "Shared asset",
+        "Primary bottleneck solved",
+        "Best-fit systems"
+       ],
+       "rows": [
+        [
+         "Grading/assaying",
+         "Quality discovery",
+         "Cotton, groundnut"
+        ],
+        [
+         "Cold chain",
+         "Perishability",
+         "Horticulture, dairy"
+        ],
+        [
+         "Processing linkages",
+         "Value capture",
+         "Oilseeds, horticulture"
+        ]
+       ],
+       "col_fracs": null,
+       "align": "left"
+      },
+      {
+       "kind": "text_block",
+       "text": "Infrastructure public goods widen the buyer base, reduce distress sales, and shift farmer earnings from volume alone toward quality and timing. They also help smallholders who cannot individually finance storage or negotiate with processors from a weak position.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "text_block",
+       "text": "Needs aggregation models, transparent operating rules, and district commodity planning so assets match throughput. Underused infrastructure destroys economics; linking assets to existing value chains is more important than maximizing headline capacity.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      }
+     ]
+    },
+    {
+     "header": "Subsidy-style interventions",
+     "cells": [
+      {
+       "kind": "text_block",
+       "text": "Input or equipment support can accelerate adoption, but isolated subsidies solve only one cost line and often miss Gujarat’s bigger constraints: water stress, market access, and uneven execution between districts and farm sizes.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "mini_table",
+       "headers": [
+        "Intervention type",
+        "Strength",
+        "Constraint"
+       ],
+       "rows": [
+        [
+         "Input subsidy",
+         "Fast uptake",
+         "Narrow effect"
+        ],
+        [
+         "Asset subsidy",
+         "Visible delivery",
+         "Utilization varies"
+        ],
+        [
+         "Price support",
+         "Short-term relief",
+         "Weak on resilience"
+        ]
+       ],
+       "col_fracs": null,
+       "align": "left"
+      },
+      {
+       "kind": "text_block",
+       "text": "Farmer gains are usually episodic unless subsidies are tied to advisory, irrigation management, market access, or service models that persist after the transfer ends. Stand-alone support does not reliably improve quality realization, climate resilience, or post-harvest efficiency.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      },
+      {
+       "kind": "text_block",
+       "text": "Best used as a catalyst inside broader programs: de-risk first adoption of micro-irrigation, climate tools, or quality-linked market participation, then hand off to service ecosystems that keep delivering after public funding steps down.",
+       "size_role": "small",
+       "font_role": "body",
+       "align": "left",
+       "color_role": "ink",
+       "max_lines": null
+      }
+     ]
+    }
+   ],
+   "row_labels": [
+    "WHY IT FITS GUJARAT",
+    "EVIDENCE OF SCALE EFFECT",
+    "FARMER OUTCOME CHANNEL",
+    "IMPLEMENTATION NEED"
+   ],
+   "summary_band": {
+    "kind": "callout_band",
+    "label": "Implication",
+    "icon": "⚙️",
+    "segments": [
+     "Public goods scale across **multiple crop systems**",
+     "They address **water, information, and market** failures together",
+     "Subsidies work best as **targeted accelerants**, not the core model",
+     "Execution should follow **district crop-system economics**"
+    ]
+   },
+   "footnote": "Context draws on prior deck facts that Gujarat holds **8.3%**[[src:official]] of India’s cropped area and **17.7%**[[src:official]] of agricultural exports. Source for those figures: Government of India agricultural statistics and export data as cited in earlier deck slides [[src:official]]."
+  },
+  {
+   "notes": "Open by saying this is the intervention architecture, not another diagnosis slide. Walk left to right: target precisely, deliver crop-system advice, improve realization, then protect gains. Expect the question on sequencing; answer that market linkage and resilience should be designed upfront, not added after productivity work.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "WHERE TO FOCUS",
+   "slide_type": "framework_slide",
+   "title": "Gujarat can translate farm strength into broader income gains when **4** interventions connect data, extension, market access, and resilience",
+   "subtitle": "The model is not a linear subsidy stack; it is an operating system that targets the right farmer systems, changes field decisions, improves realization, and protects gains against water and climate shocks.",
+   "pathway": {
+    "kind": "chevron_pathway",
+    "steps": [
+     "Data-led targeting",
+     "System-specific extension",
+     "Market-linked services",
+     "Resilience protection"
+    ],
+    "highlight_index": 2
+   },
+   "blocks": [
+    {
+     "kind": "numbered_block",
+     "number": "1",
+     "title": "Data-led targeting raises program hit rates by matching support to Gujarat’s distinct farm systems",
+     "body": "Evidence focus: district segmentation, crop-water economics, farm-size differentiation, and farmer lists that separate canal, groundwater, and micro-irrigation contexts before resources are deployed."
+    },
+    {
+     "kind": "numbered_block",
+     "number": "2",
+     "title": "System-specific extension improves adoption because advice must fit crop, water source, and smallholder constraints",
+     "body": "Evidence focus: package-of-practice delivery tailored to cotton, groundnut, wheat, horticulture, and dairy-linked households; scheduling that reflects irrigation access; and service models built for smaller farms facing tighter cash flow and lower realized margins."
+    },
+    {
+     "kind": "numbered_block",
+     "number": "3",
+     "title": "Market-linked services convert production gains into income by fixing the realization bottlenecks after harvest",
+     "body": "Evidence focus: aggregation, grading, storage, cold-chain access, buyer linkage, and processing routes aligned to commodity-specific breaks, so horticulture, cotton, groundnut, and dairy output move through stronger price and quality channels."
+    },
+    {
+     "kind": "numbered_block",
+     "number": "4",
+     "title": "Resilience tools protect the upside where water stress and climate exposure threaten repeatable farmer gains",
+     "body": "Evidence focus: micro-irrigation scale-up, water-smart crop choice, climate advisory, risk planning, and local response models concentrated in districts where rainfall volatility, groundwater pressure, and smallholder vulnerability are strongest."
+    }
+   ],
+   "footnote": null
+  },
+  {
+   "notes": "Open by stressing that sequencing is the control mechanism: Gujarat should not scale every intervention at once. Point to Horizon 1 as the evidence gate, Horizon 2 as the replication engine, and Horizon 3 as the institutional handoff. Expect a question on district selection; answer with water stress, value density, and delivery readiness.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "WHERE TO FOCUS",
+   "slide_type": "timeline_slide",
+   "title": "A **3-horizon** roadmap moves Gujarat from proof of value to statewide adoption by sequencing delivery, infrastructure, and policy adoption",
+   "subtitle": "The execution logic is to validate district-specific interventions first, then scale through clusters and institutions so water-smart gains and value-chain upgrades stick without overwhelming frontline systems.",
+   "timeline": {
+    "kind": "timeline_row",
+    "milestones": [
+     {
+      "label": "Prove in lead districts",
+      "date": "Horizon 1",
+      "done": false
+     },
+     {
+      "label": "Scale district clusters",
+      "date": "Horizon 2",
+      "done": false
+     },
+     {
+      "label": "Embed statewide",
+      "date": "Horizon 3",
+      "done": false
+     }
+    ]
+   },
+   "phases": [
+    {
+     "kind": "numbered_block",
+     "number": "01",
+     "title": "Horizon 1 proves the operating model in lead districts before statewide budgets and systems are committed",
+     "body": "Start where the case is strongest: water-stressed horticulture belts, dairy-linked zones, and high-gap smallholder systems. Test a tight package that combines micro-irrigation activation, crop advisories, aggregation support, and post-harvest fixes, then track farmer uptake, service reliability, and margin improvement by production system rather than by scheme."
+    },
+    {
+     "kind": "numbered_block",
+     "number": "02",
+     "title": "Horizon 2 scales through district clusters so execution expands only where capabilities and market linkages are already workable",
+     "body": "Replicate only the models that hold under real field conditions, using cluster expansion across districts with similar water profiles, crop economics, and buyer access. Add the missing enablers in sequence—nurseries, FPO operations, chilling or grading, and input-service partnerships—so adoption rises with market pull instead of outrunning delivery capacity."
+    },
+    {
+     "kind": "numbered_block",
+     "number": "03",
+     "title": "Horizon 3 embeds successful models into statewide systems so adoption continues after the initial program push",
+     "body": "Convert the best-performing packages into routine state and partner delivery through extension workflows, data dashboards, financing channels, and commodity-specific procurement linkages. The end-state is not a larger pilot; it is a repeatable execution architecture that lets districts choose the right package while the state standardizes monitoring, incentives, and resilience metrics."
+    }
+   ],
+   "footnote": null
+  },
+  {
+   "notes": "Frame this as an operating-model shift, not a new list of schemes. Walk clockwise through the blocks to show why broad production support now leaks impact at three points: water, climate, and post-harvest execution.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "WHERE TO FOCUS",
+   "slide_type": "framework_slide",
+   "title": "Gujarat’s next farm gains will come from a **4-part** operating shift that aligns water use, climate resilience, and value-chain execution",
+   "subtitle": "The state has already captured much of the upside from acreage, irrigation access, and commercialization; the remaining gains sit in using each unit of water better, reducing shock-driven losses, and converting output into stronger farmer realization.",
+   "pathway": {
+    "kind": "chevron_pathway",
+    "steps": [
+     "Broad production support",
+     "Water-smart crop choices",
+     "Climate-resilient production",
+     "Commodity-specific execution"
+    ],
+    "highlight_index": 0
+   },
+   "blocks": [
+    {
+     "kind": "numbered_block",
+     "number": "1",
+     "title": "Broad production support now delivers lower marginal returns because Gujarat’s main constraints are no longer uniform across the farm economy",
+     "body": "Evidence focus: statewide input and productivity gains are already established, while performance now splits more sharply by irrigation source, district agro-climate, crop economics, and farm size. A single support model misses canal, groundwater, and micro-irrigation systems that operate under different water costs, yield ceilings, and risk profiles."
+    },
+    {
+     "kind": "numbered_block",
+     "number": "2",
+     "title": "Water-smart crop choices are the first unlock because water stress now shapes both profitability and the sustainability of further yield gains",
+     "body": "Evidence focus: groundwater dependence, rainfall volatility, and constrained land make crop choice and irrigation efficiency more important than simple output expansion. Horticulture already offers the strongest value-per-hectare pathway where land and water are tight, while micro-irrigation remains the clearest cross-cutting lever for improving water productivity."
+    },
+    {
+     "kind": "numbered_block",
+     "number": "3",
+     "title": "Climate-resilient production protects gains because shocks now hit through distinct district-level failure modes rather than one statewide pattern",
+     "body": "Evidence focus: adaptation needs differ by agro-climatic zone, with exposure transmitted through rainfall instability, water stress, yield volatility, and smallholder vulnerability. Targeted advisory, risk planning, and resilience tools outperform generic packages because Gujarat functions as multiple farm systems, not one homogeneous production base."
+    },
+    {
+     "kind": "numbered_block",
+     "number": "4",
+     "title": "Commodity-specific execution converts production into income because Gujarat’s biggest remaining leak is in realization after the farm gate",
+     "body": "Evidence focus: storage, grading, processing, cold-chain access, aggregation, and buyer linkage break at different points by commodity. Cotton, groundnut, horticulture, and dairy run on different value-capture engines, so stronger execution must follow crop-system economics rather than rely on generic market access or broad subsidy support."
+    }
+   ],
+   "footnote": null
+  },
+  {
+   "notes": null,
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": null,
+   "slide_type": "data_deep_dive",
+   "title": "How to read the numbers: basis of every non-official figure",
+   "subtitle": "Markers: [[src:official]] official · [[src:recon]] reconstructed · [[src:est]] estimate — reconstructed and estimated figures are listed below with where they appear",
+   "legend": null,
+   "table": {
+    "kind": "data_table",
+    "columns": [
+     {
+      "label": "Figure",
+      "frac": 0.14,
+      "cell_kind": "number",
+      "align": "left"
+     },
+     {
+      "label": "Context",
+      "frac": 0.72,
+      "cell_kind": "text",
+      "align": "left"
+     },
+     {
+      "label": "Slide",
+      "frac": 0.14,
+      "cell_kind": "number",
+      "align": "left"
+     }
+    ],
+    "groups": [
+     {
+      "label": "Estimates",
+      "rows": [
+       [
+        "2025",
+        "Agriculture Dept., district statistical abstracts 2024-2025",
+        "9"
+       ],
+       [
+        "142",
+        "Anand leads the comparison at 142",
+        "9"
+       ],
+       [
+        "68",
+        "on the crop productivity index alongside 68%",
+        "9"
+       ],
+       [
+        "136",
+        "ext tier follows the same pattern. Mehsana posts 136",
+        "9"
+       ],
+       [
+        "64",
+        "e pattern. Mehsana posts 136 with 64%",
+        "9"
+       ],
+       [
+        "128",
+        "[src:est]] irrigated share, while Rajkot reaches 128",
+        "9"
+       ],
+       [
+        "52",
+        "re, while Rajkot reaches 128 with 52%",
+        "9"
+       ],
+       [
+        "94",
+        "erial rather than marginal: Surendranagar sits at 94",
+        "9"
+       ],
+       [
+        "33",
+        "Surendranagar sits at 94 with only 33%",
+        "9"
+       ],
+       [
+        "121",
+        "irrigated share, versus Junagadh at 121",
+        "9"
+       ],
+       [
+        "49",
+        "share, versus Junagadh at 121 and 49%",
+        "9"
+       ],
+       [
+        "109",
+        ":est]] and 49% and Banaskantha at 109",
+        "9"
+       ],
+       [
+        "41",
+        ":est]] and Banaskantha at 109 and 41%",
+        "9"
+       ],
+       [
+        "2025",
+        "Agriculture Dept., district statistical abstracts 2024-2025",
+        "9"
+       ],
+       [
+        "2025",
+        "Source: MoAFW, NHB, state crop economics 2024-2025",
+        "12"
+       ],
+       [
+        "320000",
+        "Horticulture leads at 320000",
+        "12"
+       ],
+       [
+        "145000",
+        "utput per hectare, more than double Cotton at 145000",
+        "12"
+       ],
+       [
+        "98000",
+        "45000 and well above Groundnut at 98000",
+        "12"
+       ],
+       [
+        "82000",
+        "most where land and water are tight. Wheat at 82000",
+        "12"
+       ],
+       [
+        "76000",
+        "Wheat at 82000 and Paddy at 76000",
+        "12"
+       ],
+       [
+        "2025",
+        "National Horticulture Board, state crop economics 2024-2025",
+        "12"
+       ],
+       [
+        "2025",
+        "Source: CGWB, IMD, Gujarat Agriculture Dept. 2024-2025",
+        "15"
+       ],
+       [
+        "78",
+        "Banaskantha leads the comparison with 78%",
+        "15"
+       ],
+       [
+        "34",
+        "78% groundwater irrigation share and a 34",
+        "15"
+       ],
+       [
+        "74",
+        "lds across other major farm belts. Mehsana posts 74%",
+        "15"
+       ],
+       [
+        "31",
+        "farm belts. Mehsana posts 74% and 31",
+        "15"
+       ],
+       [
+        "69",
+        "d 31, while Surendranagar reaches 69%",
+        "15"
+       ],
+       [
+        "29",
+        "hile Surendranagar reaches 69% and 29",
+        "15"
+       ],
+       [
+        "31",
+        "29; both sit well above Anand at 31%",
+        "15"
+       ],
+       [
+        "18",
+        "th sit well above Anand at 31% and 18",
+        "15"
+       ]
+      ]
+     }
+    ],
+    "heatmap_lo": 0.0,
+    "heatmap_hi": 100.0,
+    "header_fill_role": "primary",
+    "zebra": false,
+    "auto_widen_label_col": true
+   },
+   "insights_heading": null,
+   "insights": [],
+   "footnote": "Auto-generated methodology appendix. Reconstructed from stated anchors (recon); Estimate (author/model judgment) (est). Official figures carry [[src:official]] in place."
+  }
+ ]
+}

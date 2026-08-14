@@ -105,8 +105,12 @@ class ArrowCallout(Component):
         plan = self._plan(data, bbox.w, ctx)
         band_h = plan.band_h
         if band_h > bbox.h:
+            # never paint past the given cell: the evaluated deck's slide-4
+            # band ran over the footer exactly this way
             ctx.report.warn(
-                f"arrow_callout: band height {band_h} exceeds bbox height {bbox.h}")
+                f"arrow_callout: band height {band_h} exceeds bbox height "
+                f"{bbox.h}; clamping")
+            band_h = max(inch(0.5), bbox.h)
         elif ctx.fill_hint and bbox.h > band_h:
             band_h = min(bbox.h, round(band_h * 1.4))
         pad = theme.spacing(0.6)

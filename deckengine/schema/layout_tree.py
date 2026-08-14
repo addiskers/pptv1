@@ -107,6 +107,14 @@ def tree_stats(node) -> tuple[int, int]:
     return 1, 1
 
 
+def _leaf_kinds(node) -> list[str]:
+    if isinstance(node, PanelNode):
+        return _leaf_kinds(node.child)
+    if isinstance(node, (RowsNode, ColsNode)):
+        return [k for c in node.children for k in _leaf_kinds(c)]
+    return [getattr(node, "kind", "")]
+
+
 def check_tree(root) -> list[str]:
     """Whole-tree rails (per-node frac sanity is enforced on the nodes)."""
     problems = []
@@ -120,4 +128,9 @@ def check_tree(root) -> list[str]:
         problems.append(f"tree depth {depth} exceeds {MAX_DEPTH}")
     if leaves > MAX_LEAVES:
         problems.append(f"{leaves} leaves exceed {MAX_LEAVES} — merge cells")
+    if "section_header" in _leaf_kinds(root):
+        problems.append(
+            "custom_layout must not embed section_header — the slide already "
+            "has a title/subtitle; use a text_block with size_role 'h2' for "
+            "an in-body heading")
     return problems

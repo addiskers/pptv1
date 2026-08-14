@@ -174,8 +174,15 @@ def generate_outline(prompt: str, facts: FactTable | None) -> Outline:
     outline = Outline.model_validate(_structured_call("emit_outline", schema, p))
 
     def _problems(o: Outline) -> list[str]:
-        return (check_outline(o) + check_outline_formats(o, facts)
-                + check_outline_chart_density(o))
+        out = (check_outline(o) + check_outline_formats(o, facts)
+               + check_outline_chart_density(o))
+        if not facts and not any(s.slide_type == "exec_summary"
+                                 for s in o.slides):
+            out.append(
+                "a marker-mode deck MUST close with an exec_summary whose "
+                "last two sections are 'What we would want to be challenged "
+                "on' and 'Where we are least confident'")
+        return out
 
     problems = _problems(outline)
     review = REVIEW_PROMPT

@@ -101,7 +101,11 @@ def test_methodology_appendix_lists_non_official():
     appendix = methodology_appendix([_marked_slide()])
     assert appendix is not None
     labels = [g.label for g in appendix.table.groups]
-    assert "Reconstructed figures" in labels and "Estimates" in labels
+    assert "Reconstructed" in labels and "Estimates" in labels
+    assert [c.label for c in appendix.table.columns] == \
+        ["Basis", "Figure", "Context", "Slide"]
+    # rows carry len(columns)-1 cells (col 0 is the merged group column)
+    assert all(len(r) == 3 for g in appendix.table.groups for r in g.rows)
     all_rows = [r for g in appendix.table.groups for r in g.rows]
     assert any(r[0] == "34" for r in all_rows)
     assert any(r[0] == "18" for r in all_rows)

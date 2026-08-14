@@ -168,14 +168,15 @@ def methodology_appendix(slides: list[BaseModel]):
     basis = {"recon": "Reconstructed from stated anchors",
              "est": "Estimate (author/model judgment)"}
     groups = []
-    for tier, label in (("recon", "Reconstructed figures"),
-                        ("est", "Estimates")):
+    for tier, label in (("recon", "Reconstructed"), ("est", "Estimates")):
         rows = [[r["figure"], f"{r['context'][:70]}", str(r["slide"])]
                 for r in marked if r["tier"] == tier][:30]
         if rows:
             groups.append({"label": label, "rows": rows})
     if not groups:
         return None
+    # col 0 is the merged GROUP column in data_table: rows carry exactly
+    # len(columns)-1 cells (figure, context, slide)
     return DataDeepDiveSpec(
         slide_type="data_deep_dive",
         title="How to read the numbers: basis of every non-official figure",
@@ -184,9 +185,10 @@ def methodology_appendix(slides: list[BaseModel]):
         table={
             "kind": "data_table",
             "columns": [
-                {"label": "Figure", "frac": 0.14, "cell_kind": "number"},
-                {"label": "Context", "frac": 0.72},
-                {"label": "Slide", "frac": 0.14, "cell_kind": "number"},
+                {"label": "Basis", "frac": 0.14},
+                {"label": "Figure", "frac": 0.12, "cell_kind": "number"},
+                {"label": "Context", "frac": 0.62},
+                {"label": "Slide", "frac": 0.12, "cell_kind": "number"},
             ],
             "groups": groups,
         },
@@ -259,8 +261,13 @@ def collect_marked_figures(slides: list[BaseModel]) -> list[dict]:
                         num = n.group()
                 if num is None:
                     continue
-                ctx = re.sub(r"\[\[.*?\]\]|\*", "",
-                             before[-60:]).strip()
+                # strip markup from the FULL text first, THEN window — a
+                # window cut through a token leaves "[src:est]]" junk
+                clean = re.sub(r"\s+", " ",
+                               re.sub(r"\[\[.*?\]\]|\*+", " ", before)).strip()
+                ctx = clean[-60:]
+                if len(clean) > 60 and " " in ctx:
+                    ctx = "…" + ctx[ctx.find(" ") + 1:]  # word boundary
                 rows.append({"figure": num, "tier": tier, "slide": idx,
                              "context": ctx})
     return rows
