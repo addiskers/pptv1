@@ -28,11 +28,47 @@ load_env()
 
 app = FastAPI(title="DeckEngine", version="0.1.0")
 
-JOBS_DIR = Path(tempfile.gettempdir()) / "deckengine_jobs"
+# decks are user deliverables: point DECKENGINE_JOBS_DIR at durable storage
+# in production (the default tempdir is fine for local dev only)
+JOBS_DIR = Path(os.environ.get("DECKENGINE_JOBS_DIR")
+                or Path(tempfile.gettempdir()) / "deckengine_jobs")
 _JOBS: dict[str, dict] = {}
 _UI = Path(__file__).with_name("ui.html")
 _LOGIN = Path(__file__).with_name("login.html")
 _REPO = Path(__file__).resolve().parents[2]
+
+
+def _persist(job_id: str) -> None:
+    """Write the job's current state to disk. Jobs are created PERSISTED —
+    a server restart must never vaporize a running job (it happened: a
+    deploy restart killed a 19-minute generation the UI thought was ready)."""
+    job_dir = JOBS_DIR / job_id
+    job_dir.mkdir(parents=True, exist_ok=True)
+    (job_dir / "meta.json").write_text(json.dumps(_JOBS[job_id]),
+                                       encoding="utf-8")
+
+
+@app.on_event("startup")
+def _mark_interrupted_jobs() -> None:
+    """Any job still 'running'/'awaiting_approval' on disk at startup died
+    with the previous process: mark it errored (which also refunds the
+    owner's quota) instead of leaving a ghost the UI polls forever."""
+    if not JOBS_DIR.is_dir():
+        return
+    for d in JOBS_DIR.iterdir():
+        meta_p = d / "meta.json"
+        if not meta_p.is_file():
+            continue
+        try:
+            meta = json.loads(meta_p.read_text(encoding="utf-8"))
+        except Exception:  # noqa: BLE001
+            continue
+        if meta.get("status") in ("running", "awaiting_approval"):
+            meta = {"status": "error",
+                    "error": "interrupted by a server restart — please "
+                             "generate again",
+                    "owner": meta.get("owner")}
+            meta_p.write_text(json.dumps(meta), encoding="utf-8")
 
 
 @app.get("/")
@@ -181,6 +217,7 @@ def render_spec(req: GenerateFromSpec, background: BackgroundTasks,
     _check_quota(user)
     job_id = uuid.uuid4().hex[:12]
     _JOBS[job_id] = {"status": "running", "owner": user}
+    _persist(job_id)
     background.add_task(_run_render, job_id, req.spec)
     return {"job_id": job_id}
 
@@ -195,6 +232,7 @@ def generate(req: GenerateFromPrompt, background: BackgroundTasks,
     job_id = uuid.uuid4().hex[:12]
     _JOBS[job_id] = {"status": "running", "owner": user,
                      "request": req.model_dump()}
+    _persist(job_id)
     if req.auto_approve:
         background.add_task(_run_generate, job_id, req, None)
     else:
@@ -213,6 +251,7 @@ def approve(job_id: str, req: ApproveOutline, background: BackgroundTasks,
     gen_req = GenerateFromPrompt.model_validate(job["request"])
     _JOBS[job_id] = {"status": "running", "owner": job.get("owner"),
                      "request": job["request"]}
+    _persist(job_id)
     background.add_task(_run_generate, job_id, gen_req, outline)
     return {"job_id": job_id, "status": "running"}
 
@@ -271,6 +310,7 @@ def _run_render(job_id: str, spec: DeckSpec) -> None:
     except Exception as e:  # noqa: BLE001
         _JOBS[job_id] = {"status": "error", "error": str(e),
                          "owner": _JOBS.get(job_id, {}).get("owner")}
+        _persist(job_id)
 
 
 def _load_job(job_id: str) -> dict | None:
@@ -344,7 +384,9 @@ def _run_regen(job_id: str, spec: DeckSpec, n: int, instruction: str,
         spec.slides[n - 1] = new_slide
         _run_render(job_id, spec)
     except Exception as e:  # noqa: BLE001
-        _JOBS[job_id] = {"status": "error", "error": str(e)}
+        _JOBS[job_id] = {"status": "error", "error": str(e),
+                         "owner": _JOBS.get(job_id, {}).get("owner")}
+        _persist(job_id)
 
 
 def _run_outline(job_id: str, req: GenerateFromPrompt) -> None:
@@ -355,8 +397,11 @@ def _run_outline(job_id: str, req: GenerateFromPrompt) -> None:
         outline = generate_outline(req.prompt, facts)
         _JOBS[job_id].update(status="awaiting_approval",
                              outline=outline.model_dump())
+        _persist(job_id)
     except Exception as e:  # noqa: BLE001
-        _JOBS[job_id] = {"status": "error", "error": str(e)}
+        _JOBS[job_id] = {"status": "error", "error": str(e),
+                         "owner": _JOBS.get(job_id, {}).get("owner")}
+        _persist(job_id)
 
 
 def _run_generate(job_id: str, req: GenerateFromPrompt, outline) -> None:
@@ -369,4 +414,6 @@ def _run_generate(job_id: str, req: GenerateFromPrompt, outline) -> None:
                                   theme=req.theme, meta=meta, outline=outline)
         _run_render(job_id, spec)
     except Exception as e:  # noqa: BLE001
-        _JOBS[job_id] = {"status": "error", "error": str(e)}
+        _JOBS[job_id] = {"status": "error", "error": str(e),
+                         "owner": _JOBS.get(job_id, {}).get("owner")}
+        _persist(job_id)

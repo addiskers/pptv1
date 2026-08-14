@@ -114,6 +114,33 @@ def test_api_key_service_bypass(client, monkeypatch):
                            headers=h).status_code == 200
 
 
+def test_jobs_persist_across_restart(client):
+    """A running job survives a process restart (the deploy-restart bug:
+    an in-flight generation vanished and the UI 404'd on download)."""
+    _login(client)
+    job_id = client.post("/render", json={"spec": SPEC}).json()["job_id"]
+    # TestClient runs the background task synchronously -> job is done
+    api_main._JOBS.clear()  # simulate a fresh process
+    job = client.get(f"/jobs/{job_id}").json()
+    assert job["status"] == "done" and job["owner"] == "u@example.com"
+    assert client.get(f"/download/{job_id}").status_code == 200
+
+
+def test_interrupted_job_marked_errored_and_refunds(client):
+    _login(client)
+    # a job that died mid-generation: persisted as running, process gone
+    jid = "feedbeefcafe"
+    api_main._JOBS[jid] = {"status": "running", "owner": "u@example.com"}
+    api_main._persist(jid)
+    api_main._JOBS.clear()
+    api_main._mark_interrupted_jobs()
+    job = client.get(f"/jobs/{jid}").json()
+    assert job["status"] == "error" and "restart" in job["error"]
+    # errored jobs refund the quota
+    assert client.get("/me").json()["used"] == 0
+    assert client.post("/render", json={"spec": SPEC}).status_code == 200
+
+
 def test_seeded_owner_account_exists():
     """The committed data/users.json carries the real account, hashed."""
     real = json.loads((auth.REPO / "data" / "users.json")

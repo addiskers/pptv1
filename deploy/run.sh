@@ -16,4 +16,4 @@ fi
 
 # Bind to localhost; put nginx/Caddy in front for TLS on your domain.
 exec .venv/bin/uvicorn deckengine.api.main:app \
-  --host "${HOST:-127.0.0.1}" --port "${PORT:-8000}" --workers "${WORKERS:-2}"
+  --host "${HOST:-127.0.0.1}" --port "${PORT:-8000}" --workers "${WORKERS:-1}"

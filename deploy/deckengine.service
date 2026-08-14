@@ -12,7 +12,12 @@ EnvironmentFile=-/home/ec2-user/deckengine/.env
 Environment=DECKENGINE_PREVIEW=soffice
 Environment=HOST=127.0.0.1
 Environment=PORT=8000
-Environment=WORKERS=2
+# ONE worker: job state lives in process memory between persist points, and
+# background generation threads belong to the process that accepted the job.
+# Two workers split-brain the job table (polls 404, approvals fail).
+Environment=WORKERS=1
+# durable deck storage — /tmp loses user deliverables to restarts/cleanup
+Environment=DECKENGINE_JOBS_DIR=/home/ec2-user/deckengine/data/jobs
 ExecStart=/home/ec2-user/deckengine/deploy/run.sh
 Restart=on-failure
 RestartSec=3

@@ -16,3 +16,6 @@ assets/uploads/
 
 # session signing secret - never committed
 data/.secret
+
+# durable job storage on servers
+data/jobs/
