@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import re
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from ..schema.rich import plain
 
@@ -29,6 +29,26 @@ class OutlineSlide(BaseModel):
                     "across consecutive slides of one act, changing at "
                     "dividers. Rendered as the small-caps kicker above each "
                     "title. Null on title/divider slides.")
+    visual_concept: str | None = Field(
+        default=None, max_length=120,
+        description="One sentence naming the slide's visual composition — "
+                    "the form AND the arrangement (e.g. 'dark hero panel "
+                    "left with oversized stat, proof chart right, three "
+                    "chips below'). Vary it slide to slide; null on "
+                    "title/divider slides.")
+
+    @field_validator("section", "visual_concept", mode="before")
+    @classmethod
+    def _trim_advisory(cls, v, info):
+        """Advisory prompt-side fields TRIM instead of failing: an overlong
+        concept sentence must never kill the whole outline (there is no
+        repair loop around stage 1's validation)."""
+        cap = 40 if info.field_name == "section" else 120
+        if isinstance(v, str) and len(v) > cap:
+            cut = v[:cap]
+            sp = cut.rfind(" ")
+            return (cut[:sp] if sp > cap // 2 else cut).strip()
+        return v
 
 
 class Outline(BaseModel):
@@ -36,7 +56,20 @@ class Outline(BaseModel):
         max_length=300,
         description="The deck's single-sentence answer — what the audience "
                     "should believe after the last slide.")
+    narrative_arc: str | None = Field(
+        default=None, max_length=40,
+        description="The deck FLOW this outline follows, chosen by the "
+                    "audience's meta-question (one id from the flow menu, "
+                    "e.g. 'options_decision', 'scqa', 'diagnostic').")
     slides: list[OutlineSlide] = Field(min_length=2, max_length=30)
+
+    @field_validator("narrative_arc", mode="before")
+    @classmethod
+    def _norm_arc(cls, v):
+        """Advisory: normalize and trim; never fail the outline over it."""
+        if isinstance(v, str):
+            return v.strip().lower().replace(" ", "_").replace("-", "_")[:40]
+        return v
 
 
 REVIEW_PROMPT = """You are a partner reviewing a deck outline before any slide is written.

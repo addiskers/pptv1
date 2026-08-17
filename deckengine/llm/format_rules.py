@@ -470,7 +470,8 @@ def check_slide_format(slide, facts: FactTable | None = None) -> list[str]:
     cross-checks; v1 checks are purely shape-based."""
     if isinstance(slide, ChartSlideSpec):
         charts = [slide.chart.model_dump()]
-    elif isinstance(slide, CustomLayoutSpec):
+    elif isinstance(slide, CustomLayoutSpec) or \
+            getattr(slide, "slide_type", "") == "canvas":
         charts = list(_walk_charts(slide.model_dump()))
     else:
         return []

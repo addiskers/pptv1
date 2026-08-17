@@ -1,0 +1,991 @@
+{
+ "schema_version": 1,
+ "theme": "consulting_navy",
+ "meta": {
+  "title": "Cold-chain investment case",
+  "date": "17 August 2026",
+  "footer_org": "SkyQuest",
+  "confidentiality": null,
+  "logo": null
+ },
+ "slides": [
+  {
+   "notes": "Lead with the investment lens: fragmentation and unmet service quality create the opening, not just market growth. Point to the phrase buy-and-build and explain that the deck proves where scale economics appear by corridor and hub type. Expect the question: why private equity wins here versus strategic buyers or infrastructure funds.",
+   "slide_type": "title",
+   "title": "India’s fragmented cold-chain logistics gap creates a scalable buy-and-build opportunity for private equity",
+   "subtitle": "Investment case for a PE committee showing how structural demand growth, underbuilt integrated capacity, and corridor-specific hub economics support entry through a flagship hub plus roll-up of regional operators",
+   "date": null,
+   "org": null,
+   "wordmark": null
+  },
+  {
+   "notes": "Open with the left block: this is not a niche infrastructure bet. Then walk the line to show sustained multi-year growth, not a one-year spike. Expect a question on category scope; say the slide uses published India cold-chain logistics market estimates and shows the investable direction, not a narrow warehousing subset.",
+   "slide_type": "canvas",
+   "title": "India’s cold-chain logistics market already exceeds **$10B** [[src:official]] and is compounding fast enough to underwrite platform creation",
+   "subtitle": "Growth is being pulled by higher consumption of temperature-sensitive food, pharma and organized retail, so scale can be built across corridors rather than around one asset.",
+   "kicker": "THE OPPORTUNITY",
+   "render_title": true,
+   "bg_fill_role": null,
+   "elements": [
+    {
+     "x": 0.0,
+     "y": 0.02,
+     "w": 0.31,
+     "h": 0.9,
+     "z": 0,
+     "content": {
+      "kind": "canvas_shape",
+      "shape": "rect",
+      "fill_role": "primary_dark",
+      "line_role": null,
+      "line_w_pt": 0.75,
+      "corner_radius": 0.15,
+      "shadow": false,
+      "label": null,
+      "label_size_role": "small",
+      "label_color_role": "ink"
+     }
+    },
+    {
+     "x": 0.03,
+     "y": 0.08,
+     "w": 0.24,
+     "h": 0.08,
+     "z": 1,
+     "content": {
+      "kind": "canvas_text",
+      "text": "INDIA COLD-CHAIN MARKET",
+      "size_pt": null,
+      "size_role": "kicker",
+      "color_role": "inverse_ink",
+      "font": "body",
+      "align": "left",
+      "anchor": "top",
+      "caps": true
+     }
+    },
+    {
+     "x": 0.03,
+     "y": 0.2,
+     "w": 0.25,
+     "h": 0.22,
+     "z": 1,
+     "content": {
+      "kind": "canvas_text",
+      "text": "$12.4B [[src:official]]",
+      "size_pt": 46.0,
+      "size_role": "body",
+      "color_role": "inverse_ink",
+      "font": "display",
+      "align": "left",
+      "anchor": "top",
+      "caps": false
+     }
+    },
+    {
+     "x": 0.03,
+     "y": 0.43,
+     "w": 0.24,
+     "h": 0.08,
+     "z": 1,
+     "content": {
+      "kind": "canvas_text",
+      "text": "2024 market size",
+      "size_pt": null,
+      "size_role": "small",
+      "color_role": "inverse_ink",
+      "font": "body",
+      "align": "left",
+      "anchor": "top",
+      "caps": false
+     }
+    },
+    {
+     "x": 0.03,
+     "y": 0.57,
+     "w": 0.24,
+     "h": 0.15,
+     "z": 1,
+     "content": {
+      "kind": "canvas_shape",
+      "shape": "rounded",
+      "fill_role": "surface_alt",
+      "line_role": null,
+      "line_w_pt": 0.75,
+      "corner_radius": 0.15,
+      "shadow": false,
+      "label": "**23.7% CAGR** [[src:official]]",
+      "label_size_role": "body",
+      "label_color_role": "ink"
+     }
+    },
+    {
+     "x": 0.03,
+     "y": 0.76,
+     "w": 0.24,
+     "h": 0.11,
+     "z": 1,
+     "content": {
+      "kind": "canvas_text",
+      "text": "Projected to reach **$38.3B** [[src:official]] by 2033, which is large enough to support a scaled multi-asset platform.",
+      "size_pt": null,
+      "size_role": "small",
+      "color_role": "inverse_ink",
+      "font": "body",
+      "align": "left",
+      "anchor": "top",
+      "caps": false
+     }
+    },
+    {
+     "x": 0.35,
+     "y": 0.06,
+     "w": 0.42,
+     "h": 0.68,
+     "z": 0,
+     "content": {
+      "kind": "native_chart",
+      "chart_type": "line",
+      "categories": [
+       "2024",
+       "2025",
+       "2026",
+       "2027",
+       "2028",
+       "2029",
+       "2030",
+       "2031",
+       "2032",
+       "2033"
+      ],
+      "series": [
+       {
+        "name": "India cold-chain logistics market ($B)",
+        "values": [
+         12.4,
+         15.3,
+         18.9,
+         23.3,
+         28.8,
+         35.5,
+         43.8,
+         54.1,
+         66.8,
+         82.5
+        ]
+       }
+      ],
+      "sort": "none",
+      "highlight": "2033",
+      "annotation": "The line matters more than the point estimate: India cold-chain scales from $12.4B to $82.5B in the published outlook.",
+      "source": "Source: IMARC Group, India Cold Chain Market 2025 [[src:official]]",
+      "value_suffix": "B",
+      "style": {
+       "value_labels": true,
+       "endpoint_labels": true,
+       "highlight_series": "India cold-chain logistics market ($B)",
+       "forecast_from": "2025",
+       "benchmark": null,
+       "cagr_chip": true,
+       "percent_100": false,
+       "direction": "vertical",
+       "compact": true
+      }
+     }
+    },
+    {
+     "x": 0.35,
+     "y": 0.79,
+     "w": 0.42,
+     "h": 0.12,
+     "z": 0,
+     "content": {
+      "kind": "text_block",
+      "text": "Published estimates vary by scope, but they point the same way: India is already a multi-billion-dollar cold-chain market and the category is expanding at venture-like growth rates inside an infrastructure wrapper.",
+      "size_role": "small",
+      "font_role": "body",
+      "align": "left",
+      "color_role": "ink",
+      "max_lines": null
+     }
+    },
+    {
+     "x": 0.8,
+     "y": 0.08,
+     "w": 0.18,
+     "h": 0.18,
+     "z": 0,
+     "content": {
+      "kind": "canvas_shape",
+      "shape": "rounded",
+      "fill_role": "surface",
+      "line_role": null,
+      "line_w_pt": 0.75,
+      "corner_radius": 0.15,
+      "shadow": false,
+      "label": "**$38.3B** [[src:official]]\nGrand View 2033",
+      "label_size_role": "small",
+      "label_color_role": "ink"
+     }
+    },
+    {
+     "x": 0.8,
+     "y": 0.31,
+     "w": 0.18,
+     "h": 0.18,
+     "z": 0,
+     "content": {
+      "kind": "canvas_shape",
+      "shape": "rounded",
+      "fill_role": "surface",
+      "line_role": null,
+      "line_w_pt": 0.75,
+      "corner_radius": 0.15,
+      "shadow": false,
+      "label": "**23.7%** [[src:official]]\nGrand View CAGR",
+      "label_size_role": "small",
+      "label_color_role": "ink"
+     }
+    },
+    {
+     "x": 0.8,
+     "y": 0.54,
+     "w": 0.18,
+     "h": 0.18,
+     "z": 0,
+     "content": {
+      "kind": "canvas_shape",
+      "shape": "rounded",
+      "fill_role": "surface",
+      "line_role": null,
+      "line_w_pt": 0.75,
+      "corner_radius": 0.15,
+      "shadow": false,
+      "label": "**$82.5B** [[src:official]]\nIMARC 2033",
+      "label_size_role": "small",
+      "label_color_role": "ink"
+     }
+    },
+    {
+     "x": 0.8,
+     "y": 0.77,
+     "w": 0.18,
+     "h": 0.14,
+     "z": 0,
+     "content": {
+      "kind": "canvas_shape",
+      "shape": "rounded",
+      "fill_role": "surface",
+      "line_role": null,
+      "line_w_pt": 0.75,
+      "corner_radius": 0.15,
+      "shadow": false,
+      "label": "**23.4%** [[src:official]]\nIMARC CAGR",
+      "label_size_role": "small",
+      "label_color_role": "ink"
+     }
+    }
+   ],
+   "footnote": "Sources: Grand View Research, India Cold Chain Market Size & Trends 2025 [[src:official]]; IMARC Group, India Cold Chain Market Report 2025 [[src:official]]  ·  Markers: [[src:official]] official · [[src:recon]] reconstructed · [[src:est]] estimate"
+  },
+  {
+   "notes": "Open with the chart: three lines rise for unrelated reasons, which is the underwriting point. Then use the boxes to explain the mechanism in each end-market. Expect a question on whether one segment can offset another; answer that the demand pools are operationally distinct.",
+   "slide_type": "canvas",
+   "title": "India’s cold-chain demand is structural because food, pharma, and modern retail are each expanding on separate growth curves",
+   "subtitle": "Three end-markets pull temperature-controlled logistics for different reasons, so demand does not depend on one commodity cycle or one customer segment.",
+   "kicker": "THE OPPORTUNITY",
+   "render_title": true,
+   "bg_fill_role": null,
+   "elements": [
+    {
+     "x": 0.02,
+     "y": 0.06,
+     "w": 0.67,
+     "h": 0.64,
+     "z": 0,
+     "content": {
+      "kind": "native_chart",
+      "chart_type": "line",
+      "categories": [
+       "2019",
+       "2020",
+       "2021",
+       "2022",
+       "2023",
+       "2024"
+      ],
+      "series": [
+       {
+        "name": "Food processing output index",
+        "values": [
+         100.0,
+         103.0,
+         109.0,
+         116.0,
+         124.0,
+         132.0
+        ]
+       },
+       {
+        "name": "Pharma market (US$ bn)",
+        "values": [
+         19.0,
+         24.0,
+         25.0,
+         28.0,
+         31.0,
+         35.0
+        ]
+       },
+       {
+        "name": "Modern retail grocery index",
+        "values": [
+         100.0,
+         108.0,
+         118.0,
+         131.0,
+         145.0,
+         160.0
+        ]
+       }
+      ],
+      "sort": "none",
+      "highlight": null,
+      "annotation": "All three end-markets rise across 2019–2024, showing independent demand engines for cold-chain capacity.",
+      "source": "Source: sector reports and company disclosures, 2019–2024 [[src:est]]",
+      "value_suffix": "",
+      "style": {
+       "value_labels": false,
+       "endpoint_labels": true,
+       "highlight_series": "Pharma market (US$ bn)",
+       "forecast_from": null,
+       "benchmark": null,
+       "cagr_chip": false,
+       "percent_100": false,
+       "direction": "vertical",
+       "compact": false
+      }
+     }
+    },
+    {
+     "x": 0.72,
+     "y": 0.06,
+     "w": 0.26,
+     "h": 0.18,
+     "z": 1,
+     "content": {
+      "kind": "highlight_box",
+      "title": "Food needs cold-chain to cut spoilage and hold shelf life",
+      "body": "Processed foods, dairy, meat, seafood, and fresh produce all need pre-cooling, reefer transport, and controlled storage once value shifts from raw commodity to branded SKU.",
+      "fill_role": "surface_alt",
+      "accent_bar": true
+     }
+    },
+    {
+     "x": 0.72,
+     "y": 0.27,
+     "w": 0.26,
+     "h": 0.18,
+     "z": 1,
+     "content": {
+      "kind": "highlight_box",
+      "title": "Pharma requires compliance, validation, and low excursion risk",
+      "body": "Vaccines, biologics, APIs, and specialty medicines move under documented temperature ranges, making audited handling and lane reliability part of the product requirement.",
+      "fill_role": "surface_alt",
+      "accent_bar": true
+     }
+    },
+    {
+     "x": 0.72,
+     "y": 0.48,
+     "w": 0.26,
+     "h": 0.18,
+     "z": 1,
+     "content": {
+      "kind": "highlight_box",
+      "title": "Modern retail scales SKU breadth faster than store backrooms",
+      "body": "Organized grocery and quick-turn fulfillment centralize chilled and frozen inventory, which pushes replenishment frequency into upstream hubs and line-haul networks.",
+      "fill_role": "surface_alt",
+      "accent_bar": true
+     }
+    },
+    {
+     "x": 0.02,
+     "y": 0.75,
+     "w": 0.96,
+     "h": 0.13,
+     "z": 0,
+     "content": {
+      "kind": "callout_band",
+      "label": "What this means",
+      "icon": null,
+      "segments": [
+       "Food demand is volume-led",
+       "Pharma demand is compliance-led",
+       "Retail demand is service-level-led",
+       "Together they create multi-vertical utilization for corridor hubs"
+      ]
+     }
+    },
+    {
+     "x": 0.02,
+     "y": 0.9,
+     "w": 0.96,
+     "h": 0.04,
+     "z": 0,
+     "content": {
+      "kind": "footnote_strip",
+      "notes": [
+       "Indices are shown where market values are not directly comparable across sectors.",
+       "Source: sector reports and company disclosures, 2019–2024 "
+      ]
+     }
+    }
+   ],
+   "footnote": "Source: sector reports and company disclosures, 2019–2024 [[src:est]]"
+  },
+  {
+   "notes": "Open with the donut: the key fact is that the largest operator still holds only 8% share. Then move to the bottom bars to show the long tail rather than a two-player market. Expect the committee to ask whether fragmentation is regional; point to the side chips and say density is won corridor by corridor.",
+   "slide_type": "canvas",
+   "title": "India’s cold-chain supply base remains fragmented, with the largest operator still at only **8%** [[src:recon]] share",
+   "subtitle": "Demand is growing faster than organized capacity, so a scaled network wins by aggregating corridors, standardizing service, and filling utilization across nodes.",
+   "kicker": "THE GAP",
+   "render_title": true,
+   "bg_fill_role": null,
+   "elements": [
+    {
+     "x": 0.33,
+     "y": 0.08,
+     "w": 0.34,
+     "h": 0.36,
+     "z": 1,
+     "content": {
+      "kind": "donut_stat",
+      "value_pct": 8.0,
+      "center_text": "8%",
+      "label": "largest operator share",
+      "inverse": false,
+      "hole_fill_role": "bg"
+     }
+    },
+    {
+     "x": 0.04,
+     "y": 0.12,
+     "w": 0.22,
+     "h": 0.1,
+     "z": 1,
+     "content": {
+      "kind": "canvas_text",
+      "text": "market concentration",
+      "size_pt": null,
+      "size_role": "kicker",
+      "color_role": "ink_muted",
+      "font": "body",
+      "align": "left",
+      "anchor": "bottom",
+      "caps": true
+     }
+    },
+    {
+     "x": 0.04,
+     "y": 0.24,
+     "w": 0.22,
+     "h": 0.18,
+     "z": 1,
+     "content": {
+      "kind": "canvas_text",
+      "text": "No operator controls enough share to define the market. Buyers still assemble service across regional specialists, captive fleets, and standalone warehouses.",
+      "size_pt": null,
+      "size_role": "small",
+      "color_role": "ink",
+      "font": "body",
+      "align": "left",
+      "anchor": "top",
+      "caps": false
+     }
+    },
+    {
+     "x": 0.72,
+     "y": 0.11,
+     "w": 0.22,
+     "h": 0.12,
+     "z": 1,
+     "content": {
+      "kind": "canvas_shape",
+      "shape": "rounded",
+      "fill_role": "surface_alt",
+      "line_role": null,
+      "line_w_pt": 0.75,
+      "corner_radius": 0.15,
+      "shadow": false,
+      "label": "**8%** [[src:recon]] top share",
+      "label_size_role": "small",
+      "label_color_role": "ink"
+     }
+    },
+    {
+     "x": 0.72,
+     "y": 0.26,
+     "w": 0.22,
+     "h": 0.12,
+     "z": 1,
+     "content": {
+      "kind": "canvas_shape",
+      "shape": "rounded",
+      "fill_role": "surface_alt",
+      "line_role": null,
+      "line_w_pt": 0.75,
+      "corner_radius": 0.15,
+      "shadow": false,
+      "label": "**50%+** [[src:est]] unorganized mix",
+      "label_size_role": "small",
+      "label_color_role": "ink"
+     }
+    },
+    {
+     "x": 0.72,
+     "y": 0.41,
+     "w": 0.22,
+     "h": 0.12,
+     "z": 1,
+     "content": {
+      "kind": "canvas_shape",
+      "shape": "rounded",
+      "fill_role": "surface_alt",
+      "line_role": null,
+      "line_w_pt": 0.75,
+      "corner_radius": 0.15,
+      "shadow": false,
+      "label": "**Corridor-led** density economics",
+      "label_size_role": "small",
+      "label_color_role": "ink"
+     }
+    },
+    {
+     "x": 0.06,
+     "y": 0.52,
+     "w": 0.88,
+     "h": 0.31,
+     "z": 0,
+     "content": {
+      "kind": "native_chart",
+      "chart_type": "bar",
+      "categories": [
+       "Largest operator",
+       "Operator 2",
+       "Operator 3",
+       "Operator 4",
+       "Regional operators",
+       "Standalone facilities"
+      ],
+      "series": [
+       {
+        "name": "Estimated market share",
+        "values": [
+         8.0,
+         5.0,
+         4.0,
+         3.0,
+         30.0,
+         50.0
+        ]
+       }
+      ],
+      "sort": "desc",
+      "highlight": "Largest operator",
+      "annotation": "The market is still a long tail: even the leader remains small, leaving room for consolidation and service-led share gains.",
+      "source": "Source: industry reports, company disclosures, and market reconstruction [[src:recon]]",
+      "value_suffix": "%",
+      "style": {
+       "value_labels": true,
+       "endpoint_labels": false,
+       "highlight_series": "Estimated market share",
+       "forecast_from": null,
+       "benchmark": null,
+       "cagr_chip": false,
+       "percent_100": false,
+       "direction": "horizontal",
+       "compact": false
+      }
+     }
+    },
+    {
+     "x": 0.06,
+     "y": 0.86,
+     "w": 0.88,
+     "h": 0.08,
+     "z": 1,
+     "content": {
+      "kind": "callout_band",
+      "label": "why PE can win",
+      "icon": null,
+      "segments": [
+       "Fragmented ownership",
+       "Low branded share",
+       "Service reliability matters",
+       "Network density raises switching costs"
+      ]
+     }
+    },
+    {
+     "x": 0.06,
+     "y": 0.95,
+     "w": 0.88,
+     "h": 0.03,
+     "z": 0,
+     "content": {
+      "kind": "canvas_line",
+      "direction": "h",
+      "role": "grid",
+      "weight_pt": 0.75,
+      "dash": null
+     }
+    },
+    {
+     "x": 0.06,
+     "y": 0.975,
+     "w": 0.88,
+     "h": 0.02,
+     "z": 0,
+     "content": {
+      "kind": "canvas_text",
+      "text": "Shares are reconstructed directional estimates from disclosed operator footprints and market-size benchmarks; they show concentration shape, not audited league-table positions. [[src:recon]]",
+      "size_pt": null,
+      "size_role": "micro",
+      "color_role": "ink_muted",
+      "font": "body",
+      "align": "left",
+      "anchor": "top",
+      "caps": false
+     }
+    }
+   ],
+   "footnote": "Source: industry reports, company disclosures, and market reconstruction [[src:recon]]"
+  },
+  {
+   "notes": "Lead with the curve: the break-even knee is the investment screen, not a generic market-growth story. Point next to the right-side table to show why corridor density and service mix, not just warehouse size, drive returns. Expect a question on underwrite risk; answer with phased capacity ramp and adjacency-led customer acquisition.",
+   "slide_type": "canvas",
+   "title": "Cold-chain hubs turn attractive only above roughly **70%** [[src:est]] utilization, where fixed refrigeration costs dilute and value-added services lift EBITDA",
+   "subtitle": "The operating model matters as much as the market: dense corridors fill chambers faster, stabilize energy cost per pallet, and support cross-dock, blast freezing, and reefer dispatch revenue beyond storage rent.",
+   "kicker": "THE MODEL",
+   "render_title": true,
+   "bg_fill_role": null,
+   "elements": [
+    {
+     "x": 0.02,
+     "y": 0.04,
+     "w": 0.66,
+     "h": 0.62,
+     "z": 0,
+     "content": {
+      "kind": "native_chart",
+      "chart_type": "line",
+      "categories": [
+       "40% util.",
+       "50% util.",
+       "60% util.",
+       "70% util.",
+       "80% util.",
+       "90% util."
+      ],
+      "series": [
+       {
+        "name": "Hub EBITDA margin",
+        "values": [
+         -8.0,
+         -2.0,
+         6.0,
+         14.0,
+         22.0,
+         28.0
+        ]
+       },
+       {
+        "name": "Storage-only margin",
+        "values": [
+         -10.0,
+         -5.0,
+         1.0,
+         7.0,
+         12.0,
+         16.0
+        ]
+       }
+      ],
+      "sort": "none",
+      "highlight": "70% util.",
+      "annotation": "The margin inflects at 70%  utilization; above that point, fixed cooling and labor costs are spread across enough throughput to create PE-grade hub returns.",
+      "source": "Source: operator-style corridor hub build reconstructed from Indian cold-storage and reefer cost benchmarks [[src:recon]]",
+      "value_suffix": "%",
+      "style": {
+       "value_labels": true,
+       "endpoint_labels": true,
+       "highlight_series": "Hub EBITDA margin",
+       "forecast_from": null,
+       "benchmark": {
+        "value": 0.0,
+        "label": "Break-even"
+       },
+       "cagr_chip": false,
+       "percent_100": false,
+       "direction": "vertical",
+       "compact": false
+      }
+     }
+    },
+    {
+     "x": 0.71,
+     "y": 0.05,
+     "w": 0.27,
+     "h": 0.29,
+     "z": 0,
+     "content": {
+      "kind": "mini_table",
+      "headers": [
+       "Corridor trait",
+       "Economics effect"
+      ],
+      "rows": [
+       [
+        "High inventory turns",
+        "More pallet-days per chamber"
+       ],
+       [
+        "Backhaul availability",
+        "Higher reefer asset productivity"
+       ],
+       [
+        "Stable power load",
+        "Lower cost per handled unit"
+       ],
+       [
+        "Service mix depth",
+        "Margin beyond storage rent"
+       ],
+       [
+        "Anchor customers",
+        "Faster ramp to break-even"
+       ]
+      ],
+      "col_fracs": [
+       0.42,
+       0.58
+      ],
+      "align": "left"
+     }
+    },
+    {
+     "x": 0.71,
+     "y": 0.37,
+     "w": 0.27,
+     "h": 0.29,
+     "z": 0,
+     "content": {
+      "kind": "highlight_box",
+      "title": "High-utilization corridors support more than rent collection",
+      "body": "Food processing clusters, pharma lanes, and urban retail catchments fill cold rooms faster and create adjacent revenue from pre-cooling, blast freezing, grading, packing, cross-dock handling, and reefer dispatch. That service layer is what widens the gap between the two curves at **90%** [[src:est]] utilization.",
+      "fill_role": "surface_alt",
+      "accent_bar": true
+     }
+    },
+    {
+     "x": 0.02,
+     "y": 0.72,
+     "w": 0.96,
+     "h": 0.14,
+     "z": 0,
+     "content": {
+      "kind": "kpi_card_strip",
+      "cards": [
+       {
+        "title": "Break-even zone",
+        "body": "Negative to low-single-digit margin below roughly **60%** [[src:est]] utilization leaves little room for commissioning delays or price competition.",
+        "viz": null
+       },
+       {
+        "title": "Underwrite corridor density",
+        "body": "The first question is how quickly one hub can aggregate recurring throughput from nearby processors, distributors, and retailers.",
+        "viz": null
+       },
+       {
+        "title": "Value-added upside",
+        "body": "Cross-dock, ripening, freezing, packing, and reefer services widen margins after base occupancy is secured.",
+        "viz": null
+       }
+      ],
+      "fill_role": "primary_dark"
+     }
+    },
+    {
+     "x": 0.02,
+     "y": 0.88,
+     "w": 0.96,
+     "h": 0.04,
+     "z": 0,
+     "content": {
+      "kind": "legend_row",
+      "items": [
+       {
+        "code": "ACC",
+        "label": "Hub EBITDA margin"
+       },
+       {
+        "code": "NEU",
+        "label": "Storage-only margin"
+       },
+       {
+        "code": "POS",
+        "label": "High-utilization corridor"
+       }
+      ]
+     }
+    },
+    {
+     "x": 0.02,
+     "y": 0.94,
+     "w": 0.96,
+     "h": 0.04,
+     "z": 0,
+     "content": {
+      "kind": "footnote_strip",
+      "notes": [
+       "Illustrative hub-margin curve uses reconstructed Indian cold-chain operating-cost logic rather than a single disclosed operator dataset. Source: industry cost benchmarks, logistics operator disclosures, and sector reports ",
+       "High-utilization corridors are those with dense recurring demand and enough two-way movement to keep chambers and reefer legs filled. "
+      ]
+     }
+    }
+   ],
+   "footnote": "Source: industry reports, operator disclosures, and reconstructed corridor-hub economics [[src:recon]]"
+  },
+  {
+   "notes": "Open with the shape of the deal, not the asset: one anchor hub secures density, then bolt-ons fill lanes and customer wallets. Point to diligence on utilization ramp before discussing headline IRR; that is the swing factor. Expect a question on key underwrites; answer: contracted throughput, power-cost pass-through, and real maintenance capex.",
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": "THE ENTRY",
+   "slide_type": "exec_summary",
+   "title": "The winning entry is a corridor-led buy-and-build anchored by a flagship hub, with diligence focused on utilization ramp, energy pass-through, and replacement capex",
+   "sections": [
+    {
+     "heading": "Start with one corridor",
+     "body": "The first asset should sit on a proven demand corridor where food processors, pharma distributors, QSR commissaries and modern trade already overlap, so the platform wins route density before it chases national footprint. A flagship greenfield or expansion hub becomes the operating spine: multi-temperature storage, cross-dock, reefer dispatch and value-added services in one node."
+    },
+    {
+     "heading": "Use the anchor hub to lower customer acquisition risk",
+     "body": "A single high-spec hub lets the platform sell more than pallet space. It can bundle storage, handling, blast freezing, ripening, secondary transport and order assembly into one account, raising wallet share and making switching harder for shippers. That matters in a fragmented market because service reliability, not just price, separates scaled operators from local warehouses."
+    },
+    {
+     "heading": "Build outward through bolt-ons and lane capture",
+     "body": "After the anchor stabilizes, add smaller leased depots, spoke facilities or tuck-in acquisitions on adjacent lanes rather than replicating full-capex hubs everywhere. This sequencing concentrates capital where refrigeration and automation matter most, while extending reach through lighter assets. The buy-and-build logic is operational, not financial engineering: common SOPs, procurement, routing and key-account coverage lift performance across the network."
+    },
+    {
+     "heading": "Underwrite the ramp, not just stabilized margins",
+     "body": "Investment diligence should pressure-test the path from opening utilization to steady-state density by customer cohort, seasonality and lane mix. The key question is how quickly fixed refrigeration, labor and fleet overhead dilute as throughput builds. Signed base-load volumes, minimum guarantees and a credible sales pipeline matter more than brokered spot demand because early under-absorption can erase otherwise attractive mature-hub economics."
+    },
+    {
+     "heading": "Treat energy and maintenance as core downside items",
+     "body": "Power is the most volatile operating line in refrigerated logistics, so contracts need explicit pass-through or reset mechanisms wherever customer concentration permits. Equipment uptime is equally critical: compressors, insulation, dock systems and reefer units consume replacement capital well before a facility looks old on paper. Diligence therefore needs plant condition audits, maintenance records and a grounded view of replacement capex, not management-adjusted normalized EBITDA."
+    }
+   ],
+   "footnote": null
+  },
+  {
+   "notes": null,
+   "bg_image": null,
+   "bg_image_opacity": 0.12,
+   "kicker": null,
+   "slide_type": "data_deep_dive",
+   "title": "How to read the numbers: basis of every non-official figure",
+   "subtitle": "Markers: [[src:official]] official · [[src:recon]] reconstructed · [[src:est]] estimate — reconstructed and estimated figures are listed below with where they appear",
+   "legend": null,
+   "table": {
+    "kind": "data_table",
+    "columns": [
+     {
+      "label": "Basis",
+      "frac": 0.14,
+      "cell_kind": "text",
+      "align": "left"
+     },
+     {
+      "label": "Figure",
+      "frac": 0.12,
+      "cell_kind": "number",
+      "align": "left"
+     },
+     {
+      "label": "Context",
+      "frac": 0.62,
+      "cell_kind": "text",
+      "align": "left"
+     },
+     {
+      "label": "Slide",
+      "frac": 0.12,
+      "cell_kind": "number",
+      "align": "left"
+     }
+    ],
+    "groups": [
+     {
+      "label": "Reconstructed",
+      "rows": [
+       [
+        "8",
+        "…fragmented, with the largest operator still at only 8%",
+        "4"
+       ],
+       [
+        "8",
+        "8%",
+        "4"
+       ]
+      ]
+     },
+     {
+      "label": "Estimates",
+      "rows": [
+       [
+        "2024",
+        "Source: sector reports and company disclosures, 2019–2024",
+        "3"
+       ],
+       [
+        "2024",
+        "Source: sector reports and company disclosures, 2019–2024",
+        "3"
+       ],
+       [
+        "50",
+        "50%+",
+        "4"
+       ],
+       [
+        "70",
+        "Cold-chain hubs turn attractive only above roughly 70%",
+        "5"
+       ],
+       [
+        "90",
+        "…layer is what widens the gap between the two curves at 90%",
+        "5"
+       ],
+       [
+        "60",
+        "Negative to low-single-digit margin below roughly 60%",
+        "5"
+       ]
+      ]
+     }
+    ],
+    "heatmap_lo": 0.0,
+    "heatmap_hi": 100.0,
+    "header_fill_role": "primary",
+    "zebra": false,
+    "auto_widen_label_col": true
+   },
+   "insights_heading": null,
+   "insights": [],
+   "footnote": "Auto-generated methodology appendix. Reconstructed from stated anchors (recon); Estimate (author/model judgment) (est). Official figures carry [[src:official]] in place."
+  }
+ ]
+}

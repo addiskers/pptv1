@@ -109,12 +109,15 @@ def check_slide_markers(slide: BaseModel) -> list[str]:
                 tabular_hit = True
     if tabular_hit:
         foot = dump.get("footnote") or ""
-        if not _MARKER.search(foot):
+        sources = [t for k, t in _walk(dump) if k == "source"]
+        if not (_MARKER.search(foot)
+                or any(_MARKER.search(s) for s in sources)):
             problems.append(
-                "chart/table figures need a marked source: end the footnote "
-                "with e.g. 'Source: <best-known source, year> "
-                "[[src:official]]' (or [[src:recon]]/[[src:est]] to match "
-                "how the numbers were derived)")
+                "chart/table figures need a marked source: set the chart's "
+                "source (e.g. 'Source: <best-known source, year> "
+                "[[src:official]]') or end the footnote with one "
+                "([[src:recon]]/[[src:est]] to match how the numbers were "
+                "derived)")
     return problems
 
 

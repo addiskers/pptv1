@@ -16,13 +16,15 @@ from pathlib import Path
 
 log = logging.getLogger("deckengine")
 
-RUBRIC = """You are a partner choosing between two candidate renderings (A and B) of the SAME slide. The slide's claim: {claim}
+RUBRIC = """You are a DESIGN DIRECTOR choosing between two candidate renderings (A and B) of the SAME slide. The slide's claim: {claim}
 
 Pick the one a top consulting firm would ship. Judge ONLY what you can see:
-- visual hierarchy: does the eye land on the claim's proof first?
-- density: full but not cramped; no dead zones, no crowding
-- structure fit: does the layout SHAPE match the argument (comparison, flow, ranking)?
-- craft: alignment, breathing room, emphasis discipline
+- visual hierarchy: does the eye land on the claim's proof FIRST, at the greatest visual weight?
+- emphasis: is the claim's subject visually marked (color, size, position) — not merely stated?
+- whitespace & alignment: shared edges, breathing room, no dead zones, no crowding
+- structure fit: does the layout SHAPE match the argument (comparison, flow, ranking, part-of-whole)?
+- distinctiveness: reward a composed, bespoke design over a stamped template look
+- craft: consistent type sizes, readable contrast, emphasis discipline
 
 Answer with the winner letter and one short reason."""
 

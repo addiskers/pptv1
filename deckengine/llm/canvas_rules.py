@@ -143,4 +143,27 @@ def check_canvas_slide(slide: CanvasSlideSpec) -> list[str]:
                 f"carries {len(el.content.text)} characters: widen it to "
                 f">=0.12 or shorten the text")
 
+    # 4) fixed-height components crammed into boxes they cannot fit: they
+    # overflow and paint over neighbours (seen live: a callout_band over a
+    # chart). Floors are conservative fractions of the body height.
+    for i, el in enumerate(els):
+        floor = _MIN_H.get(el.content.kind)
+        if floor and el.h < floor:
+            problems.append(
+                f"{el.content.kind} element {i + 1} has height {el.h:.2f} "
+                f"but needs >= {floor:.2f} to render without overflowing "
+                f"its box: make it taller, or use a canvas_shape/"
+                f"canvas_text instead")
+
     return problems
+
+
+# components with intrinsic minimum heights (body-height fractions);
+# below these they overflow their cell instead of shrinking
+_MIN_H = {
+    "callout_band": 0.16, "kpi_card_strip": 0.18, "arrow_callout": 0.18,
+    "icon_stat_row": 0.10, "icon_tile_row": 0.16, "funnel": 0.30,
+    "comparison_columns": 0.35, "data_table": 0.30, "timeline_row": 0.16,
+    "chevron_pathway": 0.10, "native_chart": 0.28, "matrix_2x2": 0.35,
+    "brace_group": 0.25, "two_tone_header": 0.08,
+}

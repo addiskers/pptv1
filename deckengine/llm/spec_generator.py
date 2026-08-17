@@ -46,7 +46,8 @@ _ARCHETYPES: dict[str, type[BaseModel]] = {
     m.model_fields["slide_type"].default: m for m in get_args(get_args(SlideSpec)[0])
 }
 
-SYSTEM = """You write slide specs for DeckEngine, a consulting-grade deck engine.
+SYSTEM = """You are the slide DESIGNER for DeckEngine, a consulting-grade deck engine.
+You design each slide AROUND its message — the fixed archetype molds are references, not menus. On 'canvas' slides you place every element freely (fractional geometry); make the ONE thing the viewer must see carry the greatest visual weight (size, color, position), and never give two adjacent slides the same silhouette.
 Hard rules:
 - Titles are full-sentence takeaways ("X raised incomes 5% above state average"), never labels ("Results"). Keep titles under 160 characters. A title carries a verb and, when the facts allow, a number.
 - Prefer stats, tables and comparisons over prose (assertion-evidence style): every body element is EVIDENCE for the title claim, not commentary about it.
@@ -59,7 +60,11 @@ Hard rules:
 - SEMANTIC COLOUR: name chart series/categories with meaning-bearing words when the data has a health scale — the engine colours Overdrawn/Critical red, Moderate/Watch amber, Healthy/Safe green automatically.
 - The subtitle is a STANDFIRST: one lede sentence that ADDS mechanism or so-what beyond the title — never a restatement of it.
 - Every slide includes "notes": 2-3 DIRECTIVE speaker sentences (max 350 chars) — what to say, what to point at, what question to expect. Never a restatement of the slide text.
+{principles}
 - Respect every field constraint in the schema exactly."""
+
+from .narrative import SLIDE_PRINCIPLES  # noqa: E402
+SYSTEM = SYSTEM.replace("{principles}", SLIDE_PRINCIPLES)
 
 
 def provider() -> str:
@@ -137,9 +142,15 @@ def generate_outline(prompt: str, facts: FactTable | None) -> Outline:
     revised outline is kept only if it doesn't score worse."""
     archetype_list = ", ".join(_ARCHETYPES)
     schema = Outline.model_json_schema()
+    from .narrative import flow_menu
     p = (f"Plan a slide deck for this request:\n\n{prompt}\n\n"
          f"Available slide_type values: {archetype_list}.\n"
          f"{facts.prompt_block() if facts else ''}\n"
+         "FIRST choose the deck FLOW by the AUDIENCE'S META-QUESTION — not "
+         "the topic (the same data answers different questions with "
+         "different decks). Declare it in narrative_arc and shape the "
+         "claim chain to complete that flow's argument, closing on its "
+         "ask/resolution:\n" + flow_menu() + "\n\n"
          "Emit the outline as a CLAIM CHAIN: a one-sentence governing_thought "
          "(the deck's answer), plus one entry per slide with slide_type and "
          "claim — the full-sentence assertion that slide proves (it becomes "
@@ -147,7 +158,12 @@ def generate_outline(prompt: str, facts: FactTable | None) -> Outline:
          "tag: 2-4 words naming the act it belongs to (e.g. 'THE "
          "OPPORTUNITY', 'WHAT IT TAKES') — identical across consecutive "
          "slides of one act, changing only at section boundaries; null on "
-         "title and divider slides. Read in sequence, the claims must "
+         "title and divider slides. Give every BODY slide a "
+         "'visual_concept': one sentence naming its composition (form + "
+         "arrangement, e.g. 'oversized stat left panel, evidence chart "
+         "right, proof chips below') — every concept DIFFERENT from its "
+         "neighbours; body slides are later DESIGNED freeform from these "
+         "concepts. Read in sequence, the claims must "
          "prove the governing thought. VARY THE VISUAL RHYTHM so the deck "
          "never reads as stamped from a fixed set of molds: never more than "
          "two consecutive slides of the same slide_type, and use custom_layout "
@@ -175,8 +191,9 @@ def generate_outline(prompt: str, facts: FactTable | None) -> Outline:
     outline = Outline.model_validate(_structured_call("emit_outline", schema, p))
 
     def _problems(o: Outline) -> list[str]:
+        from .narrative import check_outline_flow
         out = (check_outline(o) + check_outline_formats(o, facts)
-               + check_outline_chart_density(o))
+               + check_outline_chart_density(o) + check_outline_flow(o))
         if not facts and not any(s.slide_type == "exec_summary"
                                  for s in o.slides):
             out.append(
@@ -254,9 +271,26 @@ def _few_shot(archetype: str, claim: str = "") -> str:
                 for i, p in enumerate(ordered, start=1)))
 
 
+_CANVAS_HELP = (
+    "\n\nCANVAS DESIGN RULES: place elements with fractional x/y/w/h "
+    "(0..1 of the body area below the title; of the FULL slide when "
+    "render_title=false). Content kinds: canvas_text (size_pt up to 80 for "
+    "hero numbers; caps=true for small-caps labels), canvas_shape "
+    "(rect/rounded/oval/pentagon/chevron/right_arrow/down_arrow; optional "
+    "centered label; a LABEL-LESS shape at lower z is a panel others sit "
+    "on), canvas_line (h/v rule), or ANY component kind as a placeable "
+    "primitive: native_chart, mini_table, bullet_list, stat_row, "
+    "kpi_card_strip, funnel, matrix_2x2, harvey_balls, donut_stat, "
+    "progress_pill, timeline_row, icon_stat_row, callout_band, "
+    "brace_group. Use color_role='inverse_ink' for any text on dark fills. "
+    "6-14 elements is the sweet spot; align edges to shared lines; leave "
+    "real whitespace — one dominant element, everything else supports it.")
+
+
 def generate_slide(archetype: str, intent: str, prompt: str,
                    facts: FactTable | None,
-                   prior_slides: list[str] | None = None) -> BaseModel:
+                   prior_slides: list[str] | None = None,
+                   design_brief: str | None = None) -> BaseModel:
     model_cls = _ARCHETYPES[archetype]
     schema = model_cls.model_json_schema()
     # cross-slide context: without it, slides duplicate each other's content
@@ -267,7 +301,12 @@ def generate_slide(archetype: str, intent: str, prompt: str,
                  "\n".join(f"- {t}" for t in prior_slides))
     # teach the format decision table where the chart choice is live
     table = ("\n\n" + decision_table_text()
-             if archetype in ("chart_slide", "custom_layout") else "")
+             if archetype in ("chart_slide", "custom_layout", "canvas")
+             else "")
+    if archetype == "canvas":
+        table += _CANVAS_HELP
+    if design_brief:
+        table += "\n\n" + design_brief
     # corpus-mined style priors (empty until a corpus run has been done)
     priors = prior_block(archetype, intent)
     if priors:
@@ -420,22 +459,72 @@ def _record_win(archetype: str, slide) -> None:
         log.warning("could not record win: %s", e)
 
 
+def _design_brief(claim: str, visual_concept: str | None,
+                  recent_silhouettes: list[str],
+                  facts: FactTable | None) -> "DesignBrief | None":
+    """One tiny structured call deciding the slide's visual intent BEFORE
+    geometry. Best-effort: a failed brief never blocks generation."""
+    from .designer import DesignBrief, brief_prompt, describe_silhouette
+    try:
+        raw = _structured_call(
+            "design_brief", DesignBrief.model_json_schema(),
+            brief_prompt(claim, visual_concept,
+                         [describe_silhouette(s)
+                          for s in recent_silhouettes[-4:]],
+                         facts is not None),
+            max_tokens=2000)
+        return DesignBrief.model_validate(raw)
+    except Exception as e:  # noqa: BLE001
+        log.warning("design brief failed (%s); designing without one", e)
+        return None
+
+
+def _brief_text(brief, alternate: bool) -> str:
+    if brief is None:
+        return ""
+    head = ("DESIGN BRIEF — follow it exactly:" if not alternate else
+            "DESIGN BRIEF — same message and emphasis, but take a "
+            f"DIFFERENT layout concept than {brief.layout_concept!r}:")
+    lines = [head,
+             f"- message: {brief.message}",
+             f"- the eye lands on: {brief.eye_lands_on} (give it the "
+             f"greatest visual weight)"]
+    if brief.emphasis_entity:
+        lines.append(f"- visually mark: {brief.emphasis_entity}")
+    if not alternate:
+        lines.append(f"- layout concept: {brief.layout_concept}")
+    lines.append(f"- density: {brief.density}")
+    return "\n".join(lines)
+
+
 def generate_slide_best(archetype: str, claim: str, prompt: str,
                         facts: FactTable | None,
                         prior_slides: list[str] | None = None,
-                        theme: str = "consulting_navy") -> BaseModel:
+                        theme: str = "consulting_navy",
+                        visual_concept: str | None = None,
+                        recent_silhouettes: list[str] | None = None) -> BaseModel:
     """N candidates -> render all -> deterministic score -> ONE pairwise
-    vision-judge call only when the metrics can't separate the finalists."""
+    vision-judge call only when the metrics can't separate the finalists.
+    Canvas slides get a DESIGN BRIEF first; candidate 2 is briefed toward a
+    different concept, and a candidate whose silhouette repeats the
+    previous slide's loses the tie."""
+    from .designer import silhouette
+    recent = recent_silhouettes or []
+    prev_sil = recent[-1] if recent else None
+    brief = (_design_brief(claim, visual_concept, recent, facts)
+             if archetype == "canvas" else None)
     n = candidate_count()
     if n == 1:
         return generate_slide(archetype, claim, prompt, facts,
-                              prior_slides=prior_slides)
+                              prior_slides=prior_slides,
+                              design_brief=_brief_text(brief, False))
     cands = []
     for i in range(n):
         p = prompt if i == 0 else prompt + _VARIANT_NUDGE
         try:
-            cands.append(generate_slide(archetype, claim, p, facts,
-                                        prior_slides=prior_slides))
+            cands.append(generate_slide(
+                archetype, claim, p, facts, prior_slides=prior_slides,
+                design_brief=_brief_text(brief, alternate=i > 0)))
         except RuntimeError as e:
             log.warning("candidate %d for %s failed: %s", i, archetype, e)
     if not cands:
@@ -453,9 +542,16 @@ def generate_slide_best(archetype: str, claim: str, prompt: str,
     try:
         scored = [(c, _render_candidate(c, theme, workdir, f"cand{i}"))
                   for i, c in enumerate(uniq)]
-        scored.sort(key=lambda cs: (cs[1]["defects"], -cs[1]["fill"]))
+        for c, s in scored:
+            # repeating the previous slide's silhouette is a defect class:
+            # variety is part of the score, not just the judge's taste
+            s["same_sil"] = 1 if (prev_sil
+                                  and silhouette(c) == prev_sil) else 0
+        scored.sort(key=lambda cs: (cs[1]["defects"], cs[1]["same_sil"],
+                                    -cs[1]["fill"]))
         best, runner = scored[0], scored[1]
         clear = (best[1]["defects"] < runner[1]["defects"]
+                 or best[1]["same_sil"] < runner[1]["same_sil"]
                  or best[1]["fill"] - runner[1]["fill"] > 0.05)
         if clear or best[1]["pptx"] is None or runner[1]["pptx"] is None:
             return best[0]
@@ -489,22 +585,47 @@ def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
     log.info("outline: %s", [o.slide_type for o in outline.slides])
     deck_context = (f"{prompt}\n\nDeck governing thought: "
                     f"{outline.governing_thought}")
+    # designer mode: body slides are DESIGNED freeform on the canvas; the
+    # outline's slide_type survives as the reliability fallback. Covers,
+    # dividers and the closing exec_summary keep their dedicated molds.
+    designer_on = os.environ.get("DECKENGINE_DESIGNER", "1") != "0"
+    _not_designed = ("title", "section_divider", "exec_summary")
+    from .designer import silhouette
     slides = []
     prior: list[str] = []
+    recent_sils: list[str] = []
     for item in outline.slides:
         if item.slide_type not in _ARCHETYPES:
             log.warning("skipping unknown archetype %r", item.slide_type)
             continue
+        use_canvas = designer_on and item.slide_type not in _not_designed
         try:
-            slide = generate_slide_best(item.slide_type, item.claim,
-                                        deck_context, facts,
-                                        prior_slides=prior, theme=theme)
+            if use_canvas:
+                try:
+                    slide = generate_slide_best(
+                        "canvas", item.claim, deck_context, facts,
+                        prior_slides=prior, theme=theme,
+                        visual_concept=item.visual_concept,
+                        recent_silhouettes=recent_sils)
+                except RuntimeError as e:
+                    log.warning("canvas design failed for %r (%s); "
+                                "archetype fallback %s",
+                                item.claim[:50], e, item.slide_type)
+                    slide = generate_slide_best(
+                        item.slide_type, item.claim, deck_context, facts,
+                        prior_slides=prior, theme=theme)
+            else:
+                slide = generate_slide_best(item.slide_type, item.claim,
+                                            deck_context, facts,
+                                            prior_slides=prior, theme=theme)
         except RuntimeError as e:
             # one stubborn slide must NEVER kill a whole deck: ship without
             # it and record the gap (the claim chain stays reviewable)
             log.warning("skipping slide %r (%s): %s",
                         item.claim[:60], item.slide_type, e)
             continue
+        recent_sils.append(silhouette(slide))
+        del recent_sils[:-6]
         if facts:
             # CSV facts are official by construction — mark their displays
             slide = inject_fact_markers(slide, facts)

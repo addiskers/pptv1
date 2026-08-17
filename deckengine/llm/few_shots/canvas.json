@@ -1,7 +1,7 @@
 {
  "slide_type": "canvas",
  "title": "Drip-irrigated plots return **3.4x** [[src:recon]] the income of flood-irrigated ones",
- "subtitle": "Farm-gate margin per acre across 214 sampled plots, 2024 season",
+ "subtitle": "Farm-gate margin per acre across 214 [[src:recon]] sampled plots, 2024 season",
  "kicker": "the economics",
  "render_title": true,
  "notes": "Say: the left number is the whole slide. Point at the gap between the two right-hand bars, then the water line below.",
@@ -41,7 +41,7 @@
    "z": 1,
    "content": {
     "kind": "canvas_text",
-    "text": "3.4x",
+    "text": "3.4x [[src:recon]]",
     "size_pt": 64,
     "font": "display",
     "color_role": "inverse_ink",
