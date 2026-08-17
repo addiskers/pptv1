@@ -1,0 +1,163 @@
+{
+ "slide_type": "canvas",
+ "title": "Drip-irrigated plots return **3.4x** [[src:recon]] the income of flood-irrigated ones",
+ "subtitle": "Farm-gate margin per acre across 214 sampled plots, 2024 season",
+ "kicker": "the economics",
+ "render_title": true,
+ "notes": "Say: the left number is the whole slide. Point at the gap between the two right-hand bars, then the water line below.",
+ "elements": [
+  {
+   "x": 0.0,
+   "y": 0.0,
+   "w": 0.38,
+   "h": 1.0,
+   "z": 0,
+   "content": {
+    "kind": "canvas_shape",
+    "shape": "rect",
+    "fill_role": "primary_dark"
+   }
+  },
+  {
+   "x": 0.03,
+   "y": 0.1,
+   "w": 0.32,
+   "h": 0.1,
+   "z": 1,
+   "content": {
+    "kind": "canvas_text",
+    "text": "income multiple",
+    "size_role": "kicker",
+    "caps": true,
+    "color_role": "inverse_ink",
+    "anchor": "bottom"
+   }
+  },
+  {
+   "x": 0.03,
+   "y": 0.22,
+   "w": 0.32,
+   "h": 0.3,
+   "z": 1,
+   "content": {
+    "kind": "canvas_text",
+    "text": "3.4x",
+    "size_pt": 64,
+    "font": "display",
+    "color_role": "inverse_ink",
+    "anchor": "top"
+   }
+  },
+  {
+   "x": 0.03,
+   "y": 0.56,
+   "w": 0.32,
+   "h": 0.28,
+   "z": 1,
+   "content": {
+    "kind": "canvas_text",
+    "text": "Drip plots cleared **₹86,400** [[src:recon]] per acre against ₹25,300 [[src:recon]] on flood irrigation — the gap widens in every water-stressed district.",
+    "size_role": "small",
+    "color_role": "inverse_ink"
+   }
+  },
+  {
+   "x": 0.42,
+   "y": 0.02,
+   "w": 0.56,
+   "h": 0.6,
+   "z": 0,
+   "content": {
+    "kind": "native_chart",
+    "chart_type": "bar",
+    "categories": [
+     "Drip",
+     "Sprinkler",
+     "Flood"
+    ],
+    "series": [
+     {
+      "name": "Margin per acre (₹ 000)",
+      "values": [
+       86.4,
+       51.2,
+       25.3
+      ]
+     }
+    ],
+    "sort": "desc",
+    "highlight": "Drip",
+    "annotation": null,
+    "source": "Source: field survey 2024, n=214 [[src:recon]]",
+    "value_suffix": "k"
+   }
+  },
+  {
+   "x": 0.42,
+   "y": 0.68,
+   "w": 0.17,
+   "h": 0.14,
+   "z": 0,
+   "content": {
+    "kind": "canvas_shape",
+    "shape": "rounded",
+    "fill_role": "surface",
+    "label": "**62%** less water",
+    "label_size_role": "small"
+   }
+  },
+  {
+   "x": 0.615,
+   "y": 0.68,
+   "w": 0.17,
+   "h": 0.14,
+   "z": 0,
+   "content": {
+    "kind": "canvas_shape",
+    "shape": "rounded",
+    "fill_role": "surface",
+    "label": "**2 seasons** payback",
+    "label_size_role": "small"
+   }
+  },
+  {
+   "x": 0.81,
+   "y": 0.68,
+   "w": 0.17,
+   "h": 0.14,
+   "z": 0,
+   "content": {
+    "kind": "canvas_shape",
+    "shape": "rounded",
+    "fill_role": "surface",
+    "label": "**91%** would reinvest",
+    "label_size_role": "small"
+   }
+  },
+  {
+   "x": 0.42,
+   "y": 0.86,
+   "w": 0.56,
+   "h": 0.02,
+   "z": 0,
+   "content": {
+    "kind": "canvas_line",
+    "direction": "h",
+    "role": "grid"
+   }
+  },
+  {
+   "x": 0.42,
+   "y": 0.89,
+   "w": 0.56,
+   "h": 0.09,
+   "z": 0,
+   "content": {
+    "kind": "canvas_text",
+    "text": "Margins reconstructed from mandi prices and input-cost schedules. [[src:recon]]",
+    "size_role": "micro",
+    "color_role": "ink_muted"
+   }
+  }
+ ]
+}

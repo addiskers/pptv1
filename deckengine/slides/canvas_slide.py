@@ -1,0 +1,156 @@
+"""canvas assembler — render a freeform-designed slide.
+
+Every text element passes through fit_text INTO its box (overflow is
+structurally impossible); component leaves render through the standard
+Component contract with their element box as the cell; shapes/lines paint
+by z-order. A light alignment pass snaps near-aligned edges (the hand-built
+tell is crisp alignment, and the LLM's fractions are approximate).
+"""
+from __future__ import annotations
+
+from dataclasses import replace
+
+from ..components.base import RenderContext, get_component
+from ..core.bbox import BBox
+from ..core.fit_text import Span, fit_text
+from ..core.pptx_shapes import add_hline, add_shape, add_vline
+from ..core.pptx_text import add_text_box, make_text_frame, write_fit_result
+from ..layout.zones import SLIDE
+from ..schema.canvas import CanvasElement, CanvasSlideSpec
+from ..schema.rich import parse_rich
+from .base import SlideAssembler, register_slide
+
+_SNAP_TOL = 0.015     # edges within this fraction snap to a shared line
+_KICKER_SPC = 0.9     # letter-spacing for caps text (matches section_header)
+_TEXT_MIN_FRAC = 0.5  # text may shrink to half its asked size before ellipsis
+
+
+def _snap(elements: list[CanvasElement]) -> list[tuple[float, float, float, float]]:
+    """Snapped (x, y, w, h) per element: edges within _SNAP_TOL of an
+    earlier element's edge adopt it. Pure function — rails and render see
+    the same geometry."""
+    out: list[list[float]] = []
+    for el in elements:
+        x, y, w, h = el.x, el.y, el.w, el.h
+        r, b = x + w, y + h
+        for px, py, pw, ph in out:
+            pr, pb = px + pw, py + ph
+            for cand in (px, pr):
+                if abs(x - cand) <= _SNAP_TOL:
+                    r0 = x + w
+                    x = cand
+                    w = max(0.02, r0 - x)
+                if abs(r - cand) <= _SNAP_TOL:
+                    w = max(0.02, cand - x)
+                    r = x + w
+            for cand in (py, pb):
+                if abs(y - cand) <= _SNAP_TOL:
+                    b0 = y + h
+                    y = cand
+                    h = max(0.015, b0 - y)
+                if abs(b - cand) <= _SNAP_TOL:
+                    h = max(0.015, cand - y)
+                    b = y + h
+        out.append([x, y, w, h])
+    return [tuple(v) for v in out]
+
+
+@register_slide("canvas")
+class CanvasSlide(SlideAssembler):
+    def assemble(self, slide, spec: CanvasSlideSpec,
+                 ctx: RenderContext) -> None:
+        theme = ctx.theme
+        if spec.bg_fill_role:
+            add_shape(slide, SLIDE, theme, shape="rect",
+                      fill_role=spec.bg_fill_role)
+        if spec.render_title:
+            z = self.render_title(slide, spec, ctx)
+            area = z["body"]
+        else:
+            area = SLIDE
+
+        geoms = _snap(spec.elements)
+        order = sorted(range(len(spec.elements)),
+                       key=lambda i: (spec.elements[i].z, i))
+        for i in order:
+            el = spec.elements[i]
+            x, y, w, h = geoms[i]
+            box = BBox(area.x + round(x * area.w),
+                       area.y + round(y * area.h),
+                       max(1, round(w * area.w)),
+                       max(1, round(h * area.h)))
+            self._render_element(slide, el, box, ctx)
+
+        if spec.footnote:
+            from ..schema.components import TextBlockSpec
+            fn = TextBlockSpec(text=spec.footnote, size_role="micro",
+                               color_role="ink_muted")
+            comp = get_component("text_block")
+            fh = comp.measure(fn, area.w, ctx)
+            comp.render(slide, fn,
+                        BBox(area.x, area.bottom - fh, area.w, fh), ctx)
+
+    # -- element dispatch ---------------------------------------------------
+
+    def _render_element(self, slide, el: CanvasElement, box: BBox,
+                        ctx: RenderContext) -> None:
+        c = el.content
+        kind = c.kind
+        if kind == "canvas_text":
+            self._text(slide, c, box, ctx)
+        elif kind == "canvas_shape":
+            self._shape(slide, c, box, ctx)
+        elif kind == "canvas_line":
+            if c.direction == "h":
+                add_hline(slide, box.x, box.y + box.h // 2, box.w, ctx.theme,
+                          role=c.role, weight_pt=c.weight_pt, dash=c.dash)
+            else:
+                add_vline(slide, box.x + box.w // 2, box.y, box.h, ctx.theme,
+                          role=c.role, weight_pt=c.weight_pt, dash=c.dash)
+        else:  # any registered component: box is its cell, flexers may fill
+            comp = get_component(kind)
+            ctx.fill_hint = True
+            try:
+                comp.render(slide, c, box, ctx)
+            finally:
+                ctx.fill_hint = False
+
+    def _text(self, slide, c, box: BBox, ctx: RenderContext) -> None:
+        size = c.size_pt if c.size_pt is not None else ctx.size(c.size_role)
+        spans = parse_rich(c.text, base_color_role=c.color_role)
+        if c.caps:
+            spans = [replace(s, caps=True, spc_pts=_KICKER_SPC)
+                     for s in spans]
+        family = ctx.font("display") if c.font == "display" \
+            else ctx.font("body")
+        fit = fit_text(spans, BBox(0, 0, box.w, box.h), family,
+                       max_size=size,
+                       min_size=max(6.5, size * _TEXT_MIN_FRAC),
+                       measurer=ctx.measurer)
+        if fit.truncated:
+            ctx.report.truncated(f"canvas text: {c.text[:40]!r}")
+        tb = add_text_box(slide, box, align=c.align, anchor=c.anchor)
+        write_fit_result(tb.text_frame, fit, ctx.theme, family=family,
+                         align=c.align, default_color_role=c.color_role)
+
+    def _shape(self, slide, c, box: BBox, ctx: RenderContext) -> None:
+        s = add_shape(slide, box, ctx.theme, shape=c.shape,
+                      fill_role=c.fill_role, line_role=c.line_role,
+                      line_w_pt=c.line_w_pt, corner_radius=c.corner_radius,
+                      shadow=c.shadow)
+        if not (c.label or "").strip():
+            return
+        pad = ctx.theme.spacing(0.4)
+        fit = fit_text(parse_rich(c.label,
+                                  base_color_role=c.label_color_role),
+                       BBox(0, 0, max(1, box.w - 2 * pad),
+                            max(1, box.h - ctx.theme.spacing(0.3))),
+                       ctx.font("body"),
+                       max_size=ctx.size(c.label_size_role), min_size=6.5,
+                       measurer=ctx.measurer)
+        if fit.truncated:
+            ctx.report.truncated(f"canvas shape label: {c.label[:40]!r}")
+        tf = make_text_frame(s, align="center", anchor="middle")
+        write_fit_result(tf, fit, ctx.theme, family=ctx.font("body"),
+                         align="center",
+                         default_color_role=c.label_color_role)

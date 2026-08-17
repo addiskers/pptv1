@@ -28,6 +28,7 @@ from .facts import FactTable, verify_spec_numbers
 from .format_rules import (check_outline_chart_density,
                            check_outline_formats, check_slide_format,
                            decision_table_text)
+from .canvas_rules import check_canvas_slide
 from .exemplar_retrieval import select_exemplars
 from .provenance import (append_legend_once, check_slide_markers,
                          inject_fact_markers, marker_coverage,
@@ -336,6 +337,19 @@ def generate_slide(archetype: str, intent: str, prompt: str,
             continue
         if fproblems:
             log.warning("format problems survived repairs: %s", fproblems)
+        if slide.slide_type == "canvas":
+            cproblems = check_canvas_slide(slide)
+            if cproblems and attempt < MAX_REPAIRS:
+                attempt_prompt = (base_prompt +
+                                  "\n\nDesign problems — fix ALL of them "
+                                  "while keeping the same message and "
+                                  "overall composition:\n" +
+                                  "\n".join(f"- {p}" for p in cproblems) +
+                                  "\nEmit the full JSON again.")
+                continue
+            if cproblems:
+                log.warning("canvas problems survived repairs: %s",
+                            cproblems)
         return slide
     if slide is None:
         raise RuntimeError(f"slide {archetype} failed validation after "

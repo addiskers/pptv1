@@ -1,4 +1,13 @@
 {
+  "canvas_hero": {
+    "slides": 1,
+    "warnings": 0,
+    "truncations": 0,
+    "overflows": 0,
+    "min_fill": null,
+    "mean_fill": null,
+    "zones_below_floor": 0
+  },
   "chart_variants": {
     "slides": 4,
     "warnings": 0,
@@ -22,8 +31,8 @@
     "warnings": 0,
     "truncations": 0,
     "overflows": 0,
-    "min_fill": 0.814,
-    "mean_fill": 0.814,
+    "min_fill": 0.832,
+    "mean_fill": 0.832,
     "zones_below_floor": 0
   },
   "gates_slide3": {
@@ -31,8 +40,8 @@
     "warnings": 0,
     "truncations": 0,
     "overflows": 0,
-    "min_fill": 0.982,
-    "mean_fill": 0.982,
+    "min_fill": 0.984,
+    "mean_fill": 0.984,
     "zones_below_floor": 0
   },
   "gates_slide4": {
@@ -40,8 +49,8 @@
     "warnings": 0,
     "truncations": 0,
     "overflows": 0,
-    "min_fill": 0.988,
-    "mean_fill": 0.988,
+    "min_fill": 0.993,
+    "mean_fill": 0.993,
     "zones_below_floor": 0
   },
   "gates_slide5": {
@@ -58,8 +67,8 @@
     "warnings": 0,
     "truncations": 0,
     "overflows": 0,
-    "min_fill": 0.598,
-    "mean_fill": 0.866,
+    "min_fill": 0.605,
+    "mean_fill": 0.868,
     "zones_below_floor": 0
   },
   "ev_market_entry.spec": {
@@ -67,8 +76,8 @@
     "warnings": 0,
     "truncations": 0,
     "overflows": 0,
-    "min_fill": 0.308,
-    "mean_fill": 0.696,
+    "min_fill": 0.32,
+    "mean_fill": 0.703,
     "zones_below_floor": 1
   },
   "agdev_demo": {
@@ -76,8 +85,8 @@
     "warnings": 0,
     "truncations": 0,
     "overflows": 0,
-    "min_fill": 0.538,
-    "mean_fill": 0.773,
+    "min_fill": 0.531,
+    "mean_fill": 0.78,
     "zones_below_floor": 1
   },
   "showcase_qcommerce": {
@@ -85,8 +94,8 @@
     "warnings": 0,
     "truncations": 0,
     "overflows": 0,
-    "min_fill": 0.078,
-    "mean_fill": 0.639,
+    "min_fill": 0.079,
+    "mean_fill": 0.644,
     "zones_below_floor": 4
   }
 }
