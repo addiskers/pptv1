@@ -12,7 +12,20 @@
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
-LO_VERSION="${LO_VERSION:-24.8.4}"
+STABLE_INDEX="https://download.documentfoundation.org/libreoffice/stable/"
+LO_VERSION="${LO_VERSION:-auto}"
+if [ "$LO_VERSION" = "auto" ]; then
+  # TDF prunes old point releases from /stable/ — discover what exists and
+  # prefer the OLDEST listed branch ("still": most conservative), newest
+  # patch within it. Pin via LO_VERSION=x.y.z to override.
+  vers=$(curl -fsSL "$STABLE_INDEX" | grep -oE 'href="[0-9]+\.[0-9]+\.[0-9]+/"' \
+         | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | sort -uV)
+  [ -n "$vers" ] || { echo "FATAL: could not list $STABLE_INDEX"; exit 1; }
+  still_branch=$(echo "$vers" | head -1 | cut -d. -f1-2)
+  LO_VERSION=$(echo "$vers" | grep "^${still_branch}\." | tail -1)
+  echo "  discovered LibreOffice versions: $(echo $vers | tr '\n' ' ')"
+  echo "  picked (still branch): $LO_VERSION"
+fi
 LO_DIR="LibreOffice_${LO_VERSION}_Linux_x86-64_rpm"
 LO_TAR="${LO_DIR}.tar.gz"
 # primary + mirror fallback (TDF moves old point releases to downloadarchive)
