@@ -8,8 +8,10 @@ User=ec2-user
 WorkingDirectory=/home/ec2-user/deckengine
 # Put secrets in /home/ec2-user/deckengine/.env (KEY=VALUE per line); .env is
 # gitignored and auto-loaded by the app (envfile.load_env).
+# .env is the SINGLE source of truth for DECKENGINE_* settings —
+# EnvironmentFile overrides Environment= lines, so never set preview/keys
+# here (a stale Environment= line masked the real preview mode once).
 EnvironmentFile=-/home/ec2-user/deckengine/.env
-Environment=DECKENGINE_PREVIEW=soffice
 Environment=HOST=127.0.0.1
 Environment=PORT=8000
 # ONE worker: job state lives in process memory between persist points, and

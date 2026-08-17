@@ -295,8 +295,12 @@ def _run_render(job_id: str, spec: DeckSpec) -> None:
                                         width=1280, height=720))
         except Exception:  # noqa: BLE001
             pass
+        from ..schema.rich import plain
         meta = {"status": "done", "path": str(out),
                 "title": spec.meta.title, "slides": len(spec.slides),
+                "slide_titles": [plain(getattr(s, "title", "") or
+                                       s.slide_type.replace("_", " "))[:120]
+                                 for s in spec.slides],
                 "warnings": report.warnings,
                 "truncations": report.truncations,
                 "previews": previews,
@@ -359,17 +363,20 @@ def regen_slide(job_id: str, n: int, req: RegenSlide,
     spec = DeckSpec.model_validate_json(spec_p.read_text(encoding="utf-8"))
     if not (1 <= n <= len(spec.slides)):
         raise HTTPException(404, f"deck has {len(spec.slides)} slides")
-    _JOBS[job_id] = {**job, "status": "running"}
+    # regen_slide lets the UI show a per-slide busy state while the rest of
+    # the deck stays interactive
+    _JOBS[job_id] = {**job, "status": "running", "regen_slide": n}
+    _persist(job_id)
     background.add_task(_run_regen, job_id, spec, n, req.instruction,
                         job.get("request"))
-    return {"job_id": job_id, "status": "running"}
+    return {"job_id": job_id, "status": "running", "regen_slide": n}
 
 
 def _run_regen(job_id: str, spec: DeckSpec, n: int, instruction: str,
                request: dict | None) -> None:
     try:
         from ..llm.facts import FactTable
-        from ..llm.spec_generator import generate_slide
+        from ..llm.spec_generator import generate_slide_best
         target = spec.slides[n - 1]
         req = request or {}
         facts = (FactTable.from_csv(req["csv_text"])
@@ -378,9 +385,13 @@ def _run_regen(job_id: str, spec: DeckSpec, n: int, instruction: str,
                  for i, s in enumerate(spec.slides) if i != n - 1]
         claim = (f"{getattr(target, 'title', '')} — REVISION INSTRUCTION from "
                  f"the analyst: {instruction}")
-        new_slide = generate_slide(target.slide_type, claim,
-                                   req.get("prompt", spec.meta.title),
-                                   facts, prior_slides=prior)
+        # multi-candidate + judge: this is the ONE slide the user is
+        # actively watching — worth the extra ~30s
+        new_slide = generate_slide_best(target.slide_type, claim,
+                                        req.get("prompt", spec.meta.title),
+                                        facts, prior_slides=prior,
+                                        theme=req.get("theme",
+                                                      "consulting_navy"))
         spec.slides[n - 1] = new_slide
         _run_render(job_id, spec)
     except Exception as e:  # noqa: BLE001

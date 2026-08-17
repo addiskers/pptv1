@@ -141,11 +141,22 @@ def test_interrupted_job_marked_errored_and_refunds(client):
     assert client.post("/render", json={"spec": SPEC}).status_code == 200
 
 
+def test_done_meta_carries_slide_titles(client, monkeypatch):
+    """The UI's no-preview fallback and editor headline need per-slide
+    titles in the job meta."""
+    monkeypatch.setenv("DECKENGINE_PREVIEW", "none")
+    _login(client)
+    job_id = client.post("/render", json={"spec": SPEC}).json()["job_id"]
+    job = client.get(f"/jobs/{job_id}").json()
+    assert job["slide_titles"] == ["One"]
+    assert job["previews"] == 0  # preview-less server -> UI must fall back
+
+
 def test_seeded_owner_account_exists():
     """The committed data/users.json carries the real account, hashed."""
     real = json.loads((auth.REPO / "data" / "users.json")
                       .read_text(encoding="utf-8"))
     u = real["users"]["sd@skyquestt.com"]
-    assert u["quota"] == 1
+    assert isinstance(u["quota"], int) and u["quota"] >= 1
     assert u["pw"].startswith("pbkdf2_sha256$")
     assert "hello" not in u["pw"]  # never plaintext

@@ -247,6 +247,42 @@
   .deck-item .m { font-size: 12px; color: var(--muted); }
   .drawer-empty { text-align: center; color: var(--muted); padding: 40px 20px; font-size: 13.5px; }
 
+  /* slide editor drawer */
+  .editor-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+  .ed-img { width: 100%; border: 1px solid var(--line); border-radius: var(--r-sm);
+            display: none; margin-bottom: 12px; }
+  .ed-headline { font: 600 14px inherit; color: var(--navy); margin-bottom: 14px; }
+  .ed-label { font: 600 11.5px inherit; text-transform: uppercase; letter-spacing: .06em;
+              color: var(--faint); margin: 14px 0 6px; }
+  #ed-text { width: 100%; border: 1px solid var(--line-strong); border-radius: var(--r-sm);
+             padding: 10px 12px; font: 14px/1.5 inherit; background: var(--surface-2); resize: vertical; }
+  #ed-text:focus { outline: none; border-color: var(--slate); }
+  .ed-apply { width: 100%; margin-top: 12px; border: 0; border-radius: var(--r-sm);
+              background: var(--navy); color: #fff; font: 600 14px inherit;
+              padding: 12px; cursor: pointer; }
+  .ed-apply:hover { background: #22303b; }
+  .ed-apply:disabled { opacity: .55; cursor: wait; }
+  .ed-note { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+
+  /* per-slide busy overlay + no-preview fallback list */
+  .pv.busy::after { content: "reworking…"; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(244,242,236,.82); color: var(--navy);
+    font: 600 13px inherit; letter-spacing: .02em; }
+  .no-previews { background: var(--surface); border: 1px solid var(--line);
+    border-radius: var(--r-md); padding: 8px 0; margin-top: 14px; }
+  .no-previews .np-note { padding: 10px 18px 12px; color: var(--muted); font-size: 12.5px;
+    border-bottom: 1px solid var(--line); }
+  .sl-item { display: flex; align-items: center; gap: 12px; padding: 9px 18px;
+    border-bottom: 1px solid var(--line); cursor: pointer; }
+  .sl-item:last-child { border-bottom: 0; }
+  .sl-item:hover { background: var(--surface-2); }
+  .sl-item .sn { font: 700 12px inherit; color: var(--faint); min-width: 22px; }
+  .sl-item .st { flex: 1; font-size: 13.5px; color: var(--ink); }
+  .sl-item .se { border: 1px solid var(--line-strong); background: var(--surface);
+    border-radius: 6px; padding: 4px 12px; font: 600 12px inherit; color: var(--navy);
+    cursor: pointer; }
+
   /* toast */
   #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
     background: #3a2018; color: #fff; padding: 13px 20px; border-radius: var(--r-md); font-size: 13.5px;
@@ -389,10 +425,30 @@
 
 <div id="lightbox" onclick="this.style.display='none'"><img id="lightimg" alt="slide"></div>
 
-<div class="drawer-bg" id="drawerBg" onclick="closeDrawer()"></div>
+<div class="drawer-bg" id="drawerBg" onclick="closeDrawer(); closeEditor();"></div>
 <aside class="drawer" id="drawer">
   <div class="drawer-head"><h3>Recent decks</h3><button onclick="closeDrawer()">&times;</button></div>
   <div class="drawer-list" id="drawerList"><div class="drawer-empty">Loading…</div></div>
+</aside>
+
+<!-- per-slide editor -->
+<aside class="drawer" id="editor" aria-label="Slide editor">
+  <div class="drawer-head">
+    <h3 id="ed-title">Slide</h3>
+    <button type="button" onclick="closeEditor()" aria-label="Close">&times;</button>
+  </div>
+  <div class="editor-body">
+    <img id="ed-img" class="ed-img" alt="" />
+    <div id="ed-headline" class="ed-headline"></div>
+    <div class="ed-label">Quick changes</div>
+    <div class="chips" id="ed-chips"></div>
+    <div class="ed-label">Or tell it what to change</div>
+    <textarea id="ed-text" rows="3"
+      placeholder="e.g. turn this into a donut chart and highlight Indonesia"></textarea>
+    <button class="ed-apply" id="ed-apply" type="button">Rework this slide</button>
+    <div class="ed-note">Only this slide is regenerated — the rest of the deck
+      is untouched. Takes ~30–60 seconds.</div>
+  </div>
 </aside>
 
 <div id="toast"></div>
@@ -635,9 +691,13 @@ function poll(jobId) {
   }, 1500);
 }
 
+let lastJob = null;
+
 function renderResult(jobId, job) {
-  const n = job.previews || job.slides || 0;
-  $('r-sub').textContent = (n ? n + ' slides · ' : '') + 'fully editable PowerPoint';
+  lastJob = job;
+  const nSlides = job.slides || 0;
+  const nPrev = job.previews || 0;   // previews and slides are DIFFERENT counts
+  $('r-sub').textContent = (nSlides ? nSlides + ' slides · ' : '') + 'fully editable PowerPoint';
   $('dl').href = '/download/' + jobId;
   const wb = $('warnbox');
   if ((job.warnings || []).length) {
@@ -646,28 +706,103 @@ function renderResult(jobId, job) {
     $('warnbody').textContent = job.warnings.join('\n');
   } else wb.classList.add('hidden');
   const p = $('previews'); p.innerHTML = '';
-  for (let i = 1; i <= n; i++) {
-    const pv = document.createElement('div'); pv.className = 'pv';
-    const img = document.createElement('img');
-    img.src = '/previews/' + jobId + '/' + i + '?v=' + Date.now(); img.alt = 'slide ' + i; img.loading = 'lazy';
-    img.onclick = () => { $('lightimg').src = img.src; $('lightbox').style.display = 'flex'; };
-    const num = document.createElement('div'); num.className = 'n'; num.textContent = i;
-    const rw = document.createElement('button'); rw.className = 'rework';
-    rw.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v6h6M20 20v-6h-6M20 8a8 8 0 00-14-3M4 16a8 8 0 0014 3"/></svg>rework';
-    rw.onclick = e => { e.stopPropagation(); rework(jobId, i); };
-    pv.append(img, num, rw); p.appendChild(pv);
+  if (nPrev > 0) {
+    for (let i = 1; i <= nPrev; i++) {
+      const pv = document.createElement('div'); pv.className = 'pv'; pv.id = 'pv-' + i;
+      const img = document.createElement('img');
+      img.src = '/previews/' + jobId + '/' + i + '?v=' + Date.now(); img.alt = 'slide ' + i; img.loading = 'lazy';
+      img.onclick = () => openEditor(jobId, i);
+      const num = document.createElement('div'); num.className = 'n'; num.textContent = i;
+      const rw = document.createElement('button'); rw.className = 'rework';
+      rw.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4v6h6M20 20v-6h-6M20 8a8 8 0 00-14-3M4 16a8 8 0 0014 3"/></svg>edit';
+      rw.onclick = e => { e.stopPropagation(); openEditor(jobId, i); };
+      pv.append(img, num, rw); p.appendChild(pv);
+    }
+  } else if (nSlides > 0) {
+    // no preview renderer on this server: numbered title list keeps
+    // per-slide editing reachable
+    const box = document.createElement('div'); box.className = 'no-previews';
+    const note = document.createElement('div'); note.className = 'np-note';
+    note.textContent = 'Slide previews are not available on this server — the deck itself is complete. Click any slide to rework it.';
+    box.appendChild(note);
+    const titles = job.slide_titles || [];
+    for (let i = 1; i <= nSlides; i++) {
+      const row = document.createElement('div'); row.className = 'sl-item'; row.id = 'pv-' + i;
+      row.innerHTML = '<span class="sn">' + i + '</span><span class="st">' +
+        (titles[i-1] || 'Slide ' + i) + '</span><span class="se">edit</span>';
+      row.onclick = () => openEditor(jobId, i);
+      box.appendChild(row);
+    }
+    p.appendChild(box);
   }
   show('result');
 }
 
-async function rework(jobId, i) {
-  const instruction = window.prompt('How should slide ' + i + ' change?\n(e.g. "make the title sharper", "use a waterfall chart", "cut to 4 bullets")');
-  if (!instruction) return;
-  progress('Reworking slide ' + i + '…', 'Just this slide is regenerated; the rest is untouched. The deck re-renders in seconds.', 'render', ['outline','slides']);
+// ---- per-slide editor ----
+const ED_CHIPS = [
+  ['More visual', 'Make this slide more visual: replace text with a chart, diagram or icons where possible. '],
+  ['Less text', 'Cut the text roughly in half; keep only the sharpest evidence. '],
+  ['Highlight…', 'Visually highlight '],
+  ['Different chart', 'Use a different, better-suited chart type for this data. '],
+  ['Redesign', 'Redesign this slide with a completely different layout while keeping the same message. '],
+];
+let edJob = null, edSlide = null;
+
+function openEditor(jobId, i) {
+  edJob = jobId; edSlide = i;
+  $('ed-title').textContent = 'Slide ' + i;
+  const titles = (lastJob && lastJob.slide_titles) || [];
+  $('ed-headline').textContent = titles[i-1] || '';
+  const img = $('ed-img');
+  if (lastJob && lastJob.previews >= i) {
+    img.src = '/previews/' + jobId + '/' + i + '?v=' + Date.now();
+    img.style.display = 'block';
+    img.onclick = () => { $('lightimg').src = img.src; $('lightbox').style.display = 'flex'; };
+  } else img.style.display = 'none';
+  const chips = $('ed-chips'); chips.innerHTML = '';
+  ED_CHIPS.forEach(([label, text]) => {
+    const b = document.createElement('button'); b.className = 'chip'; b.type = 'button';
+    b.textContent = label;
+    b.onclick = () => { const t = $('ed-text'); t.value = (t.value ? t.value.trim() + ' ' : '') + text; t.focus(); };
+    chips.appendChild(b);
+  });
+  $('ed-text').value = '';
+  $('ed-apply').disabled = false; $('ed-apply').textContent = 'Rework this slide';
+  $('drawerBg').style.display = 'block';
+  $('editor').classList.add('open');
+}
+function closeEditor() { $('editor').classList.remove('open'); $('drawerBg').style.display = 'none'; }
+
+$('ed-apply').onclick = async () => {
+  const instruction = $('ed-text').value.trim();
+  if (!instruction) { $('ed-text').focus(); return; }
+  $('ed-apply').disabled = true; $('ed-apply').textContent = 'Reworking…';
   try {
-    await fetch('/decks/' + jobId + '/slides/' + i, {method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({instruction})});
-    poll(jobId);
-  } catch (e) { fail(e.message); }
+    const res = await fetch('/decks/' + edJob + '/slides/' + edSlide,
+      {method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify({instruction})});
+    if (!res.ok) throw new Error(await apiError(res));
+    closeEditor();
+    const card = $('pv-' + edSlide); if (card) card.classList.add('busy');
+    pollRegen(edJob);
+  } catch (e) {
+    $('ed-apply').disabled = false; $('ed-apply').textContent = 'Rework this slide';
+    toast(e.message, true);
+  }
+};
+
+function pollRegen(jobId) {
+  // stay on the result view; only the affected card shows busy
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    let job;
+    try { job = await (await fetch('/jobs/' + jobId)).json(); }
+    catch (e) { return; }
+    if (job.status === 'running') return;
+    clearInterval(pollTimer);
+    if (job.status === 'error') { toast(job.error || 'Rework failed.', true); renderResult(jobId, lastJob); return; }
+    renderResult(jobId, job);
+    toast('Slide updated.');
+  }, 2000);
 }
 
 function fail(msg) {
@@ -700,7 +835,7 @@ async function openDrawer() {
   } catch (e) { list.innerHTML = '<div class="drawer-empty">Could not load recent decks.</div>'; }
 }
 function closeDrawer() { $('drawerBg').style.display = 'none'; $('drawer').classList.remove('open'); }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawer(); $('lightbox').style.display = 'none'; } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawer(); closeEditor(); $('lightbox').style.display = 'none'; } });
 </script>
 </body>
 </html>
