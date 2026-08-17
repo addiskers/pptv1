@@ -46,8 +46,9 @@ else
   echo "== [2/5] Runtime dependencies (dnf) =="
   # LibreOffice RPMs assume a desktop-ish userland; headless still needs these
   sudo dnf install -y -q cairo cups-libs libSM libICE libXinerama \
-    libXrender libXext libXrandr libX11 dbus-libs freetype fontconfig \
-    nss nspr || { echo "FATAL: dependency install failed"; exit 1; }
+    libXrender libXext libXrandr libX11 libX11-xcb libxcb dbus-libs \
+    freetype fontconfig nss nspr \
+    || { echo "FATAL: dependency install failed"; exit 1; }
 
   echo "== [3/5] Download + install LibreOffice ${LO_VERSION} =="
   tmp=$(mktemp -d)
