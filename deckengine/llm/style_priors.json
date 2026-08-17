@@ -1,450 +1,459 @@
 {
-  "version": 1,
-  "generated_at": "2026-08-06T10:23:03+00:00",
-  "n_slides_total": 642,
-  "n_slides_high_quality": 602,
-  "chart_variants": {
-    "bar": {
-      "n": 65,
-      "features": {
-        "value_labels": 0.9692,
-        "annotations": 0.7077,
-        "sorted_desc": 0.4615,
-        "series_highlight": 0.4
-      }
-    },
-    "donut_pie": {
-      "n": 17,
-      "features": {
-        "value_labels": 1.0,
-        "annotations": 0.5294,
-        "series_highlight": 0.0588,
-        "sorted_desc": 0.0588
-      }
-    },
-    "line": {
-      "n": 26,
-      "features": {
-        "annotations": 0.9615,
-        "value_labels": 0.5769,
-        "series_highlight": 0.3462
-      }
-    },
-    "stacked_bar": {
-      "n": 62,
-      "features": {
-        "value_labels": 0.9516,
-        "annotations": 0.9032,
-        "series_highlight": 0.1774,
-        "sorted_desc": 0.0484
-      }
-    }
+ "version": 1,
+ "generated_at": "2026-08-06T10:23:03+00:00",
+ "n_slides_total": 642,
+ "n_slides_high_quality": 602,
+ "chart_variants": {
+  "bar": {
+   "n": 65,
+   "features": {
+    "value_labels": 0.9692,
+    "annotations": 0.7077,
+    "sorted_desc": 0.4615,
+    "series_highlight": 0.4
+   }
   },
-  "by_claim_context": {
-    "benchmark": {
-      "n": 93,
-      "chart_type_freq": {
-        "bar": 0.2473,
-        "stacked_bar": 0.1398,
-        "donut_pie": 0.086,
-        "line": 0.0538
-      },
-      "top_features": {
-        "value_labels": 0.6559,
-        "annotations": 0.5376,
-        "series_highlight": 0.172,
-        "sorted_desc": 0.1613
-      },
-      "craft_freq": {
-        "legend_chips": 0.3871,
-        "big_number": 0.2366,
-        "arrow_callout": 0.2043,
-        "icon_rail": 0.172,
-        "brace": 0.1183,
-        "so_what_band": 0.0968,
-        "numbered_steps": 0.0753,
-        "watermark_image": 0.0645,
-        "chevron": 0.0538,
-        "kpi_cards": 0.043,
-        "harvey_balls": 0.0215,
-        "heatmap_cells": 0.0215,
-        "framework_2x2": 0.0108,
-        "timeline_bar": 0.0108
-      }
-    },
-    "growth": {
-      "n": 32,
-      "chart_type_freq": {
-        "bar": 0.2188,
-        "stacked_bar": 0.125
-      },
-      "top_features": {
-        "value_labels": 0.5312,
-        "annotations": 0.4375,
-        "series_highlight": 0.125,
-        "sorted_desc": 0.0625
-      },
-      "craft_freq": {
-        "big_number": 0.4375,
-        "legend_chips": 0.2188,
-        "arrow_callout": 0.1562,
-        "watermark_image": 0.1562,
-        "numbered_steps": 0.125,
-        "icon_rail": 0.0938,
-        "brace": 0.0625,
-        "chevron": 0.0625,
-        "so_what_band": 0.0625,
-        "heatmap_cells": 0.0312,
-        "timeline_bar": 0.0312
-      }
-    },
-    "org_capability": {
-      "n": 76,
-      "chart_type_freq": {
-        "bar": 0.0395,
-        "stacked_bar": 0.0132
-      },
-      "top_features": {
-        "value_labels": 0.0658,
-        "annotations": 0.0526,
-        "series_highlight": 0.0395,
-        "sorted_desc": 0.0132
-      },
-      "craft_freq": {
-        "icon_rail": 0.2632,
-        "big_number": 0.1579,
-        "arrow_callout": 0.1316,
-        "so_what_band": 0.1053,
-        "numbered_steps": 0.0921,
-        "chevron": 0.0789,
-        "brace": 0.0526,
-        "legend_chips": 0.0526,
-        "framework_2x2": 0.0263,
-        "timeline_bar": 0.0263,
-        "funnel": 0.0132,
-        "kpi_cards": 0.0132,
-        "watermark_image": 0.0132
-      }
-    },
-    "other": {
-      "n": 177,
-      "chart_type_freq": {
-        "bar": 0.0452,
-        "stacked_bar": 0.0226
-      },
-      "top_features": {
-        "value_labels": 0.0847,
-        "annotations": 0.0678,
-        "series_highlight": 0.0169,
-        "sorted_desc": 0.0169
-      },
-      "craft_freq": {
-        "icon_rail": 0.1299,
-        "arrow_callout": 0.096,
-        "numbered_steps": 0.096,
-        "watermark_image": 0.096,
-        "big_number": 0.0847,
-        "chevron": 0.0621,
-        "so_what_band": 0.0508,
-        "legend_chips": 0.0282,
-        "brace": 0.0169,
-        "kpi_cards": 0.0113,
-        "framework_2x2": 0.0056,
-        "heatmap_cells": 0.0056
-      }
-    },
-    "process_roadmap": {
-      "n": 64,
-      "chart_type_freq": {
-        "donut_pie": 0.0312,
-        "stacked_bar": 0.0156
-      },
-      "top_features": {
-        "value_labels": 0.0938,
-        "annotations": 0.0625
-      },
-      "craft_freq": {
-        "icon_rail": 0.3125,
-        "numbered_steps": 0.2969,
-        "chevron": 0.2656,
-        "arrow_callout": 0.2188,
-        "legend_chips": 0.1562,
-        "timeline_bar": 0.1094,
-        "framework_2x2": 0.0781,
-        "brace": 0.0625,
-        "so_what_band": 0.0625,
-        "big_number": 0.0312,
-        "watermark_image": 0.0156
-      }
-    },
-    "ranking_comparison": {
-      "n": 33,
-      "chart_type_freq": {
-        "stacked_bar": 0.303,
-        "bar": 0.1818,
-        "donut_pie": 0.0606
-      },
-      "top_features": {
-        "value_labels": 0.8182,
-        "annotations": 0.7273,
-        "sorted_desc": 0.303,
-        "series_highlight": 0.2727
-      },
-      "craft_freq": {
-        "legend_chips": 0.4242,
-        "big_number": 0.303,
-        "arrow_callout": 0.2424,
-        "brace": 0.2424,
-        "icon_rail": 0.1818,
-        "heatmap_cells": 0.0909,
-        "numbered_steps": 0.0606,
-        "so_what_band": 0.0606,
-        "watermark_image": 0.0606,
-        "kpi_cards": 0.0303
-      }
-    },
-    "segmentation": {
-      "n": 24,
-      "chart_type_freq": {
-        "stacked_bar": 0.25,
-        "donut_pie": 0.0833,
-        "bar": 0.0417
-      },
-      "top_features": {
-        "annotations": 0.625,
-        "value_labels": 0.5833,
-        "series_highlight": 0.125,
-        "sorted_desc": 0.0833
-      },
-      "craft_freq": {
-        "legend_chips": 0.5417,
-        "big_number": 0.25,
-        "icon_rail": 0.25,
-        "arrow_callout": 0.2083,
-        "brace": 0.0833,
-        "framework_2x2": 0.0833,
-        "heatmap_cells": 0.0833,
-        "harvey_balls": 0.0417,
-        "watermark_image": 0.0417
-      }
-    },
-    "share_mix": {
-      "n": 23,
-      "chart_type_freq": {
-        "stacked_bar": 0.4783,
-        "bar": 0.2174,
-        "donut_pie": 0.087
-      },
-      "top_features": {
-        "value_labels": 0.913,
-        "annotations": 0.8261,
-        "series_highlight": 0.3478,
-        "sorted_desc": 0.1739
-      },
-      "craft_freq": {
-        "arrow_callout": 0.5217,
-        "big_number": 0.3913,
-        "legend_chips": 0.2174,
-        "brace": 0.1739,
-        "icon_rail": 0.1304,
-        "watermark_image": 0.087,
-        "harvey_balls": 0.0435,
-        "so_what_band": 0.0435
-      }
-    },
-    "trend_forecast": {
-      "n": 68,
-      "chart_type_freq": {
-        "line": 0.2941,
-        "stacked_bar": 0.1765,
-        "bar": 0.1176,
-        "donut_pie": 0.0147
-      },
-      "top_features": {
-        "annotations": 0.7647,
-        "value_labels": 0.6324,
-        "series_highlight": 0.2206
-      },
-      "craft_freq": {
-        "legend_chips": 0.5588,
-        "arrow_callout": 0.3824,
-        "big_number": 0.3529,
-        "icon_rail": 0.1912,
-        "brace": 0.1765,
-        "so_what_band": 0.1029,
-        "watermark_image": 0.0735,
-        "numbered_steps": 0.0588,
-        "timeline_bar": 0.0588,
-        "chevron": 0.0294,
-        "harvey_balls": 0.0294,
-        "heatmap_cells": 0.0147,
-        "kpi_cards": 0.0147
-      }
-    }
+  "donut_pie": {
+   "n": 17,
+   "features": {
+    "value_labels": 1.0,
+    "annotations": 0.5294,
+    "series_highlight": 0.0588,
+    "sorted_desc": 0.0588
+   }
   },
-  "layout_patterns": {
-    "chart": {
-      "structure_freq": {
-        "two_col": 0.523,
-        "single": 0.2469,
-        "three_col": 0.0628,
-        "full_bleed": 0.0502,
-        "rows_stack": 0.0502,
-        "grid": 0.0209,
-        "header_band_plus_body": 0.0209,
-        "sidebar_left": 0.0126,
-        "four_plus_col": 0.0084,
-        "sidebar_right": 0.0042
-      },
-      "has_bottom_band": 0.4059,
-      "has_source_footer": 0.9372
-    },
-    "divider": {
-      "structure_freq": {
-        "full_bleed": 0.4118,
-        "single": 0.2353,
-        "two_col": 0.2353,
-        "header_band_plus_body": 0.0588,
-        "sidebar_left": 0.0392,
-        "sidebar_right": 0.0196
-      },
-      "has_bottom_band": 0.098,
-      "has_source_footer": 0.3922
-    },
-    "exec_summary": {
-      "structure_freq": {
-        "two_col": 0.5,
-        "single": 0.15,
-        "full_bleed": 0.1,
-        "rows_stack": 0.075,
-        "sidebar_left": 0.075,
-        "three_col": 0.05,
-        "grid": 0.025,
-        "sidebar_right": 0.025
-      },
-      "has_bottom_band": 0.175,
-      "has_source_footer": 0.825
-    },
-    "framework": {
-      "structure_freq": {
-        "two_col": 0.41,
-        "single": 0.15,
-        "three_col": 0.15,
-        "sidebar_left": 0.08,
-        "grid": 0.07,
-        "four_plus_col": 0.05,
-        "rows_stack": 0.05,
-        "full_bleed": 0.02,
-        "header_band_plus_body": 0.01,
-        "sidebar_right": 0.01
-      },
-      "has_bottom_band": 0.44,
-      "has_source_footer": 0.77
-    },
-    "other": {
-      "structure_freq": {
-        "two_col": 0.3667,
-        "single": 0.3333,
-        "three_col": 0.1333,
-        "sidebar_left": 0.1,
-        "four_plus_col": 0.0333,
-        "grid": 0.0333
-      },
-      "has_bottom_band": 0.2333,
-      "has_source_footer": 0.6667
-    },
-    "table": {
-      "structure_freq": {
-        "single": 0.5,
-        "two_col": 0.3125,
-        "grid": 0.0625,
-        "sidebar_left": 0.0625,
-        "three_col": 0.0625
-      },
-      "has_bottom_band": 0.25,
-      "has_source_footer": 0.75
-    },
-    "text_bullets": {
-      "structure_freq": {
-        "two_col": 0.46,
-        "single": 0.32,
-        "rows_stack": 0.1,
-        "three_col": 0.04,
-        "four_plus_col": 0.02,
-        "full_bleed": 0.02,
-        "grid": 0.02,
-        "sidebar_right": 0.02
-      },
-      "has_bottom_band": 0.28,
-      "has_source_footer": 0.82
-    },
-    "title": {
-      "structure_freq": {
-        "full_bleed": 0.463,
-        "single": 0.2593,
-        "two_col": 0.2407,
-        "header_band_plus_body": 0.0185,
-        "rows_stack": 0.0185
-      },
-      "has_bottom_band": 0.2037,
-      "has_source_footer": 0.4444
-    }
+  "line": {
+   "n": 26,
+   "features": {
+    "annotations": 0.9615,
+    "value_labels": 0.5769,
+    "series_highlight": 0.3462
+   }
   },
-  "global": {
-    "density_mean": 3.0399,
-    "title_is_action_rate": 0.5681,
-    "craft_freq": {
-      "legend_chips": 0.2193,
-      "arrow_callout": 0.2076,
-      "big_number": 0.2027,
-      "icon_rail": 0.1844,
-      "numbered_steps": 0.0997,
-      "brace": 0.0963,
-      "chevron": 0.0731,
-      "so_what_band": 0.0731,
-      "watermark_image": 0.0664,
-      "timeline_bar": 0.0249,
-      "framework_2x2": 0.0183,
-      "heatmap_cells": 0.0166,
-      "kpi_cards": 0.015,
-      "harvey_balls": 0.01,
-      "funnel": 0.0017
-    }
-  },
-  "judge_craft_checklist": [
-    "value_labels: label every bar/point with its value (91% of top slides)",
-    "annotations: annotate the chart with the takeaway (80% of top slides)",
-    "series_highlight: highlight one series and mute the rest (28% of top slides)",
-    "legend_chips: render legends as inline color chips (22% of top slides)",
-    "arrow_callout: call out the key delta with an arrow (21% of top slides)",
-    "big_number: let one hero number dominate the slide (20% of top slides)"
-  ],
-  "capability_gaps": {
-    "photo_background": 0.2076,
-    "endpoint_labels": 0.1246,
-    "grouped_bar": 0.0515,
-    "delta_brackets": 0.0465,
-    "other": 0.0332,
-    "avg_or_target_line": 0.0282,
-    "waterfall": 0.0249,
-    "forecast_dashed": 0.0216,
-    "area_fill": 0.0183,
-    "indexed_base100": 0.0133,
-    "cagr_arrow": 0.0116,
-    "combo": 0.0116,
-    "area": 0.0083,
-    "scatter": 0.0083,
-    "bubble": 0.005,
-    "mekko": 0.0033
-  },
-  "provenance": {
-    "n_decks": 216,
-    "firm_style_mix": {
-      "mck_like": 0.4502,
-      "bcg_like": 0.1578,
-      "bain_like": 0.1545,
-      "unknown": 0.1246,
-      "other": 0.113
-    }
+  "stacked_bar": {
+   "n": 62,
+   "features": {
+    "value_labels": 0.9516,
+    "annotations": 0.9032,
+    "series_highlight": 0.1774,
+    "sorted_desc": 0.0484
+   }
   }
+ },
+ "by_claim_context": {
+  "benchmark": {
+   "n": 93,
+   "chart_type_freq": {
+    "bar": 0.2473,
+    "stacked_bar": 0.1398,
+    "donut_pie": 0.086,
+    "line": 0.0538
+   },
+   "top_features": {
+    "value_labels": 0.6559,
+    "annotations": 0.5376,
+    "series_highlight": 0.172,
+    "sorted_desc": 0.1613
+   },
+   "craft_freq": {
+    "legend_chips": 0.3871,
+    "big_number": 0.2366,
+    "arrow_callout": 0.2043,
+    "icon_rail": 0.172,
+    "brace": 0.1183,
+    "so_what_band": 0.0968,
+    "numbered_steps": 0.0753,
+    "watermark_image": 0.0645,
+    "chevron": 0.0538,
+    "kpi_cards": 0.043,
+    "harvey_balls": 0.0215,
+    "heatmap_cells": 0.0215,
+    "framework_2x2": 0.0108,
+    "timeline_bar": 0.0108
+   }
+  },
+  "growth": {
+   "n": 32,
+   "chart_type_freq": {
+    "bar": 0.2188,
+    "stacked_bar": 0.125
+   },
+   "top_features": {
+    "value_labels": 0.5312,
+    "annotations": 0.4375,
+    "series_highlight": 0.125,
+    "sorted_desc": 0.0625
+   },
+   "craft_freq": {
+    "big_number": 0.4375,
+    "legend_chips": 0.2188,
+    "arrow_callout": 0.1562,
+    "watermark_image": 0.1562,
+    "numbered_steps": 0.125,
+    "icon_rail": 0.0938,
+    "brace": 0.0625,
+    "chevron": 0.0625,
+    "so_what_band": 0.0625,
+    "heatmap_cells": 0.0312,
+    "timeline_bar": 0.0312
+   }
+  },
+  "org_capability": {
+   "n": 76,
+   "chart_type_freq": {
+    "bar": 0.0395,
+    "stacked_bar": 0.0132
+   },
+   "top_features": {
+    "value_labels": 0.0658,
+    "annotations": 0.0526,
+    "series_highlight": 0.0395,
+    "sorted_desc": 0.0132
+   },
+   "craft_freq": {
+    "icon_rail": 0.2632,
+    "big_number": 0.1579,
+    "arrow_callout": 0.1316,
+    "so_what_band": 0.1053,
+    "numbered_steps": 0.0921,
+    "chevron": 0.0789,
+    "brace": 0.0526,
+    "legend_chips": 0.0526,
+    "framework_2x2": 0.0263,
+    "timeline_bar": 0.0263,
+    "funnel": 0.0132,
+    "kpi_cards": 0.0132,
+    "watermark_image": 0.0132
+   }
+  },
+  "other": {
+   "n": 177,
+   "chart_type_freq": {
+    "bar": 0.0452,
+    "stacked_bar": 0.0226
+   },
+   "top_features": {
+    "value_labels": 0.0847,
+    "annotations": 0.0678,
+    "series_highlight": 0.0169,
+    "sorted_desc": 0.0169
+   },
+   "craft_freq": {
+    "icon_rail": 0.1299,
+    "arrow_callout": 0.096,
+    "numbered_steps": 0.096,
+    "watermark_image": 0.096,
+    "big_number": 0.0847,
+    "chevron": 0.0621,
+    "so_what_band": 0.0508,
+    "legend_chips": 0.0282,
+    "brace": 0.0169,
+    "kpi_cards": 0.0113,
+    "framework_2x2": 0.0056,
+    "heatmap_cells": 0.0056
+   }
+  },
+  "process_roadmap": {
+   "n": 64,
+   "chart_type_freq": {
+    "donut_pie": 0.0312,
+    "stacked_bar": 0.0156
+   },
+   "top_features": {
+    "value_labels": 0.0938,
+    "annotations": 0.0625
+   },
+   "craft_freq": {
+    "icon_rail": 0.3125,
+    "numbered_steps": 0.2969,
+    "chevron": 0.2656,
+    "arrow_callout": 0.2188,
+    "legend_chips": 0.1562,
+    "timeline_bar": 0.1094,
+    "framework_2x2": 0.0781,
+    "brace": 0.0625,
+    "so_what_band": 0.0625,
+    "big_number": 0.0312,
+    "watermark_image": 0.0156
+   }
+  },
+  "ranking_comparison": {
+   "n": 33,
+   "chart_type_freq": {
+    "stacked_bar": 0.303,
+    "bar": 0.1818,
+    "donut_pie": 0.0606
+   },
+   "top_features": {
+    "value_labels": 0.8182,
+    "annotations": 0.7273,
+    "sorted_desc": 0.303,
+    "series_highlight": 0.2727
+   },
+   "craft_freq": {
+    "legend_chips": 0.4242,
+    "big_number": 0.303,
+    "arrow_callout": 0.2424,
+    "brace": 0.2424,
+    "icon_rail": 0.1818,
+    "heatmap_cells": 0.0909,
+    "numbered_steps": 0.0606,
+    "so_what_band": 0.0606,
+    "watermark_image": 0.0606,
+    "kpi_cards": 0.0303
+   }
+  },
+  "segmentation": {
+   "n": 24,
+   "chart_type_freq": {
+    "stacked_bar": 0.25,
+    "donut_pie": 0.0833,
+    "bar": 0.0417
+   },
+   "top_features": {
+    "annotations": 0.625,
+    "value_labels": 0.5833,
+    "series_highlight": 0.125,
+    "sorted_desc": 0.0833
+   },
+   "craft_freq": {
+    "legend_chips": 0.5417,
+    "big_number": 0.25,
+    "icon_rail": 0.25,
+    "arrow_callout": 0.2083,
+    "brace": 0.0833,
+    "framework_2x2": 0.0833,
+    "heatmap_cells": 0.0833,
+    "harvey_balls": 0.0417,
+    "watermark_image": 0.0417
+   }
+  },
+  "share_mix": {
+   "n": 23,
+   "chart_type_freq": {
+    "stacked_bar": 0.4783,
+    "bar": 0.2174,
+    "donut_pie": 0.087
+   },
+   "top_features": {
+    "value_labels": 0.913,
+    "annotations": 0.8261,
+    "series_highlight": 0.3478,
+    "sorted_desc": 0.1739
+   },
+   "craft_freq": {
+    "arrow_callout": 0.5217,
+    "big_number": 0.3913,
+    "legend_chips": 0.2174,
+    "brace": 0.1739,
+    "icon_rail": 0.1304,
+    "watermark_image": 0.087,
+    "harvey_balls": 0.0435,
+    "so_what_band": 0.0435
+   }
+  },
+  "trend_forecast": {
+   "n": 68,
+   "chart_type_freq": {
+    "line": 0.2941,
+    "stacked_bar": 0.1765,
+    "bar": 0.1176,
+    "donut_pie": 0.0147
+   },
+   "top_features": {
+    "annotations": 0.7647,
+    "value_labels": 0.6324,
+    "series_highlight": 0.2206
+   },
+   "craft_freq": {
+    "legend_chips": 0.5588,
+    "arrow_callout": 0.3824,
+    "big_number": 0.3529,
+    "icon_rail": 0.1912,
+    "brace": 0.1765,
+    "so_what_band": 0.1029,
+    "watermark_image": 0.0735,
+    "numbered_steps": 0.0588,
+    "timeline_bar": 0.0588,
+    "chevron": 0.0294,
+    "harvey_balls": 0.0294,
+    "heatmap_cells": 0.0147,
+    "kpi_cards": 0.0147
+   }
+  }
+ },
+ "layout_patterns": {
+  "chart": {
+   "structure_freq": {
+    "two_col": 0.523,
+    "single": 0.2469,
+    "three_col": 0.0628,
+    "full_bleed": 0.0502,
+    "rows_stack": 0.0502,
+    "grid": 0.0209,
+    "header_band_plus_body": 0.0209,
+    "sidebar_left": 0.0126,
+    "four_plus_col": 0.0084,
+    "sidebar_right": 0.0042
+   },
+   "has_bottom_band": 0.4059,
+   "has_source_footer": 0.9372
+  },
+  "divider": {
+   "structure_freq": {
+    "full_bleed": 0.4118,
+    "single": 0.2353,
+    "two_col": 0.2353,
+    "header_band_plus_body": 0.0588,
+    "sidebar_left": 0.0392,
+    "sidebar_right": 0.0196
+   },
+   "has_bottom_band": 0.098,
+   "has_source_footer": 0.3922
+  },
+  "exec_summary": {
+   "structure_freq": {
+    "two_col": 0.5,
+    "single": 0.15,
+    "full_bleed": 0.1,
+    "rows_stack": 0.075,
+    "sidebar_left": 0.075,
+    "three_col": 0.05,
+    "grid": 0.025,
+    "sidebar_right": 0.025
+   },
+   "has_bottom_band": 0.175,
+   "has_source_footer": 0.825
+  },
+  "framework": {
+   "structure_freq": {
+    "two_col": 0.41,
+    "single": 0.15,
+    "three_col": 0.15,
+    "sidebar_left": 0.08,
+    "grid": 0.07,
+    "four_plus_col": 0.05,
+    "rows_stack": 0.05,
+    "full_bleed": 0.02,
+    "header_band_plus_body": 0.01,
+    "sidebar_right": 0.01
+   },
+   "has_bottom_band": 0.44,
+   "has_source_footer": 0.77
+  },
+  "other": {
+   "structure_freq": {
+    "two_col": 0.3667,
+    "single": 0.3333,
+    "three_col": 0.1333,
+    "sidebar_left": 0.1,
+    "four_plus_col": 0.0333,
+    "grid": 0.0333
+   },
+   "has_bottom_band": 0.2333,
+   "has_source_footer": 0.6667
+  },
+  "table": {
+   "structure_freq": {
+    "single": 0.5,
+    "two_col": 0.3125,
+    "grid": 0.0625,
+    "sidebar_left": 0.0625,
+    "three_col": 0.0625
+   },
+   "has_bottom_band": 0.25,
+   "has_source_footer": 0.75
+  },
+  "text_bullets": {
+   "structure_freq": {
+    "two_col": 0.46,
+    "single": 0.32,
+    "rows_stack": 0.1,
+    "three_col": 0.04,
+    "four_plus_col": 0.02,
+    "full_bleed": 0.02,
+    "grid": 0.02,
+    "sidebar_right": 0.02
+   },
+   "has_bottom_band": 0.28,
+   "has_source_footer": 0.82
+  },
+  "title": {
+   "structure_freq": {
+    "full_bleed": 0.463,
+    "single": 0.2593,
+    "two_col": 0.2407,
+    "header_band_plus_body": 0.0185,
+    "rows_stack": 0.0185
+   },
+   "has_bottom_band": 0.2037,
+   "has_source_footer": 0.4444
+  }
+ },
+ "global": {
+  "density_mean": 3.0399,
+  "title_is_action_rate": 0.5681,
+  "craft_freq": {
+   "legend_chips": 0.2193,
+   "arrow_callout": 0.2076,
+   "big_number": 0.2027,
+   "icon_rail": 0.1844,
+   "numbered_steps": 0.0997,
+   "brace": 0.0963,
+   "chevron": 0.0731,
+   "so_what_band": 0.0731,
+   "watermark_image": 0.0664,
+   "timeline_bar": 0.0249,
+   "framework_2x2": 0.0183,
+   "heatmap_cells": 0.0166,
+   "kpi_cards": 0.015,
+   "harvey_balls": 0.01,
+   "funnel": 0.0017
+  }
+ },
+ "judge_craft_checklist": [
+  "value_labels: label every bar/point with its value (91% of top slides)",
+  "annotations: annotate the chart with the takeaway (80% of top slides)",
+  "series_highlight: highlight one series and mute the rest (28% of top slides)",
+  "legend_chips: render legends as inline color chips (22% of top slides)",
+  "arrow_callout: call out the key delta with an arrow (21% of top slides)",
+  "big_number: let one hero number dominate the slide (20% of top slides)"
+ ],
+ "capability_gaps": {
+  "photo_background": 0.2076,
+  "endpoint_labels": 0.1246,
+  "grouped_bar": 0.0515,
+  "delta_brackets": 0.0465,
+  "other": 0.0332,
+  "avg_or_target_line": 0.0282,
+  "waterfall": 0.0249,
+  "forecast_dashed": 0.0216,
+  "area_fill": 0.0183,
+  "indexed_base100": 0.0133,
+  "cagr_arrow": 0.0116,
+  "combo": 0.0116,
+  "area": 0.0083,
+  "scatter": 0.0083,
+  "bubble": 0.005,
+  "mekko": 0.0033
+ },
+ "provenance": {
+  "n_decks": 216,
+  "firm_style_mix": {
+   "mck_like": 0.4502,
+   "bcg_like": 0.1578,
+   "bain_like": 0.1545,
+   "unknown": 0.1246,
+   "other": 0.113
+  }
+ },
+ "designer": {
+  "source": "form census, 350 cluster-representative top-firm slides, 2026-08-17",
+  "lines": [
+   "22% of top-firm slides lead with a FULL-BLEED visual anchor (photo/graphic panel) \u2014 when no photo exists, anchor with a dark panel, themed backdrop or oversized number instead of more text",
+   "the standard proof patterns are the EVIDENCE PAIR (two charts over a shared rule) and SMALL MULTIPLES (a grid of compact charts with micro-titles) \u2014 one dominant element, supporting elements smaller",
+   "form variety is real: combo line+column 3%, maps 4%, hub-and-spoke 2%, bubble 1% \u2014 match the FORM to the message, never default to one chart type",
+   "dark exhibit-header bands (serif headline reversed out, context note right) are a signature full-surface move \u2014 use render_title=false for them"
+  ]
+ }
 }

@@ -26,7 +26,8 @@ from pathlib import Path
 PRIORS_PATH = Path(__file__).parent / "style_priors.json"
 MAX_CHARS = 500  # ~120 tokens; unit-tested hard cap
 
-_PRIOR_ARCHETYPES = {"chart_slide", "custom_layout", "kpi_dashboard"}
+_PRIOR_ARCHETYPES = {"chart_slide", "custom_layout", "kpi_dashboard",
+                     "canvas"}
 
 # waterfall + the four style knobs are now renderable (A+); corpus tag ->
 # engine field: avg_or_target_line -> style.benchmark, cagr_arrow ->
@@ -98,6 +99,18 @@ def _top(freqs, whitelist: set[str], k: int) -> list[tuple[str, float]]:
     return items[:k]
 
 
+def _designer_block(priors: dict) -> str:
+    """Census-derived design-language lines for canvas slides (form
+    frequencies from the 300-deck census; empty until a census ran)."""
+    lines = (priors.get("designer") or {}).get("lines") or []
+    lines = [str(x) for x in lines[:4]]
+    if not lines:
+        return ""
+    body = ("DESIGN LANGUAGE (from a census of 350 top-firm slides):\n"
+            + "\n".join(f"- {x}" for x in lines))
+    return body[:MAX_CHARS + 200]
+
+
 def prior_block(archetype: str, claim: str) -> str:
     # env checked here too so a warm load_priors cache cannot defeat
     # the kill-switch
@@ -108,9 +121,10 @@ def prior_block(archetype: str, claim: str) -> str:
     priors = load_priors()
     if not priors:
         return ""
+    designer = _designer_block(priors) if archetype == "canvas" else ""
     context = route_context(claim)
     if context is None:
-        return ""
+        return designer
     bucket = (priors.get("by_claim_context") or {}).get(context)
     if not isinstance(bucket, dict):
         return ""
@@ -126,11 +140,12 @@ def prior_block(archetype: str, claim: str) -> str:
     for name, f in craft[:1]:
         stats.append(f"consider a {name} ({_pct(f)} of top slides)")
     if len(stats) < 2:  # a lone stat is noise, not a prior
-        return ""
+        return designer
     head = ("STYLE PRIORS (top-firm frequency data - follow unless the "
             f"claim argues otherwise): for {context} claims - ")
     body = head + "; ".join(stats) + "."
     while len(body) > MAX_CHARS and len(stats) > 2:
         stats.pop()
         body = head + "; ".join(stats) + "."
-    return body[:MAX_CHARS]
+    body = body[:MAX_CHARS]
+    return (designer + "\n\n" + body) if designer else body
