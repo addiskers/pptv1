@@ -59,8 +59,11 @@ else
   done
   [ -n "$ok" ] || { echo "FATAL: download failed from all mirrors"; exit 1; }
   tar -xzf "$tmp/$LO_TAR" -C "$tmp"
+  # the tarball's inner dir uses the FULL 4-part build version (e.g.
+  # 25.8.7.2) — locate RPMS by search, never by constructed name.
   # skip desktop-integration RPMs (menus/mime, pull desktop deps we don't have)
-  rpms=$(find "$tmp/$LO_DIR/RPMS" -name '*.rpm' ! -name '*desktop-integration*')
+  rpms=$(find "$tmp" -path '*/RPMS/*.rpm' ! -name '*desktop-integration*')
+  [ -n "$rpms" ] || { echo "FATAL: no RPMs found in extracted tarball"; exit 1; }
   # shellcheck disable=SC2086
   sudo dnf install -y -q $rpms || { echo "FATAL: rpm install failed"; exit 1; }
 fi
