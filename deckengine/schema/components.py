@@ -69,6 +69,9 @@ class MiniTableSpec(BaseModel):
     rows: list[list[PlainStr]] = Field(min_length=1, max_length=8)
     col_fracs: list[float] | None = None
     align: Literal["left", "center"] = "center"
+    # the claim's subject: matches a row's first cell (case-insensitive);
+    # that row gets the accent-tint emphasis treatment
+    highlight_row: PlainStr | None = Field(default=None, max_length=80)
 
 
 class DataColumnSpec(BaseModel):
@@ -94,6 +97,10 @@ class DataTableSpec(BaseModel):
     # widen col 0 (capped +25%) when group labels would clip; explicit
     # opt-out for authors who want their fracs untouched
     auto_widen_label_col: bool = True
+    # emphasis: the claim's subject — a group label or a row's first data
+    # cell; the match gets accent-tint fill + bold + an outline overlay
+    highlight_group: PlainStr | None = Field(default=None, max_length=40)
+    highlight_row: PlainStr | None = Field(default=None, max_length=80)
 
 
 class IconStatRowSpec(BaseModel):
@@ -150,6 +157,8 @@ class KpiCardStripSpec(BaseModel):
     kind: Literal["kpi_card_strip"] = "kpi_card_strip"
     cards: list[KpiCardSpec] = Field(min_length=2, max_length=6)
     fill_role: str = "primary_dark"
+    # emphasis: this card renders in accent instead of fill_role
+    highlight_index: int | None = Field(default=None, ge=0, le=5)
 
 
 class CalloutBandSpec(BaseModel):
@@ -310,6 +319,9 @@ class ComparisonColumnsSpec(BaseModel):
     row_labels: list[str] | None = None  # left rail, one per cell row
     header_fill_role: str = "primary"
     dashed_separators: bool = True
+    # emphasis: the winning column (matches a header, case-insensitive) —
+    # accent header + full-height accent outline
+    highlight_column: PlainStr | None = Field(default=None, max_length=40)
 
 
 class ArrowStatSpec(BaseModel):
@@ -360,6 +372,9 @@ class FunnelSpec(BaseModel):
     fracs: list[float] | None = Field(default=None, description=(
         "band width shares of full width, one per stage, each in (0.25, 1]; "
         "None = linear taper 1.0 -> 0.35"))
+    # emphasis: which stage carries the accent (None keeps the historic
+    # last-stage payoff accent)
+    highlight_index: int | None = Field(default=None, ge=0, le=5)
 
 
 class QuadrantSpec(BaseModel):
@@ -390,6 +405,42 @@ class HarveyBallsSpec(BaseModel):
     items: list[HarveyItemSpec] = Field(min_length=2, max_length=6)
 
 
+class PyramidTierSpec(BaseModel):
+    label: RichStr = Field(max_length=80)
+    value: PlainStr | None = Field(default=None, max_length=16)
+
+
+class PyramidSpec(BaseModel):
+    """Tiered hierarchy/segmentation triangle — apex first. Values (if
+    given) hang right of each tier like the funnel's."""
+    kind: Literal["pyramid"] = "pyramid"
+    tiers: list[PyramidTierSpec] = Field(min_length=2, max_length=6)
+    highlight_index: int | None = Field(default=None, ge=0, le=5)
+    inverted: bool = False  # widest tier on top (priority pyramids)
+
+
+class GanttItemSpec(BaseModel):
+    label: PlainStr = Field(max_length=40)
+    start: int = Field(ge=0, le=48, description="period index (0-based)")
+    end: int = Field(ge=1, le=48, description="exclusive end period index")
+    milestone: PlainStr | None = Field(default=None, max_length=24,
+                                       description="diamond label at end")
+
+
+class GanttRowSpec(BaseModel):
+    """Phase bars over a period axis — the project-plan form (timeline_row
+    stays for milestone dots)."""
+    kind: Literal["gantt_row"] = "gantt_row"
+    periods: list[PlainStr] = Field(
+        min_length=2, max_length=12,
+        description="axis labels, e.g. ['Q1','Q2','Q3','Q4'] or months")
+    items: list[GanttItemSpec] = Field(min_length=2, max_length=8)
+    today_index: int | None = Field(default=None, ge=0, le=48,
+                                    description="draws a 'today' rule "
+                                    "before this period")
+    highlight_index: int | None = Field(default=None, ge=0, le=7)
+
+
 ComponentSpec = Union[
     TextBlockSpec, StatRowSpec, BadgeChipSpec, SectionHeaderSpec, MiniTableSpec,
     DataTableSpec, IconStatRowSpec, KpiCardStripSpec, CalloutBandSpec,
@@ -397,5 +448,5 @@ ComponentSpec = Union[
     ComparisonColumnsSpec, DonutStatSpec, ProgressPillSpec, TimelineRowSpec,
     ChevronPathwaySpec, NumberedBlockSpec, TwoToneHeaderSpec, NativeChartSpec,
     IconTileRowSpec, ArrowCalloutSpec, BraceGroupSpec, ImageBlockSpec,
-    FunnelSpec, Matrix2x2Spec, HarveyBallsSpec,
+    FunnelSpec, Matrix2x2Spec, HarveyBallsSpec, PyramidSpec, GanttRowSpec,
 ]

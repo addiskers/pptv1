@@ -129,9 +129,12 @@ class KpiCardStrip(Component):
         title_body_gap = ctx.theme.spacing(0.3)
         family = ctx.font("body")
         cols = bbox.cols(len(data.cards), gap=gap)
-        for card, plan, col in zip(data.cards, plans, cols):
+        for ci, (card, plan, col) in enumerate(zip(data.cards, plans, cols)):
+            # emphasis: the highlighted card renders in accent
+            fill = ("accent" if ci == data.highlight_index
+                    else data.fill_role)
             shape = add_shape(slide, col.with_height(card_h), ctx.theme,
-                              shape="rect", fill_role=data.fill_role,
+                              shape="rect", fill_role=fill,
                               shadow=True)
             if card.viz is not None:
                 inner_w = max(1, col.w - 2 * pad)

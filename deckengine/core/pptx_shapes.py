@@ -20,6 +20,9 @@ SHAPES = {
     "right_brace": MSO_SHAPE.RIGHT_BRACE,
     "left_brace": MSO_SHAPE.LEFT_BRACE,
     "notched_arrow": MSO_SHAPE.NOTCHED_RIGHT_ARROW,
+    "trapezoid": MSO_SHAPE.TRAPEZOID,
+    "triangle": MSO_SHAPE.ISOSCELES_TRIANGLE,
+    "diamond": MSO_SHAPE.DIAMOND,
 }
 
 

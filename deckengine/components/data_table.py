@@ -127,12 +127,36 @@ class DataTable(Component):
             offsets.append(offsets[-1] + len(group.rows) * row_h)
         return offsets
 
+    @staticmethod
+    def _emphasis_targets(data: DataTableSpec) -> tuple[int, tuple[int, int]]:
+        """(group_idx, (group_idx, row_idx)) for the emphasis matches,
+        -1 / (-1,-1) when unset or unmatched. Case-insensitive on the
+        group label / first data cell."""
+        gi_hit, row_hit = -1, (-1, -1)
+        want_g = (data.highlight_group or "").strip().casefold()
+        want_r = (data.highlight_row or "").strip().casefold()
+        for gi, group in enumerate(data.groups):
+            if want_g and group.label.strip().casefold() == want_g:
+                gi_hit = gi
+            if want_r:
+                for ri, row in enumerate(group.rows):
+                    if row and str(row[0]).strip().casefold() == want_r:
+                        row_hit = (gi, ri)
+        return gi_hit, row_hit
+
     def render(self, slide, data: DataTableSpec, bbox: BBox,
                ctx: RenderContext) -> int:
         theme = ctx.theme
         col_ws = self._col_widths(data, bbox.w, ctx)
         header_fits = self._header_fits(data, col_ws, ctx)
         header_h = self._header_h(header_fits, ctx)
+        hi_group, hi_row = self._emphasis_targets(data)
+        if (data.highlight_group or "").strip() and hi_group < 0:
+            ctx.report.warn(f"data_table: highlight_group "
+                            f"{data.highlight_group!r} matches no group")
+        if (data.highlight_row or "").strip() and hi_row == (-1, -1):
+            ctx.report.warn(f"data_table: highlight_row "
+                            f"{data.highlight_row!r} matches no row")
         row_h = self._row_h(ctx)
         total_rows = sum(len(g.rows) for g in data.groups)
         total_h = header_h + total_rows * row_h
@@ -160,20 +184,39 @@ class DataTable(Component):
 
         # body: per group, one merged label rect + one rect per data cell
         heat_bounds = self._heat_bounds(data)
+        soft = theme.soft("accent")
         y = bbox.y + header_h
+        table_w = sum(col_ws)
         for gi, group in enumerate(data.groups):
             group_h = len(group.rows) * row_h
             body_fill = "surface" if (data.zebra and gi % 2 == 1) else "bg"
+            g_emph = gi == hi_group
             self._group_label_cell(slide, BBox(xs[0], y, col_ws[0], group_h),
-                                   group.label, ctx)
+                                   group.label, ctx,
+                                   fill_hex=soft if g_emph else None,
+                                   accent=g_emph)
             for ri, row in enumerate(group.rows):
                 ry = y + ri * row_h
+                r_emph = g_emph or (gi, ri) == hi_row
                 for ci in range(1, len(data.columns)):
                     value = row[ci - 1] if ci - 1 < len(row) else ""
                     cell = BBox(xs[ci], ry, col_ws[ci], row_h)
                     self._render_cell(slide, cell, data.columns[ci], value,
-                                      body_fill, data, heat_bounds, ctx)
+                                      body_fill, data, heat_bounds, ctx,
+                                      fill_hex=soft if r_emph else None,
+                                      bold=r_emph)
+            # emphasis ring: one no-fill accent outline over the group band
+            if g_emph:
+                add_shape(slide, BBox(bbox.x, y, table_w, group_h), theme,
+                          shape="rect", line_role="accent", line_w_pt=1.5)
             y += group_h
+        if hi_row != (-1, -1) and hi_row[0] != hi_group:
+            gi, ri = hi_row
+            ry = (bbox.y + header_h
+                  + sum(len(g.rows) for g in data.groups[:gi]) * row_h
+                  + ri * row_h)
+            add_shape(slide, BBox(bbox.x, ry, table_w, row_h), theme,
+                      shape="rect", line_role="accent", line_w_pt=1.5)
         return total_h
 
     def _heat_bounds(self, data: DataTableSpec) -> tuple[float, float]:
@@ -199,11 +242,15 @@ class DataTable(Component):
     # -- cell renderers ------------------------------------------------------
 
     def _group_label_cell(self, slide, cell: BBox, label: str,
-                          ctx: RenderContext) -> None:
+                          ctx: RenderContext, *,
+                          fill_hex: str | None = None,
+                          accent: bool = False) -> None:
         """Merged column-0 rect spanning the group's full pixel height."""
         theme = ctx.theme
         pad = theme.spacing(0.25)
-        s = add_shape(slide, cell, theme, fill_role="bg",
+        s = add_shape(slide, cell, theme,
+                      fill_hex=fill_hex,
+                      fill_role=None if fill_hex else "bg",
                       line_role="grid", line_w_pt=_GRID_W_PT)
         if not label.strip():
             return
@@ -217,12 +264,13 @@ class DataTable(Component):
         tf.margin_left = Emu(pad)
         tf.margin_right = Emu(pad)
         write_fit_result(tf, fit, theme, family=ctx.font("body"), align="left",
-                         default_color_role="primary")
+                         default_color_role="accent" if accent else "primary")
 
     def _render_cell(self, slide, cell: BBox, col: DataColumnSpec, value: str,
                      body_fill: str, data: DataTableSpec,
                      heat_bounds: tuple[float, float],
-                     ctx: RenderContext) -> None:
+                     ctx: RenderContext, *, fill_hex: str | None = None,
+                     bold: bool = False) -> None:
         kind = col.cell_kind
         if kind == "badge":
             self._badge_cell(slide, cell, value, body_fill, ctx)
@@ -231,24 +279,27 @@ class DataTable(Component):
         elif kind == "dot":
             self._dot_cell(slide, cell, value, body_fill, ctx)
         elif kind == "number":
-            s = add_shape(slide, cell, ctx.theme, fill_role=body_fill,
+            s = add_shape(slide, cell, ctx.theme, fill_hex=fill_hex,
+                          fill_role=None if fill_hex else body_fill,
                           line_role="grid", line_w_pt=_GRID_W_PT)
             self._write_cell_text(s, cell, value, align="right",
-                                  color_role="ink", ctx=ctx)
+                                  color_role="ink", ctx=ctx, bold=bold)
         else:  # "text"
-            s = add_shape(slide, cell, ctx.theme, fill_role=body_fill,
+            s = add_shape(slide, cell, ctx.theme, fill_hex=fill_hex,
+                          fill_role=None if fill_hex else body_fill,
                           line_role="grid", line_w_pt=_GRID_W_PT)
             self._write_cell_text(s, cell, value, align=col.align,
-                                  color_role="ink", ctx=ctx)
+                                  color_role="ink", ctx=ctx, bold=bold)
 
     def _write_cell_text(self, shape, cell: BBox, value: str, *, align: str,
-                         color_role: str, ctx: RenderContext) -> None:
+                         color_role: str, ctx: RenderContext,
+                         bold: bool = False) -> None:
         """Single-line micro text inside a cell rect, symmetric side insets."""
         if not value.strip():
             return
         theme = ctx.theme
         pad = theme.spacing(0.25)
-        fit = fit_text([Span(value)],
+        fit = fit_text([Span(value, bold=bold)],
                        BBox(0, 0, max(1, cell.w - 2 * pad), _PROBE_H),
                        ctx.font("body"), max_size=ctx.size("micro"),
                        min_size=_CELL_MIN_PT, max_lines=1, measurer=ctx.measurer)

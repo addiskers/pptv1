@@ -29,6 +29,7 @@ from .format_rules import (check_outline_chart_density,
                            check_outline_formats, check_slide_format,
                            decision_table_text)
 from .canvas_rules import check_canvas_slide
+from .emphasis import check_slide_emphasis
 from .exemplar_retrieval import select_exemplars
 from .provenance import (append_legend_once, check_slide_markers,
                          inject_fact_markers, marker_coverage,
@@ -58,6 +59,7 @@ Hard rules:
 - Keep text tight: this engine renders at consulting density; long text gets shrunk then truncated.
 - WORD BUDGET: dense body slides carry 140-180 words of real evidence (a winning deck averages ~164); dividers under 25. Under ~60 words reads as an empty slide; over 200 gets shrunk. Fill with evidence, never filler.
 - SEMANTIC COLOUR: name chart series/categories with meaning-bearing words when the data has a health scale — the engine colours Overdrawn/Critical red, Moderate/Watch amber, Healthy/Safe green automatically.
+- EMPHASIS: every comparative element visually marks the claim's subject — set highlight / highlight_row / highlight_column / highlight_index to the exact label of the entity the title names. A table proving "Indonesia is the best market" with no highlight on Indonesia is a broken slide. Leave emphasis null only when the title names no single entity.
 - The subtitle is a STANDFIRST: one lede sentence that ADDS mechanism or so-what beyond the title — never a restatement of it.
 - Every slide includes "notes": 2-3 DIRECTIVE speaker sentences (max 350 chars) — what to say, what to point at, what question to expect. Never a restatement of the slide text.
 {principles}
@@ -376,6 +378,16 @@ def generate_slide(archetype: str, intent: str, prompt: str,
             continue
         if fproblems:
             log.warning("format problems survived repairs: %s", fproblems)
+        eproblems = check_slide_emphasis(slide)
+        if eproblems and attempt < MAX_REPAIRS:
+            attempt_prompt = (base_prompt +
+                              "\n\nEmphasis problems — fix ALL of them "
+                              "while keeping the same facts and layout:\n" +
+                              "\n".join(f"- {p}" for p in eproblems) +
+                              "\nEmit the full JSON again.")
+            continue
+        if eproblems:
+            log.warning("emphasis problems survived repairs: %s", eproblems)
         if slide.slide_type == "canvas":
             cproblems = check_canvas_slide(slide)
             if cproblems and attempt < MAX_REPAIRS:

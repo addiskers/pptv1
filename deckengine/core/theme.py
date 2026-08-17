@@ -58,6 +58,16 @@ class Theme:
             return self.badge_palette[role]
         raise KeyError(f"unknown color role: {role!r}")
 
+    def soft(self, role: str, frac: float = 0.15) -> str:
+        """A tint of `role` blended toward the background — the harmonized
+        'soft accent' every theme gets for free (emphasis row fills etc.);
+        no theme JSON edits needed."""
+        fg = self.color(role)
+        bg = self.color("bg")
+        mix = [round(int(bg[i:i + 2], 16) * (1 - frac)
+                     + int(fg[i:i + 2], 16) * frac) for i in (0, 2, 4)]
+        return "".join(f"{c:02X}" for c in mix)
+
     def heatmap_color(self, value: float, lo: float = 0.0, hi: float = 1.0) -> str:
         """Map a value in [lo, hi] onto the heatmap scale."""
         if not self.heatmap_scale:

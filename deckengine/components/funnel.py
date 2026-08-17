@@ -115,9 +115,17 @@ class Funnel(Component):
         pad = theme.spacing(_PAD_MULT)
         center_x = bbox.x + bbox.w // 2
         y = bbox.y
+        # emphasis: explicit highlight_index wins; default keeps the
+        # historic last-stage payoff accent
+        hi = data.highlight_index
+        if hi is not None and not 0 <= hi < n:
+            ctx.report.warn(f"funnel: highlight_index {hi} out of range "
+                            f"for {n} stages; using last stage")
+            hi = None
+        hi = n - 1 if hi is None else hi
         for i, (stage, bw) in enumerate(zip(data.stages, plan.band_ws)):
             band = BBox(bbox.x + (bbox.w - bw) // 2, y, bw, band_h)
-            fill = _LAST_FILL_ROLE if i == n - 1 else _FILL_ROLE
+            fill = _LAST_FILL_ROLE if i == hi else _FILL_ROLE
             shape = add_shape(slide, band, theme, shape="rect",
                               fill_role=fill)
             fit = fit_text(

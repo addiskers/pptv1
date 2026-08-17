@@ -66,7 +66,8 @@ def test_composition_fires_and_near_miss():
         "composition_share"
     near = signals_from("Shareholders approved the transaction")
     assert near.composition is False
-    assert first_rule(near) is None
+    # no data signal at all now routes to the qualitative fallback rule
+    assert first_rule(near).id == "qualitative_no_chart"
 
 
 def test_trend_needs_periods():
@@ -178,7 +179,7 @@ def test_option_and_criteria_counts():
 
 def test_decision_table_text_cap_and_content():
     text = decision_table_text()
-    assert len(text) <= 1800  # rules + the variant-hint tier
+    assert len(text) <= 2000  # rules + the variant-hint tier
     lines = text.splitlines()
     assert lines[0].startswith("FORMAT SELECTION")
     assert "2x2" in text and "waterfall" in text and "line" in text
@@ -317,5 +318,7 @@ def test_signals_from_none_claim_and_empty_facts():
     empty = signals_from("", FactTable())
     assert empty.n_periods == 0 and empty.entity_count == 0
     assert empty.share_facts == 0
-    assert first_rule(empty) is None
-    assert first_rule(signals_from(None)) is None  # defensive: claim or ""
+    # even the empty claim routes to the qualitative fallback (LAST rule)
+    assert first_rule(empty).id == "qualitative_no_chart"
+    assert first_rule(signals_from(None)).id == \
+        "qualitative_no_chart"  # defensive: claim or "" hits the fallback

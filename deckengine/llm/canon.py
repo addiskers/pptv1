@@ -62,7 +62,7 @@ CANON: dict[str, CanonForm] = {f.id: f for f in [
     _C("area_stack", "composition", "composition evolving over time",
        "gap", None),
     _C("pyramid", "composition", "tiered/hierarchical composition",
-       "gap", None),
+       "primitive", "pyramid"),
     # -- trend --------------------------------------------------------------
     _C("line", "trend", "continuous trend, few series",
        "primitive", "native_chart:line"),
@@ -123,7 +123,7 @@ CANON: dict[str, CanonForm] = {f.id: f for f in [
     _C("chevron_process", "diagram", "N-step process/phases",
        "primitive", "chevron_pathway"),
     _C("gantt", "diagram", "phases with dates/lanes over a time axis",
-       "gap", None),
+       "primitive", "gantt_row"),
     _C("flywheel", "diagram", "self-reinforcing loop", "gap", None),
     _C("onion", "diagram", "concentric layers (core -> periphery)",
        "gap", None),

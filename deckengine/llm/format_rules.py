@@ -49,6 +49,9 @@ _TREND = re.compile(
 _RANKING = re.compile(
     r"\b(?:leads?|leaders?|largest|top|ranks?|number\s+one|dominates?"
     r"|outperforms?|ahead\s+of|biggest|lags?)\b|#\d", re.I)
+_HIERARCHY = re.compile(
+    r"\b(?:pyramids?|tiers?|tiered|layered|hierarch\w*|apex|base of the|"
+    r"premium.{0,20}mass|top.{0,12}(?:middle|bottom))\b", re.I)
 _COMPOSITION = re.compile(
     r"\b(?:share|mix|split|composition|accounts?\s+for|breakdown)\b"
     r"|\bof\s+(?:the|total)\s+market\b", re.I)
@@ -127,6 +130,7 @@ class Signals:
     n_periods: int = 0
     share_facts: int = 0
     entity_count: int = 0
+    hierarchy: bool = False
 
 
 def _option_count(text: str) -> int:
@@ -187,6 +191,7 @@ def signals_from(claim: str, facts: FactTable | None = None) -> Signals:
         trend=bool(_TREND.search(text)),
         ranking=bool(_RANKING.search(text)),
         composition=bool(_COMPOSITION.search(text)),
+        hierarchy=bool(_HIERARCHY.search(text)),
         distribution=bool(_DISTRIBUTION.search(text)),
         correlation=bool(_CORRELATION.search(text)),
         two_axis=bool(_TWO_AXIS.search(text)),
@@ -312,6 +317,32 @@ RULES: tuple[FormatRule, ...] = (
         rationale="reference, not argument",
         detect=lambda s: s.entity_count >= 8 and _no_claim_signal(s),
         target_slide_types=("data_deep_dive",)),
+    FormatRule(
+        id="hierarchy_pyramid",
+        when="tiered hierarchy",
+        then="pyramid leaf",
+        rationale="tiers argue by shape",
+        detect=lambda s: s.hierarchy,
+        target_slide_types=("custom_layout", "canvas")),
+    FormatRule(
+        id="plan_gantt",
+        when="phases on a period axis",
+        then="gantt_row (bars + today line)",
+        rationale="plans live on an axis",
+        detect=lambda s: s.roadmap and s.n_periods >= 2,
+        target_slide_types=("custom_layout", "canvas", "timeline_slide")),
+    # LAST by design — the fallback of fallbacks: dense_reference and every
+    # data-shaped rule above must keep priority over it.
+    FormatRule(
+        id="qualitative_no_chart",
+        when="no numbers in the claim",
+        then="framework/custom_layout, NO chart",
+        rationale="a chart with no data is decoration",
+        detect=lambda s: (_no_claim_signal(s) and s.n_periods == 0
+                          and s.entity_count == 0 and s.share_facts == 0),
+        target_slide_types=("framework_slide", "custom_layout",
+                            "bullet_content", "n_column_comparison",
+                            "canvas")),
 )
 
 
@@ -322,25 +353,24 @@ def first_rule(signals: Signals) -> FormatRule | None:
 
 _VARIANT_HINTS = (
     "CHART STYLE (native_chart.style — top-firm defaults from the corpus):",
-    "- always label values (91-100% of elite charts do) and annotate the "
-    "takeaway on the chart",
-    "- growth line: style.endpoint_labels + style.cagr_chip (engine computes "
-    "the CAGR)",
+    "- always label values and annotate the takeaway on the chart",
+    "- growth line: style.endpoint_labels + style.cagr_chip",
     "- forecast/'by 20XX': style.forecast_from='<first future period>' dashes "
     "the tail",
-    "- 'vs benchmark/target/average': style.benchmark={value,label} draws a "
-    "dashed reference line",
+    "- 'vs benchmark/target/avg': style.benchmark={value,label} dashed "
+    "line",
     "- multi-series where one is the subject: style.highlight_series='<name>' "
     "mutes the rest to gray",
-    "- 'bridge/walk from X to Y': chart_type='waterfall' (signed steps, "
-    "opening + closing totals)",
+    "- 'bridge/walk from X to Y': waterfall (signed steps, open+close "
+    "totals)",
     "- charts embed in custom_layout (evidence pair, chart+drivers): "
     "style.compact",
 )
 
 
 def decision_table_text() -> str:
-    """Compact rule table + variant hints for prompts (capped <= 1800)."""
+    """Compact rule table + variant hints for prompts (capped <= 2000;
+    raised from 1800 when pyramid/gantt routing rules landed)."""
     lines = ["FORMAT SELECTION - match the layout shape to the argument "
              "shape:"]
     lines += [f"- {r.when} -> {r.then}; {r.rationale}" for r in RULES]
@@ -440,6 +470,16 @@ def _chart_problems(chart: dict, title: str) -> list[str]:
     if hl and hl not in cats:
         out.append(f"highlight {hl!r} is not a category: use an exact "
                    "category name or null")
+    # composition shown as a plain bar: parts of a whole are not a ranking
+    if (ctype == "bar" and len(series) == 1):
+        vals = series[0].get("values") or []
+        pct = str(chart.get("value_suffix", "")).strip() == "%"
+        looks_share = pct or _COMPOSITION.search(plain(title) or "")
+        if looks_share and vals and 95 <= sum(vals) <= 105:
+            out.append(
+                "bar chart of composition shares summing to ~100%: use "
+                "chart_type='donut' (<=6 categories, merge the tail into "
+                "'Other') or stacked_bar with style.percent_100")
     if len(series) > 3:
         out.append(f"{len(series)} series on one chart: split into "
                    "small multiples or drop to <=3")
@@ -534,6 +574,17 @@ def _enrich_chart(chart, title: str, sig: Signals) -> None:
     cats = [str(c) for c in chart.categories]
     n_cat, n_ser = len(cats), len(chart.series)
     first_vals = list(chart.series[0].values) if chart.series else []
+
+    # composition drawn as a plain bar -> donut (parts of a whole are not
+    # a ranking). Gates make the donut lints unreachable afterwards: <=6
+    # cats and a 95-105 sum. Never invent an 'Other' value (7+ cats stay,
+    # the lint asks the model to merge).
+    if (ct == "bar" and n_ser == 1 and 1 < n_cat <= 6 and first_vals
+            and 95 <= sum(first_vals) <= 105
+            and (str(chart.value_suffix).strip() == "%"
+                 or sig.composition)):
+        chart.chart_type = "donut"
+        ct = "donut"
 
     # value labels — elite charts label values (91-100%); turn on for any
     # single-series bar/line the author left on auto.

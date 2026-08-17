@@ -99,11 +99,22 @@ class ComparisonColumns(Component):
         total = (plan.header_h + plan.gap + sum(track_hs)
                  + plan.track_gap * (len(track_hs) - 1))
 
+        # emphasis: the winning column (matched on header, case-insensitive)
+        want = (data.highlight_column or "").strip().casefold()
+        hi_col = next((i for i, c in enumerate(data.columns)
+                       if want and c.header.strip().casefold() == want), -1)
+        if want and hi_col < 0:
+            ctx.report.warn(f"comparison_columns: highlight_column "
+                            f"{data.highlight_column!r} matches no header")
+
         # header bands
-        for col, off, w in zip(data.columns, plan.col_offsets, plan.col_widths):
+        for ci, (col, off, w) in enumerate(zip(data.columns,
+                                               plan.col_offsets,
+                                               plan.col_widths)):
             band = BBox(bbox.x + off, bbox.y, w, plan.header_h)
             s = add_shape(slide, band, theme, shape="rect",
-                          fill_role=data.header_fill_role)
+                          fill_role="accent" if ci == hi_col
+                          else data.header_fill_role)
             tf = make_text_frame(s, align="center", anchor="middle")
             write_spans_paragraph(
                 tf, [Span(col.header, bold=True, color_role="inverse_ink")],
@@ -132,6 +143,14 @@ class ComparisonColumns(Component):
                 add_vline(slide, (left_edge + right_edge) // 2, bbox.y,
                           total, theme, role="ink_muted", weight_pt=0.75,
                           dash="dash")
+
+        # emphasis ring: full-height accent outline around the winner
+        if hi_col >= 0:
+            add_shape(slide,
+                      BBox(bbox.x + plan.col_offsets[hi_col], bbox.y,
+                           plan.col_widths[hi_col], total),
+                      theme, shape="rect", line_role="accent",
+                      line_w_pt=1.75)
 
         return total
 

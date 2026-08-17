@@ -99,8 +99,11 @@ def test_canon_covers_the_families():
 
 def test_canon_gaps_include_user_named_forms():
     g = set(gaps())
-    assert {"pyramid", "gantt", "mekko", "venn", "radar", "flywheel",
+    # pyramid + gantt graduated to primitives in T5
+    assert {"mekko", "venn", "radar", "flywheel",
             "sankey", "bubble", "gauge"} <= g
+    assert CANON["pyramid"].status == "primitive"
+    assert CANON["gantt"].status == "primitive"
 
 
 def test_non_gap_entries_name_engine_recipes():

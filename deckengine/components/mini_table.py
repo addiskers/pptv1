@@ -94,6 +94,18 @@ class MiniTable(Component):
         if any(len(r) != len(data.headers) for r in data.rows):
             ctx.report.warn("mini_table: row length != header count; "
                             "short rows padded, extra cells dropped")
+        # emphasis: the claim's subject row (matched on first cell)
+        hi_row = -1
+        if (data.highlight_row or "").strip():
+            want = data.highlight_row.strip().casefold()
+            for ri, row in enumerate(all_rows[1:], start=1):
+                if row and row[0].strip().casefold() == want:
+                    hi_row = ri
+                    break
+            if hi_row < 0:
+                ctx.report.warn(
+                    f"mini_table: highlight_row {data.highlight_row!r} "
+                    "matches no row; rendering without emphasis")
 
         # rows that would overflow the bbox are dropped (mirrors fit_text truncation)
         n_fit = min(len(all_rows), int((bbox.h + pt(1)) // row_h))
@@ -107,11 +119,14 @@ class MiniTable(Component):
             is_header = r == 0
             row = all_rows[r]
             cells = BBox(bbox.x, y, bbox.w, row_h).split_h(*fracs)
+            emphasized = r == hi_row
             for c, cell in enumerate(cells):
                 text = row[c] if c < len(row) else ""
-                shape = add_shape(slide, cell, ctx.theme, shape="rect",
-                                  fill_role="bg", line_role="grid",
-                                  line_w_pt=_GRID_W_PT)
+                shape = add_shape(
+                    slide, cell, ctx.theme, shape="rect",
+                    fill_hex=ctx.theme.soft("accent") if emphasized else None,
+                    fill_role=None if emphasized else "bg",
+                    line_role="grid", line_w_pt=_GRID_W_PT)
                 tf = make_text_frame(shape, align=data.align, anchor="middle")
                 # single-line cells by contract: never let PowerPoint re-wrap
                 # an overlong cell into a second line the layout didn't budget
@@ -123,7 +138,8 @@ class MiniTable(Component):
                 # shrink -> ellipsize inside the cell; an overlong cell must
                 # never spill under its neighbour (the old word_wrap=False
                 # overflow was the evaluated deck's clipped-table bug)
-                fit = fit_text([Span(text, bold=is_header, color_role="ink")],
+                fit = fit_text([Span(text, bold=is_header or emphasized,
+                                     color_role="ink")],
                                BBox(0, 0, max(1, cell.w - 2 * inset),
                                     _PROBE_H), family, max_size=size,
                                min_size=_MIN_CELL, max_lines=1,
