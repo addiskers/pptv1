@@ -143,7 +143,16 @@ def check_canvas_slide(slide: CanvasSlideSpec) -> list[str]:
                 f"carries {len(el.content.text)} characters: widen it to "
                 f">=0.12 or shorten the text")
 
-    # 4) fixed-height components crammed into boxes they cannot fit: they
+    # 4) dead canvas: a design that uses less than half the surface reads
+    # as an empty slide (seen live: content compressed into a middle band)
+    coverage = sum(el.w * el.h for el in els)
+    if coverage < 0.55:
+        problems.append(
+            f"the design covers only {coverage:.0%} of the canvas: enlarge "
+            f"the dominant element, spread elements to the full height, or "
+            f"add a supporting panel — no dead quadrants")
+
+    # 5) fixed-height components crammed into boxes they cannot fit: they
     # overflow and paint over neighbours (seen live: a callout_band over a
     # chart). Floors are conservative fractions of the body height.
     for i, el in enumerate(els):

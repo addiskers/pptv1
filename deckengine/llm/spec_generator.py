@@ -285,8 +285,12 @@ _CANVAS_HELP = (
     "kpi_card_strip, funnel, matrix_2x2, harvey_balls, donut_stat, "
     "progress_pill, timeline_row, icon_stat_row, callout_band, "
     "brace_group. Use color_role='inverse_ink' for any text on dark fills. "
-    "6-14 elements is the sweet spot; align edges to shared lines; leave "
-    "real whitespace — one dominant element, everything else supports it.")
+    "6-14 elements is the sweet spot. GRID DISCIPLINE: place on a "
+    "12-column grid — x and w in multiples of 1/12 (0.083); a slide has "
+    "AT MOST 4 distinct left edges; an indent is exactly one grid step; "
+    "stack related elements on the SAME left edge. Compositions span the "
+    "full height — no dead quadrants; one dominant element, everything "
+    "else supports it.")
 
 
 def generate_slide(archetype: str, intent: str, prompt: str,

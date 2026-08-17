@@ -150,7 +150,8 @@ class CalloutBand(Component):
             tab = BBox(band.x + (band.w - tab_w) // 2, band.y - overhang,
                        tab_w, tab_h)
             s = add_shape(slide, tab, theme, shape="rounded",
-                          fill_role="positive", corner_radius=0.5)
+                          fill_role="positive", corner_radius=0.5,
+                          tag="de:tab")  # straddles the band by design
             tf = make_text_frame(s, align="center", anchor="middle")
             write_spans_paragraph(
                 tf, [Span(data.label, bold=True, color_role="inverse_ink")],

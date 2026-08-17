@@ -20,14 +20,30 @@ from ..schema.canvas import CanvasElement, CanvasSlideSpec
 from ..schema.rich import parse_rich
 from .base import SlideAssembler, register_slide
 
-_SNAP_TOL = 0.015     # edges within this fraction snap to a shared line
+_SNAP_TOL = 0.02      # edges within this fraction snap to a shared line
+_GRID_X = 24          # layout grid: 24 columns...
+_GRID_Y = 16          # ...x 16 rows — the hand-built alignment discipline
 _KICKER_SPC = 0.9     # letter-spacing for caps text (matches section_header)
 _TEXT_MIN_FRAC = 0.5  # text may shrink to half its asked size before ellipsis
 
 
+def _qpos(v: float, grid: int) -> float:
+    """Positions always land on the nearest grid line."""
+    return min(1.0, max(0.0, round(v * grid) / grid))
+
+
+def _qsize(v: float, grid: int) -> float:
+    """Sizes quantize too — except sub-cell sizes (thin rules) keep their
+    exact extent."""
+    return v if v < 1.0 / grid else round(v * grid) / grid
+
+
 def _snap(elements: list[CanvasElement]) -> list[tuple[float, float, float, float]]:
-    """Snapped (x, y, w, h) per element: edges within _SNAP_TOL of an
-    earlier element's edge adopt it. Pure function — rails and render see
+    """Snapped (x, y, w, h) per element. Pass 1: edges within _SNAP_TOL of
+    an earlier element's edge adopt it (mutual intent wins). Pass 2: the
+    result quantizes to the 24x16 layout grid, so freehand fractions land
+    on shared lines. Order matters — quantizing first can split a
+    near-pair across a cell boundary. Pure function: rails and render see
     the same geometry."""
     out: list[list[float]] = []
     for el in elements:
@@ -52,7 +68,19 @@ def _snap(elements: list[CanvasElement]) -> list[tuple[float, float, float, floa
                     h = max(0.015, cand - y)
                     b = y + h
         out.append([x, y, w, h])
-    return [tuple(v) for v in out]
+    # pass 2 quantizes EDGES (not sizes): two elements sharing an edge —
+    # including one's bottom against another's top — keep sharing it after
+    # quantization. Sub-cell extents (thin rules) keep their exact size.
+    snapped = []
+    for x, y, w, h in out:
+        qx0 = _qpos(x, _GRID_X)
+        qx1 = (qx0 + w) if w < 1.0 / _GRID_X else _qpos(x + w, _GRID_X)
+        qy0 = _qpos(y, _GRID_Y)
+        qy1 = (qy0 + h) if h < 1.0 / _GRID_Y else _qpos(y + h, _GRID_Y)
+        qw = max(0.02, min(qx1 - qx0, 1.0 - qx0))
+        qh = max(0.015, min(qy1 - qy0, 1.0 - qy0))
+        snapped.append((qx0, qy0, qw, qh))
+    return snapped
 
 
 @register_slide("canvas")
@@ -109,6 +137,16 @@ class CanvasSlide(SlideAssembler):
                           role=c.role, weight_pt=c.weight_pt, dash=c.dash)
         else:  # any registered component: box is its cell, flexers may fill
             comp = get_component(kind)
+            try:  # pre-measure: overflow paints over neighbours — make it
+                natural = comp.measure(c, box.w, ctx)   # a LOUD defect
+                if natural > box.h * 1.10:
+                    from ..core.units import to_inch
+                    ctx.report.warn(
+                        f"canvas: {kind} needs {to_inch(natural):.2f}in but "
+                        f"its box is {to_inch(box.h):.2f}in — it will "
+                        f"overflow onto neighbours")
+            except Exception:  # noqa: BLE001 — measuring must never block
+                pass
             ctx.fill_hint = True
             try:
                 comp.render(slide, c, box, ctx)

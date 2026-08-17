@@ -57,9 +57,10 @@ def test_text_collision_flagged_and_panel_exempt():
                  _text(0.2, 0.15, 0.4, 0.2, "beta")])
     assert any("overlaps" in p for p in check_canvas_slide(s))
     # same geometry, but the lower element is a label-less PANEL: legal
+    # (the fill rail may still note the sparse fixture — filter to overlaps)
     s2 = _canvas([_shape(0.05, 0.05, 0.6, 0.4, fill_role="surface"),
                   _text(0.1, 0.1, 0.4, 0.2, "alpha", z=1)])
-    assert check_canvas_slide(s2) == []
+    assert not [p for p in check_canvas_slide(s2) if "overlaps" in p]
 
 
 def test_contrast_rail():

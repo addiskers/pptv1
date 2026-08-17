@@ -71,6 +71,20 @@ def build_deck(spec: DeckSpec, out_path: str | Path) -> BuildReport:
         if notes and notes.strip():
             set_notes(slide, notes.strip())
 
+    # rendered-output audit: clipped text and ragged edges become WARNINGS,
+    # which the multi-candidate score counts as defects — a misaligned
+    # design loses to its competitor automatically
+    from .audit import audit_slide
+    _sw, _sh = int(prs.slide_width), int(prs.slide_height)
+    for i, s in enumerate(prs.slides, start=1):
+        res = audit_slide(s, _sw, _sh)
+        for ta, tb, frac in res["overlaps"][:3]:
+            report.warn(f"slide {i} text overlap ({frac:.0%}): "
+                        f"{ta!r} <-> {tb!r}")
+        if res["left_edges"] > 14:
+            report.warn(f"slide {i} alignment: {res['left_edges']} distinct "
+                        f"left edges (hand-built slides share 4-8)")
+
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     prs.save(str(out_path))

@@ -30,9 +30,11 @@ def add_shape(slide, bbox: BBox, theme: Theme, *, shape: str = "rect",
               fill_role: str | None = None, fill_hex: str | None = None,
               line_role: str | None = None, line_w_pt: float = 0.75,
               line_dash: str | None = None, corner_radius: float | None = None,
-              shadow: bool = False):
+              shadow: bool = False, tag: str | None = None):
     s = slide.shapes.add_shape(SHAPES[shape], Emu(bbox.x), Emu(bbox.y),
                                Emu(bbox.w), Emu(bbox.h))
+    if tag:  # machine-readable intent (audit whitelists, e.g. "de:tab")
+        s.name = tag
     if fill_hex is not None:
         s.fill.solid()
         s.fill.fore_color.rgb = RGBColor.from_string(fill_hex)
