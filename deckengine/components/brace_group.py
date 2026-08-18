@@ -75,14 +75,43 @@ class BraceGroup(Component):
                ctx: RenderContext) -> int:
         theme = ctx.theme
         plan = self._plan(data, bbox.w, ctx)
+        kept = list(data.content)
         if plan.total > bbox.h:
-            ctx.report.warn(
-                f"brace_group: content height {plan.total} exceeds bbox "
-                f"height {bbox.h}")
+            # a canvas cell can be shorter than the natural stack: keep the
+            # leading children that FIT, drop the rest (reported), refit the
+            # takeaway into the cell — the group never paints past its box
+            hs = list(plan.child_hs)
+            acc, n_fit = 0, 0
+            for i, h in enumerate(hs):
+                nxt = acc + h + (plan.child_gap if i else 0)
+                if nxt > bbox.h and n_fit >= 1:
+                    break
+                acc, n_fit = nxt, i + 1
+            if n_fit < len(kept):
+                ctx.report.truncated(
+                    f"brace_group: {len(kept) - n_fit} child(ren) dropped")
+                kept = kept[:n_fit]
+                hs = hs[:n_fit]
+            content_h = sum(hs) + plan.child_gap * (len(hs) - 1)
+            takeaway_fit = fit_text(
+                parse_rich(data.takeaway, base_color_role="ink"),
+                BBox(0, 0, plan.takeaway_w, bbox.h), ctx.font("body"),
+                max_size=ctx.size("h2"), min_size=_MIN_TAKEAWAY_PT,
+                measurer=ctx.measurer)
+            total = max(content_h, min(takeaway_fit.height_emu, bbox.h))
+            plan = _Plan(content_w=plan.content_w,
+                         takeaway_w=plan.takeaway_w, gap=plan.gap,
+                         child_gap=plan.child_gap, child_hs=tuple(hs),
+                         content_h=content_h, takeaway_fit=takeaway_fit,
+                         total=total)
+            if total > bbox.h:
+                ctx.report.warn(
+                    f"brace_group: content height {total} exceeds bbox "
+                    f"height {bbox.h}")
 
         # children, top-aligned within the group's own height
         y = bbox.y + (plan.total - plan.content_h) // 2
-        for child, h in zip(data.content, plan.child_hs):
+        for child, h in zip(kept, plan.child_hs):
             get_component(child.kind).render(
                 slide, child, BBox(bbox.x, y, plan.content_w, h), ctx)
             y += h + plan.child_gap

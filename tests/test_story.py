@@ -27,6 +27,23 @@ def test_all_good_titles_pass():
     assert not misses, f"claims wrongly flagged: {misses}"
 
 
+def test_overlong_advisory_fields_trim_never_fail():
+    """Stage 1 has NO repair loop: eloquent-but-overlong text must trim,
+    never crash (seen live: a >300-char governing_thought killed 2 of 5
+    batch variants; earlier a >120-char visual_concept killed a deck)."""
+    o = Outline.model_validate({
+        "governing_thought": "The Philippines offers a strong entry " + "x" * 400,
+        "slides": [
+            {"slide_type": "title", "claim": "Cover"},
+            {"slide_type": "chart_slide",
+             "claim": "The market clears every bar " + "y" * 400},
+        ]})
+    assert len(o.governing_thought) <= 300
+    assert len(o.slides[1].claim) <= 220
+    # trims land on a word boundary
+    assert not o.governing_thought.endswith(" ")
+
+
 def test_check_outline_flags_labels_and_duplicates():
     outline = Outline(
         governing_thought="Enter the commuter EV segment now.",

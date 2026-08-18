@@ -64,6 +64,35 @@ def test_measure_render_parity_variants():
         assert abs(measured - consumed) <= pt(1), data.chart_type
 
 
+# --- fill mode clamps DOWN as well as up --------------------------------------
+
+def test_fill_hint_clamps_chart_into_small_box():
+    """On the canvas, a chart in a too-short box compresses INTO the box
+    instead of painting 1-2in over the neighbour below (the live overlap
+    class: 'needs 3.8in but its box is 2.9in')."""
+    ctx = make_ctx()
+    ctx.fill_hint = True
+    _, slide = blank_slide()
+    data = _chart(chart_type="bar", categories=["A", "B", "C", "D"],
+                  series=[ChartSeriesSpec(name="s", values=[4, 3, 2, 1])])
+    box = BBox(0, 0, inch(9), inch(2.0))   # natural would be ~3.4in
+    NativeChart().render(slide, data, box, ctx)
+    frame = _graphic_frames(slide)[0]
+    assert int(frame.top) + int(frame.height) <= box.h + pt(1)
+
+
+def test_fill_hint_still_grows_into_large_box():
+    ctx = make_ctx()
+    ctx.fill_hint = True
+    _, slide = blank_slide()
+    data = _chart(chart_type="bar", categories=["A", "B"],
+                  series=[ChartSeriesSpec(name="s", values=[2, 1])])
+    box = BBox(0, 0, inch(5), inch(5))     # natural ~2.4in, zone is 5in
+    NativeChart().render(slide, data, box, ctx)
+    frame = _graphic_frames(slide)[0]
+    assert int(frame.height) >= inch(4)    # filled the zone, not the natural
+
+
 # --- value labels: auto vs explicit -------------------------------------------
 
 def _has_data_labels(frame) -> bool:

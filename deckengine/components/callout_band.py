@@ -48,7 +48,8 @@ class CalloutBand(Component):
     # -- pure layout math (no side effects) -------------------------------
 
     def _fit_at(self, seg_spans: list[list[Span]], data: CalloutBandSpec,
-                width: int, band_h: int, ctx: RenderContext) -> _BandLayout:
+                width: int, band_h: int, ctx: RenderContext,
+                max_text_h: int = _PROBE_H) -> _BandLayout:
         sp = ctx.theme.spacing
         pad = sp(0.6)
         inset = sp(0.4)
@@ -57,7 +58,8 @@ class CalloutBand(Component):
         seg_w = max(0, width - seg_x0 - pad)
         cols = BBox(0, 0, seg_w, _PROBE_H).cols(len(seg_spans))
         fits = [
-            fit_text(spans, BBox(0, 0, max(0, col.w - 2 * inset), _PROBE_H),
+            fit_text(spans,
+                     BBox(0, 0, max(0, col.w - 2 * inset), max_text_h),
                      ctx.font("body"), max_size=ctx.size("small"),
                      min_size=_MIN_SEG_PT, measurer=ctx.measurer)
             for spans, col in zip(seg_spans, cols)
@@ -105,6 +107,16 @@ class CalloutBand(Component):
         theme = ctx.theme
         lay = self._layout(data, bbox.w, ctx)
         overhang = self._overhang(data, ctx)
+        if lay.band_h + overhang > bbox.h:
+            # a canvas cell can be shorter than the natural band: CLAMP and
+            # refit — segments shrink/ellipsize INSIDE the band (reported as
+            # truncations); the band never paints over the neighbour below
+            band_h = max(inch(0.3), bbox.h - overhang)
+            seg_spans = [parse_rich(s, base_color_role="ink")
+                         for s in data.segments]
+            lay = self._fit_at(seg_spans, data, bbox.w, band_h, ctx,
+                               max_text_h=max(pt(9),
+                                              band_h - theme.spacing(1.6)))
         band = BBox(bbox.x, bbox.y + overhang, bbox.w, lay.band_h)
 
         # panel

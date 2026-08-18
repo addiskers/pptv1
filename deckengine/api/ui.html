@@ -231,6 +231,10 @@
   .vcard .vactions { display: flex; gap: 8px; margin-top: 2px; }
   .vcard .vactions a, .vcard .vactions button { font-size: 12.5px; padding: 6px 12px; }
   .vcard.errored { border-color: #e0b0a8; background: #fdf3f1; }
+  .vcard .vhead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .vswatch { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .vswatch i { width: 13px; height: 13px; display: block; }
+  .vcard .vlang { font-size: 11.5px; color: var(--slate); font-style: italic; }
 
   /* results */
   .result-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 4px; }
@@ -572,6 +576,8 @@ const EXAMPLES = [
   });
 })();
 
+let themePalette = {};   // name -> swatch colors, reused by the variant cards
+
 async function loadThemes() {
   const box = $('themes');
   let themes = [{name:'consulting_navy',primary:'#1f3864',accent:'#c05621',bg:'#f4f2ec'},
@@ -580,6 +586,7 @@ async function loadThemes() {
     const r = await fetch('/themes');
     if (r.ok) { const j = await r.json(); if (j.length) themes = j; }
   } catch (e) {}
+  themes.forEach(t => { themePalette[t.name] = t; });
   selectedTheme = themes[0].name;
   box.innerHTML = '';
   themes.forEach((t, i) => {
@@ -807,6 +814,12 @@ function renderVariantGrid(data) {
     const card = document.createElement('div');
     card.className = 'vcard' + (v.status === 'error' ? ' errored' : '');
     const flowLabel = (v.flow_id || 'designing').replace(/_/g,' ');
+    const pal = themePalette[v.theme];
+    const swatch = pal
+      ? '<span class="vswatch"><i style="background:' + pal.bg + '"></i><i style="background:' + pal.primary + '"></i><i style="background:' + pal.accent + '"></i></span>'
+      : '';
+    const lang = v.design_language
+      ? '<span class="vlang">' + v.design_language.replace(/_/g,' ') + '</span>' : '';
     let body;
     if (v.status === 'done') {
       body = '<div class="vtitle">' + (v.title || 'Variant ' + (i+1)).replace(/</g,'&lt;') + '</div>' +
@@ -822,7 +835,7 @@ function renderVariantGrid(data) {
       body = '<div class="vangle">' + (v.angle || 'Assigning this variant\'s angle…').replace(/</g,'&lt;') + '</div>' +
         '<div class="vstatus">' + sub + '</div>';
     }
-    card.innerHTML = '<div class="vflow">' + flowLabel + '</div>' + body;
+    card.innerHTML = '<div class="vhead"><div class="vflow">' + flowLabel + '</div>' + swatch + '</div>' + lang + body;
     grid.appendChild(card);
   });
 }

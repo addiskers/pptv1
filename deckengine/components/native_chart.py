@@ -122,8 +122,14 @@ class NativeChart(Component):
         annot_h = self._annot_h(data, bbox.w, ctx)
         source_h = self._source_h(data, bbox.w, ctx)
         total = self.measure(data, bbox.w, ctx)
-        if ctx.fill_hint and bbox.h > total:
-            total = bbox.h  # charts fill their zone gracefully
+        if ctx.fill_hint:
+            if bbox.h > total:
+                total = bbox.h  # charts fill their zone gracefully
+            else:
+                # ...and clamp DOWN too: charts scale, so a compressed
+                # chart in its box strictly beats painting 1-2in over the
+                # neighbour below (the canvas free-placement overlap class)
+                total = max(bbox.h, inch(1.6) + annot_h + source_h)
         chart_h = max(inch(1.6), total - annot_h - source_h)
         frame = BBox(bbox.x, bbox.y, bbox.w, chart_h)
 

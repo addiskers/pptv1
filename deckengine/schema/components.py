@@ -23,6 +23,26 @@ def _strip_markup(v):
 
 PlainStr = Annotated[str, BeforeValidator(_strip_markup)]
 
+# the Theme's real role vocabulary — an invented role coerces to a legal
+# default instead of crashing the render over a string (repair-trap
+# discipline; seen live: fill_role='safe' raised KeyError mid-render)
+COLOR_ROLES = frozenset({
+    "bg", "surface", "surface_alt", "ink", "ink_muted", "primary",
+    "primary_dark", "accent", "positive", "negative", "grid",
+    "inverse_ink", "highlight", "warning"})
+
+
+def coerce_role(default):
+    def coerce(v):
+        if v is None or (isinstance(v, str) and v in COLOR_ROLES):
+            return v
+        return default
+    return coerce
+
+
+InkRoleStr = Annotated[str, BeforeValidator(coerce_role("ink"))]
+FillRoleStr = Annotated[str, BeforeValidator(coerce_role("surface"))]
+
 
 class TextBlockSpec(BaseModel):
     kind: Literal["text_block"] = "text_block"
@@ -30,7 +50,7 @@ class TextBlockSpec(BaseModel):
     size_role: Literal["title", "h2", "body", "small", "micro"] = "body"
     font_role: Literal["display", "body"] = "body"
     align: Literal["left", "center", "right"] = "left"
-    color_role: str = "ink"
+    color_role: InkRoleStr = "ink"
     max_lines: int | None = None
 
 
@@ -92,7 +112,7 @@ class DataTableSpec(BaseModel):
     groups: list[DataGroupSpec] = Field(min_length=1, max_length=15)
     heatmap_lo: float = 0.0
     heatmap_hi: float = 100.0
-    header_fill_role: str = "primary"
+    header_fill_role: FillRoleStr = "primary"
     zebra: bool = False
     # widen col 0 (capped +25%) when group labels would clip; explicit
     # opt-out for authors who want their fracs untouched
@@ -133,7 +153,7 @@ class DonutStatSpec(BaseModel):
     label: RichStr = Field(max_length=80)         # caption under/beside the ring
     # container knobs (set by kpi_card_strip on dark tiles; leave defaults)
     inverse: bool = False           # text in inverse_ink for dark surfaces
-    hole_fill_role: str = "bg"      # hole matches the surface it sits on
+    hole_fill_role: FillRoleStr = "bg"      # hole matches the surface it sits on
 
 
 class ProgressPillSpec(BaseModel):
@@ -156,7 +176,7 @@ class KpiCardSpec(BaseModel):
 class KpiCardStripSpec(BaseModel):
     kind: Literal["kpi_card_strip"] = "kpi_card_strip"
     cards: list[KpiCardSpec] = Field(min_length=2, max_length=6)
-    fill_role: str = "primary_dark"
+    fill_role: FillRoleStr = "primary_dark"
     # emphasis: this card renders in accent instead of fill_role
     highlight_index: int | None = Field(default=None, ge=0, le=5)
 
@@ -198,7 +218,7 @@ class HighlightBoxSpec(BaseModel):
     kind: Literal["highlight_box"] = "highlight_box"
     title: RichStr = Field(max_length=200)
     body: RichStr | None = Field(default=None, max_length=600)
-    fill_role: str = "surface_alt"
+    fill_role: FillRoleStr = "surface_alt"
     accent_bar: bool = True
 
 
@@ -317,7 +337,7 @@ class ComparisonColumnsSpec(BaseModel):
     kind: Literal["comparison_columns"] = "comparison_columns"
     columns: list[ComparisonColumnSpec] = Field(min_length=2, max_length=4)
     row_labels: list[str] | None = None  # left rail, one per cell row
-    header_fill_role: str = "primary"
+    header_fill_role: FillRoleStr = "primary"
     dashed_separators: bool = True
     # emphasis: the winning column (matches a header, case-insensitive) —
     # accent header + full-height accent outline
@@ -336,7 +356,7 @@ class ArrowCalloutSpec(BaseModel):
     title: RichStr = Field(max_length=200)
     sub: RichStr | None = Field(default=None, max_length=300)
     stats: list[ArrowStatSpec] = Field(default_factory=list, max_length=4)
-    fill_role: str = "surface_alt"
+    fill_role: FillRoleStr = "surface_alt"
 
 
 class BraceGroupSpec(BaseModel):

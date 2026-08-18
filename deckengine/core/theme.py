@@ -49,14 +49,26 @@ class Theme:
 
     unit: int = inch(0.1)  # base spacing unit; all gaps are multiples
 
+    def has_color(self, role: str) -> bool:
+        """True when `role` resolves without the fallback — probes (like
+        legend_row's code-vs-cycle choice) use this, never try/except."""
+        attr = f"color_{role}" if not role.startswith("color_") else role
+        return hasattr(self, attr) or role in self.badge_palette
+
     def color(self, role: str) -> str:
-        """Resolve a semantic role name to a hex string."""
+        """Resolve a semantic role name to a hex string. An unknown role
+        falls back to ink with a warning — the LLM sometimes invents a
+        role name, and a whole deck must never die over a string (seen
+        live: KeyError 'safe' killed a variant mid-render)."""
         attr = f"color_{role}" if not role.startswith("color_") else role
         if hasattr(self, attr):
             return getattr(self, attr)
         if role in self.badge_palette:
             return self.badge_palette[role]
-        raise KeyError(f"unknown color role: {role!r}")
+        import logging
+        logging.getLogger("deckengine").warning(
+            "unknown color role %r — falling back to ink", role)
+        return self.color_ink
 
     def soft(self, role: str, frac: float = 0.15) -> str:
         """A tint of `role` blended toward the background — the harmonized

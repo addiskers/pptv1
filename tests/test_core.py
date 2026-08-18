@@ -42,8 +42,11 @@ def test_theme_roles_and_heatmap():
     assert t.color("LIV") == "7CB342"
     assert t.heatmap_color(0) == t.heatmap_scale[0]
     assert t.heatmap_color(100, 0, 100) == t.heatmap_scale[-1]
-    with pytest.raises(KeyError):
-        t.color("nope")
+    # an invented role must never crash a render: fallback to ink + warn
+    # (probes use has_color, which stays exact)
+    assert t.color("nope") == t.color("ink")
+    assert t.has_color("primary") and t.has_color("LIV")
+    assert not t.has_color("nope")
 
 
 def test_fonts_resolve_theme():

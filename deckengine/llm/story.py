@@ -37,13 +37,15 @@ class OutlineSlide(BaseModel):
                     "chips below'). Vary it slide to slide; null on "
                     "title/divider slides.")
 
-    @field_validator("section", "visual_concept", mode="before")
+    @field_validator("section", "visual_concept", "claim", mode="before")
     @classmethod
     def _trim_advisory(cls, v, info):
-        """Advisory prompt-side fields TRIM instead of failing: an overlong
-        concept sentence must never kill the whole outline (there is no
-        repair loop around stage 1's validation)."""
-        cap = 40 if info.field_name == "section" else 120
+        """Prompt-side fields TRIM instead of failing: an overlong sentence
+        must never kill the whole outline (there is no repair loop around
+        stage 1's validation — seen live twice: visual_concept, then a
+        forced-flow claim chain with long claims killed 2 batch variants)."""
+        cap = {"section": 40, "visual_concept": 120, "claim": 220}[
+            info.field_name]
         if isinstance(v, str) and len(v) > cap:
             cut = v[:cap]
             sp = cut.rfind(" ")
@@ -69,6 +71,17 @@ class Outline(BaseModel):
         """Advisory: normalize and trim; never fail the outline over it."""
         if isinstance(v, str):
             return v.strip().lower().replace(" ", "_").replace("-", "_")[:40]
+        return v
+
+    @field_validator("governing_thought", mode="before")
+    @classmethod
+    def _trim_governing(cls, v):
+        """Trim, never fail: an eloquent-but-overlong governing thought
+        killed 2 of 5 batch variants live (stage 1 has no repair loop)."""
+        if isinstance(v, str) and len(v) > 300:
+            cut = v[:300]
+            sp = cut.rfind(" ")
+            return (cut[:sp] if sp > 150 else cut).strip()
         return v
 
 

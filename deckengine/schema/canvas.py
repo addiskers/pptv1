@@ -16,15 +16,22 @@ from __future__ import annotations
 
 from typing import Annotated, Literal, Union
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, BeforeValidator, Field, model_validator
 
 from .base import SpeakerNotes
-from .components import ComponentSpec, RichStr
+from .components import ComponentSpec, RichStr, coerce_role
 
 MAX_ELEMENTS = 40
 MIN_FRAC_W = 0.02
 MIN_FRAC_H = 0.015
 _EDGE_TOL = 0.005  # x+w may exceed 1.0 by at most this (float slack)
+
+# an invented color role coerces to a legal default, never crashes a
+# render (repair-trap discipline; seen live: fill_role='safe' raised
+# KeyError mid-render and killed a whole variant)
+InkRole = Annotated[str, BeforeValidator(coerce_role("ink"))]
+FillRole = Annotated[str | None, BeforeValidator(coerce_role("surface"))]
+LineRole = Annotated[str | None, BeforeValidator(coerce_role("grid"))]
 
 
 class CanvasTextSpec(BaseModel):
@@ -35,7 +42,7 @@ class CanvasTextSpec(BaseModel):
     size_pt: float | None = Field(default=None, ge=7, le=80)
     size_role: Literal["title", "h2", "stat", "body", "small",
                        "micro", "kicker"] = "body"
-    color_role: str = "ink"
+    color_role: InkRole = "ink"
     font: Literal["body", "display"] = "body"
     align: Literal["left", "center", "right"] = "left"
     anchor: Literal["top", "middle", "bottom"] = "top"
@@ -48,22 +55,22 @@ class CanvasShapeSpec(BaseModel):
     kind: Literal["canvas_shape"] = "canvas_shape"
     shape: Literal["rect", "rounded", "oval", "pentagon", "chevron",
                    "right_arrow", "down_arrow"] = "rect"
-    fill_role: str | None = "surface"
-    line_role: str | None = None
+    fill_role: FillRole = "surface"
+    line_role: LineRole = None
     line_w_pt: float = Field(default=0.75, ge=0.25, le=4)
     corner_radius: float = Field(default=0.15, ge=0, le=0.5)
     shadow: bool = False
     label: RichStr | None = Field(default=None, max_length=160)
     label_size_role: Literal["title", "h2", "stat", "body", "small",
                              "micro"] = "small"
-    label_color_role: str = "ink"
+    label_color_role: InkRole = "ink"
 
 
 class CanvasLineSpec(BaseModel):
     """Axis-aligned rule/divider drawn through the element box's center."""
     kind: Literal["canvas_line"] = "canvas_line"
     direction: Literal["h", "v"] = "h"
-    role: str = "grid"
+    role: Annotated[str, BeforeValidator(coerce_role("grid"))] = "grid"
     weight_pt: float = Field(default=0.75, ge=0.25, le=4)
     dash: Literal["dash", "sysDot"] | None = None
 
@@ -106,7 +113,10 @@ class CanvasSlideSpec(SpeakerNotes):
     subtitle: RichStr | None = Field(default=None, max_length=400)
     kicker: str | None = Field(default=None, max_length=40)
     render_title: bool = True
-    bg_fill_role: str | None = None   # full-surface wash painted first
+    # full-surface wash painted first (unknown roles coerce to None: a bad
+    # bg guess should just mean "no wash", not a surprise surface fill)
+    bg_fill_role: Annotated[
+        str | None, BeforeValidator(coerce_role(None))] = None
     elements: list[CanvasElement] = Field(min_length=2,
                                           max_length=MAX_ELEMENTS)
     footnote: str | None = Field(default=None, max_length=300)

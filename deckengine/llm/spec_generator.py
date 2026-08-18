@@ -99,7 +99,9 @@ def fast_model_id() -> str:
 def _structured_call(name: str, schema: dict, prompt: str,
                      max_tokens: int = 16000, model: str | None = None) -> dict:
     """One structured-output call, provider-dispatched, with transient-error
-    retries (a network blip must never kill a 20-slide generation)."""
+    retries (a network blip must never kill a 20-slide generation).
+    model: an explicit model id, or the sentinel 'fast' resolved lazily to
+    fast_model_id() at call time (lazy so mocked tests never need a key)."""
     import time as _time
     last: Exception | None = None
     for attempt in range(3):
@@ -118,6 +120,8 @@ def _structured_call(name: str, schema: dict, prompt: str,
 def _structured_call_once(name: str, schema: dict, prompt: str,
                           max_tokens: int = 16000,
                           model: str | None = None) -> dict:
+    if model == "fast":
+        model = fast_model_id()
     if provider() == "openai":
         from openai import OpenAI
         client = OpenAI()
@@ -248,7 +252,7 @@ def generate_outline(prompt: str, facts: FactTable | None,
         # the fast model is enough for it (the draft stays on the main model)
         revised = Outline.model_validate(
             _structured_call("emit_outline", schema, review,
-                             model=fast_model_id()))
+                             model="fast"))
         if forced_flow and forced_flow in FLOWS:
             revised.narrative_arc = forced_flow
         if len(_problems(revised)) <= len(problems):
@@ -495,7 +499,7 @@ def _design_brief(claim: str, visual_concept: str | None,
                          [describe_silhouette(s)
                           for s in recent_silhouettes[-4:]],
                          facts is not None),
-            max_tokens=2000, model=fast_model_id())
+            max_tokens=2000, model="fast")
         return DesignBrief.model_validate(raw)
     except Exception as e:  # noqa: BLE001
         log.warning("design brief failed (%s); designing without one", e)
@@ -514,7 +518,7 @@ def _batch_briefs(items: list[tuple[str, str | None, str | None]],
         raw = _structured_call(
             "design_briefs", DeckBriefs.model_json_schema(),
             batch_brief_prompt(items, facts is not None),
-            max_tokens=8000, model=fast_model_id())
+            max_tokens=8000, model="fast")
         briefs = DeckBriefs.model_validate(raw).briefs
         if len(briefs) != len(items):
             log.warning("batch briefs returned %d briefs for %d slides; "
@@ -568,6 +572,93 @@ def judge_budget_default() -> int:
         return 6
 
 
+# warnings that mean elements PHYSICALLY collide or paint beyond their box
+# on the rendered slide — the class the render-truth repair chases. Marks
+# must be ground truth only: the audit's measured text overlaps plus the
+# self-reports of the few components that truly draw past their bbox.
+# Density guesses ("tight in its box") and self-clamping notes ("clamping",
+# "may clip") are NOT here — feeding unfixable problems to the repair
+# poisoned its accept criterion (live finding: 11/11 repairs rejected).
+_RENDER_MARKS = ("text overlap", "exceeds bbox",
+                 "taller than provided bbox",
+                 "row taller than provided bbox")
+_RENDER_SKIP = ("clamping", "may clip")
+
+
+def _render_problems(slide, theme: str) -> list[str]:
+    """Render the slide solo (deterministic, no LLM) and return ALL its
+    overlap/overflow warnings as repairable problem strings (uncapped —
+    the accept criterion compares counts; the prompt caps separately)."""
+    from ..render.deck_builder import build_deck
+    workdir = Path(tempfile.mkdtemp(prefix="deckengine_rt_"))
+    try:
+        report = build_deck(DeckSpec(theme=theme,
+                                     meta=DeckMeta(title="rt"),
+                                     slides=[slide]),
+                            workdir / "rt.pptx")
+    except Exception as e:  # noqa: BLE001 — a non-rendering slide is the worst defect
+        return [f"[render] the slide failed to render at all: {e}"]
+    finally:
+        shutil.rmtree(workdir, ignore_errors=True)
+    return [f"[render] {w}" for w in report.warnings
+            if any(m in w for m in _RENDER_MARKS)
+            and not any(s in w for s in _RENDER_SKIP)]
+
+
+def _maybe_render_repair(slide, claim: str, prompt: str,
+                         facts: FactTable | None,
+                         theme: str) -> BaseModel:
+    """Render-truth repair: overlap/overflow measured on the ACTUAL render
+    becomes ONE repair call (canvas only — archetype molds place
+    deterministically). Fast mode's first-ever render feedback; best
+    mode's fixer when every candidate rendered dirty. Deterministic
+    accept: keep the repair only if it renders strictly cleaner.
+    OPT-IN via DECKENGINE_RENDER_REPAIR=1: across 30+ live attempts the
+    model never beat the deterministic layers (clamp contract, auto-grow,
+    footnote reservation) — until the repair prompt earns its keep, the
+    default skips the extra call per dirty slide."""
+    if os.environ.get("DECKENGINE_RENDER_REPAIR", "0") != "1":
+        return slide
+    if getattr(slide, "slide_type", "") != "canvas":
+        return slide
+    probs = _render_problems(slide, theme)
+    if not probs:
+        return slide
+    model_cls = _ARCHETYPES["canvas"]
+    p = (f"Deck request:\n{prompt}\n\n"
+         f"{facts.prompt_block() if facts else ''}"
+         f"Slide claim: {claim}\n\n"
+         "Your slide design below was RENDERED and measured — it has "
+         "physical defects. Fix ALL of them while keeping the message: "
+         "give each element enough height and width for its content, move "
+         "colliding elements apart onto free canvas, and CUT content that "
+         "cannot fit. Elements must never touch or spill onto neighbours."
+         + _CANVAS_HELP + "\n\n"
+         "CURRENT SPEC:\n" + slide.model_dump_json() + "\n\n"
+         "MEASURED DEFECTS (from the actual render):\n"
+         + "\n".join(f"- {x}" for x in probs[:8])
+         + "\n\nEmit the full corrected JSON.")
+    try:
+        raw = _structured_call("emit_canvas", model_cls.model_json_schema(), p)
+        raw.setdefault("slide_type", "canvas")
+        fixed = model_cls.model_validate(raw)
+    except Exception as e:  # noqa: BLE001 — repair is best-effort
+        log.warning("render repair failed (%s); keeping original", e)
+        return slide
+    # accept on RENDER truth alone: strictly fewer measured defects. The
+    # canvas rails are deliberately not re-checked here — fixing overlap
+    # often means cutting/shrinking content, which trips the advisory
+    # coverage rail and vetoed every good repair when it was a guard.
+    fixed_probs = _render_problems(fixed, theme)
+    if len(fixed_probs) < len(probs):
+        log.info("render repair accepted (%d -> %d render defects)",
+                 len(probs), len(fixed_probs))
+        return fixed
+    log.warning("render repair did not improve (render %d -> %d); "
+                "keeping original", len(probs), len(fixed_probs))
+    return slide
+
+
 def generate_slide_best(archetype: str, claim: str, prompt: str,
                         facts: FactTable | None,
                         prior_slides: list[str] | None = None,
@@ -576,6 +667,25 @@ def generate_slide_best(archetype: str, claim: str, prompt: str,
                         recent_silhouettes: list[str] | None = None,
                         brief="auto", n_candidates: int | None = None,
                         judge_budget: JudgeBudget | None = None) -> BaseModel:
+    """Candidate generation + judging (see _pick_slide_best), then the
+    render-truth repair pass: the winner is rendered for real and any
+    overlap/overflow it still carries becomes one final repair call."""
+    slide = _pick_slide_best(
+        archetype, claim, prompt, facts, prior_slides=prior_slides,
+        theme=theme, visual_concept=visual_concept,
+        recent_silhouettes=recent_silhouettes, brief=brief,
+        n_candidates=n_candidates, judge_budget=judge_budget)
+    return _maybe_render_repair(slide, claim, prompt, facts, theme)
+
+
+def _pick_slide_best(archetype: str, claim: str, prompt: str,
+                     facts: FactTable | None,
+                     prior_slides: list[str] | None = None,
+                     theme: str = "consulting_navy",
+                     visual_concept: str | None = None,
+                     recent_silhouettes: list[str] | None = None,
+                     brief="auto", n_candidates: int | None = None,
+                     judge_budget: JudgeBudget | None = None) -> BaseModel:
     """N candidates -> render all -> deterministic score -> ONE pairwise
     vision-judge call only when the metrics can't separate the finalists.
     Canvas slides get a DESIGN BRIEF first; candidate 2 is briefed toward a
@@ -701,7 +811,8 @@ def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
                        meta: DeckMeta | None = None,
                        outline: Outline | None = None,
                        quality: str = "best",
-                       progress_cb=None) -> DeckSpec:
+                       progress_cb=None,
+                       design_directive: str | None = None) -> DeckSpec:
     """outline: pass a (human-approved/edited) claim chain to skip stage 1.
     quality: 'best' = multi-candidate + vision judge; 'fast' = one
     candidate, no judge. progress_cb(done, total, stage) fires as work lands.
@@ -730,6 +841,11 @@ def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
     log.info("outline: %s", [o.slide_type for o in outline.slides])
     deck_context = (f"{prompt}\n\nDeck governing thought: "
                     f"{outline.governing_thought}")
+    if design_directive:
+        # every brief and emission reads deck_context, so the variant's
+        # design personality reaches every slide with zero extra plumbing
+        deck_context += ("\n\nTHIS DECK'S DESIGN LANGUAGE — every slide "
+                         f"leans this way: {design_directive}")
     # designer mode: body slides are DESIGNED freeform on the canvas; the
     # outline's slide_type survives as the reliability fallback. Covers,
     # dividers and the closing exec_summary keep their dedicated molds.

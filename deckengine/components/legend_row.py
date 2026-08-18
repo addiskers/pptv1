@@ -76,9 +76,7 @@ class LegendRow(Component):
         x = bbox.x
         for i, (item, (pill_w, label_w)) in enumerate(zip(data.items, widths)):
             fill_role = item.code
-            try:
-                ctx.theme.color(fill_role)
-            except KeyError:
+            if not ctx.theme.has_color(fill_role):
                 fill_role = _CYCLE[i % len(_CYCLE)]
             pill = add_shape(slide, BBox(x, bbox.y, pill_w, pill_h), ctx.theme,
                              shape="rounded", fill_role=fill_role,

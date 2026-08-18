@@ -112,6 +112,22 @@ def test_batch_variants_get_distinct_flows_and_render(client, monkeypatch):
     for v in status["variants"]:
         dl = client.get(f"/download/{v['job_id']}")
         assert dl.status_code == 200
+    # visual + structural distinctness: 3 distinct themes (user's choice
+    # among them) and 3 distinct design languages, even though the mocked
+    # angle call assigned none (the deterministic fallback covered it)
+    themes = [v["theme"] for v in status["variants"]]
+    assert len(set(themes)) == 3 and "consulting_navy" in themes
+    langs = [v["design_language"] for v in status["variants"]]
+    assert len(set(langs)) == 3 and all(langs)
+
+
+def test_variant_theme_rotation_distinct_choice_first():
+    themes = api_main._variant_themes("emerald_gold", 5)
+    assert themes[0] == "emerald_gold"
+    assert len(set(themes)) == 5
+    themes2 = api_main._variant_themes("consulting_navy", 5)
+    assert themes2[0] == "consulting_navy"
+    assert len(set(themes2)) == 5
 
 
 def test_batch_angle_count_mismatch_falls_back_deterministically(client, monkeypatch):

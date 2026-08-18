@@ -230,7 +230,7 @@ def intake_questions(req: IntakeRequest,
         raw = _structured_call(
             "intake_questions", IntakeQuestions.model_json_schema(),
             intake_prompt(req.prompt, bool(req.csv_text)),
-            max_tokens=2000, model=fast_model_id())
+            max_tokens=2000, model="fast")
         return IntakeQuestions.model_validate(raw).model_dump()
     except Exception as e:  # noqa: BLE001 — best-effort, never blocks compose
         import logging
@@ -339,6 +339,8 @@ def batch_status(batch_id: str,
                              "title": m.get("title"),
                              "flow_id": m.get("flow_id"),
                              "angle": m.get("angle"),
+                             "theme": m.get("theme"),
+                             "design_language": m.get("design_language"),
                              "warnings": len(m.get("warnings", [])),
                              "similar_pairs": m.get("batch_similar_pairs")})
     if not variants:
@@ -567,13 +569,29 @@ def _batch_parallel() -> int:
         return 2
 
 
+# visual rotation for the variant batch, most-distinct-first; the user's
+# chosen theme always leads, skyquest_brand joins only when chosen
+_THEME_ROTATION = ["consulting_navy", "consulting_paper", "midnight_cyan",
+                   "emerald_gold", "burgundy_cream", "graphite_amber",
+                   "forest_stone", "indigo_gold", "teal_coral",
+                   "crimson_charcoal"]
+
+
+def _variant_themes(chosen: str, n: int) -> list[str]:
+    """n DISTINCT themes, the user's choice first — variants must look
+    different at a glance, not just argue differently."""
+    rest = [t for t in _THEME_ROTATION if t != chosen]
+    return ([chosen] + rest + [chosen] * n)[:n]   # pad defensively
+
+
 def _run_batch(batch_id: str, job_ids: list[str], req: GenerateBatch) -> None:
     import threading
     from concurrent.futures import ThreadPoolExecutor
     from ..llm.facts import FactTable
     from ..llm.spec_generator import (_structured_call, fast_model_id,
                                       generate_deck_spec, generate_outline)
-    from ..llm.variants import DeckAngles, angle_prompt, fallback_angles
+    from ..llm.variants import (DeckAngles, angle_prompt, design_directive,
+                                fallback_angles)
     from ..schema.slide_types import DeckMeta
 
     prompt = _fold_intake(req.prompt, req.intake_answers)
@@ -582,17 +600,32 @@ def _run_batch(batch_id: str, job_ids: list[str], req: GenerateBatch) -> None:
     try:
         raw = _structured_call(
             "deck_angles", DeckAngles.model_json_schema(),
-            angle_prompt(prompt, n), max_tokens=4000, model=fast_model_id())
+            angle_prompt(prompt, n), max_tokens=4000, model="fast")
         angles = DeckAngles.model_validate(raw).angles
         if len(angles) != n or len({a.flow_id for a in angles}) != n:
             angles = fallback_angles(n)
     except Exception:  # noqa: BLE001 — the diversity floor never depends on this
         angles = fallback_angles(n)
+    # design languages must be distinct too; if the model repeated any,
+    # take the whole assignment from the deterministic rotation
+    if len({a.design_language for a in angles}) != n:
+        fb = fallback_angles(n)
+        for a, f in zip(angles, fb):
+            a.design_language = f.design_language
 
+    themes = _variant_themes(req.theme, n)
     governing: dict[str, str] = {}
     lock = threading.Lock()
 
-    def _one(job_id: str, angle) -> None:
+    def _one(job_id: str, angle, theme: str) -> None:
+        def _tag(job: dict) -> dict:
+            job["batch_id"] = batch_id
+            job["flow_id"] = angle.flow_id
+            job["angle"] = angle.angle
+            job["design_language"] = angle.design_language
+            job["theme"] = theme
+            return job
+
         try:
             outline = generate_outline(
                 prompt, facts, forced_flow=angle.flow_id,
@@ -607,30 +640,27 @@ def _run_batch(batch_id: str, job_ids: list[str], req: GenerateBatch) -> None:
                 if job is not None and job.get("status") == "running":
                     job["progress"] = {"done": done, "total": total,
                                        "stage": stage}
-                    job["flow_id"] = angle.flow_id
-                    job["angle"] = angle.angle
+                    _tag(job)
                     _persist(job_id)
 
             spec = generate_deck_spec(
-                prompt, csv_text=req.csv_text, theme=req.theme, meta=meta,
-                outline=outline, quality=req.quality, progress_cb=_progress)
+                prompt, csv_text=req.csv_text, theme=theme, meta=meta,
+                outline=outline, quality=req.quality, progress_cb=_progress,
+                design_directive=design_directive(angle.design_language))
         except Exception as e:  # noqa: BLE001 — one bad variant must not sink the batch
-            _JOBS[job_id] = {"status": "error", "error": str(e),
-                             "owner": _JOBS.get(job_id, {}).get("owner"),
-                             "batch_id": batch_id, "flow_id": angle.flow_id,
-                             "angle": angle.angle}
+            _JOBS[job_id] = _tag(
+                {"status": "error", "error": str(e),
+                 "owner": _JOBS.get(job_id, {}).get("owner")})
             _persist(job_id)
             return
         _run_render(job_id, spec)          # replaces _JOBS[job_id] wholesale
         job = _JOBS.get(job_id)             # so batch tags are re-applied after
         if job is not None:
-            job["batch_id"] = batch_id
-            job["flow_id"] = angle.flow_id
-            job["angle"] = angle.angle
+            _tag(job)
             _persist(job_id)
 
     with ThreadPoolExecutor(max_workers=_batch_parallel()) as pool:
-        list(pool.map(lambda pair: _one(*pair), zip(job_ids, angles)))
+        list(pool.map(lambda t: _one(*t), zip(job_ids, angles, themes)))
 
     _tag_batch_diversity(batch_id, job_ids, governing)
 

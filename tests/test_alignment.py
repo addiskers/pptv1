@@ -135,3 +135,64 @@ def test_golden_canvas_passes_fill_rail():
                         .read_text(encoding="utf-8"))
     s = CanvasSlideSpec.model_validate(golden["slides"][0])
     assert not any("covers only" in p for p in check_canvas_slide(s))
+
+
+# -- box auto-grow ------------------------------------------------------------
+
+_CALLOUT = {"kind": "callout_band", "label": "SO WHAT",
+            "segments": ["the point that matters"]}
+
+
+def _grow_deck(extra_elements):
+    return DeckSpec.model_validate({
+        "schema_version": 1, "theme": "consulting_navy",
+        "meta": {"title": "g", "date": "18 Aug 2026", "footer_org": "DE"},
+        "slides": [{
+            "slide_type": "canvas", "title": "Grow test",
+            "elements": [
+                {"x": 0.05, "y": 0.05, "w": 0.9, "h": 0.05,
+                 "content": _CALLOUT},           # starved: needs ~0.16
+            ] + extra_elements}]})
+
+
+def test_starved_component_grows_into_free_space(tmp_path):
+    """A component in a too-short box with empty canvas below grows to its
+    natural height — no density warning, zero LLM calls."""
+    spec = _grow_deck([
+        {"x": 0.05, "y": 0.8, "w": 0.9, "h": 0.15,
+         "content": {"kind": "canvas_text", "text": "far below"}}])
+    report = build_deck(spec, tmp_path / "grow.pptx")
+    assert not any("tight in its box" in w for w in report.warnings)
+
+
+def test_blocked_component_still_warns(tmp_path):
+    """An element directly below blocks growth — the density note stays
+    (a defect for candidate scoring; the component itself clamps)."""
+    spec = _grow_deck([
+        {"x": 0.05, "y": 0.11, "w": 0.9, "h": 0.15,
+         "content": {"kind": "canvas_text", "text": "right below, blocking"}}])
+    report = build_deck(spec, tmp_path / "blocked.pptx")
+    assert any("tight in its box" in w for w in report.warnings)
+
+
+def test_footnote_strip_reserved_no_overlap(tmp_path):
+    """A full-height design + a footnote: the strip is reserved BEFORE
+    elements place, so the bottom row never collides with the source line
+    (was a guaranteed-overlap class: fill rail wants full height)."""
+    spec = DeckSpec.model_validate({
+        "schema_version": 1, "theme": "consulting_navy",
+        "meta": {"title": "f", "date": "18 Aug 2026", "footer_org": "DE"},
+        "slides": [{
+            "slide_type": "canvas", "title": "Footnote test",
+            "footnote": "Source: Euromonitor beauty and personal care 2025",
+            "elements": [
+                {"x": 0.05, "y": 0.05, "w": 0.9, "h": 0.4,
+                 "content": {"kind": "canvas_text",
+                             "text": "the top half body copy"}},
+                {"x": 0.05, "y": 0.55, "w": 0.9, "h": 0.45,
+                 "content": {"kind": "canvas_text",
+                             "text": "a bottom row that reaches the full "
+                                     "height of the body area"}},
+            ]}]})
+    report = build_deck(spec, tmp_path / "fn.pptx")
+    assert not any("text overlap" in w for w in report.warnings)

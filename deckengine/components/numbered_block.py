@@ -39,18 +39,23 @@ class NumberedBlock(Component):
         return min(_MAX_DIAMETER, two_lines)
 
     def _fits(self, data: NumberedBlockSpec, width: int,
-              ctx: RenderContext) -> tuple[int, FitResult, FitResult | None]:
+              ctx: RenderContext,
+              max_h: int = _PROBE_H) -> tuple[int, FitResult, FitResult | None]:
         d = self._diameter(ctx)
         gap = ctx.theme.spacing(_CIRCLE_GAP_MULT)
         col_w = max(1, width - d - gap)
-        probe = BBox(0, 0, col_w, _PROBE_H)
         title = fit_text(parse_rich(data.title, base_color_role="primary"),
-                         probe, ctx.font("body"), max_size=ctx.size("h2"),
+                         BBox(0, 0, col_w, max_h), ctx.font("body"),
+                         max_size=ctx.size("h2"),
                          min_size=_TITLE_MIN, measurer=ctx.measurer)
         body = None
         if data.body is not None:
+            body_h = (max_h if max_h == _PROBE_H else
+                      max(1, max_h - title.height_emu
+                          - ctx.theme.spacing(_TITLE_BODY_GAP_MULT)))
             body = fit_text(parse_rich(data.body, base_color_role="ink"),
-                            probe, ctx.font("body"), max_size=ctx.size("small"),
+                            BBox(0, 0, col_w, body_h), ctx.font("body"),
+                            max_size=ctx.size("small"),
                             min_size=_BODY_MIN, measurer=ctx.measurer)
         return d, title, body
 
@@ -75,6 +80,13 @@ class NumberedBlock(Component):
         d, title, body = self._fits(data, bbox.w, ctx)
         stack_h = self._stack_h(title, body, ctx)
         total = max(d, stack_h)
+        if total > bbox.h and bbox.h >= d:
+            # a canvas cell can be shorter than the natural stack: refit the
+            # text INTO the cell (shrink -> ellipsize, reported) — the block
+            # never paints over the neighbour below
+            d, title, body = self._fits(data, bbox.w, ctx, max_h=bbox.h)
+            stack_h = self._stack_h(title, body, ctx)
+            total = max(d, min(stack_h, bbox.h))
 
         # number circle, vertically centered against the text stack
         circle = BBox(bbox.x, bbox.y + (total - d) // 2, d, d)

@@ -17,6 +17,28 @@ def test_fallback_angles_distinct_flows():
     assert all(a.flow_id in FLOWS for a in angles)
 
 
+def test_fallback_angles_distinct_design_languages():
+    from deckengine.llm.variants import DESIGN_LANGUAGES
+    angles = fallback_angles(5)
+    langs = [a.design_language for a in angles]
+    assert len(set(langs)) == 5
+    assert all(lg in DESIGN_LANGUAGES for lg in langs)
+
+
+def test_design_directive_lookup():
+    from deckengine.llm.variants import design_directive
+    assert "hero-stat" in design_directive("hero_stat_editorial")
+    assert design_directive("") is None
+    assert design_directive("not_a_language") is None
+
+
+def test_angle_prompt_carries_design_language_menu():
+    from deckengine.llm.variants import DESIGN_LANGUAGES
+    p = angle_prompt("brief", 5)
+    assert "design_language" in p
+    assert all(k in p for k in DESIGN_LANGUAGES)
+
+
 def test_fallback_angles_wraps_past_flow_count():
     n = len(FLOWS) + 3
     angles = fallback_angles(n)

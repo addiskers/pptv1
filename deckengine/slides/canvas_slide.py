@@ -97,26 +97,72 @@ class CanvasSlide(SlideAssembler):
         else:
             area = SLIDE
 
+        # the footnote strip is RESERVED before any element is placed: the
+        # fill rail pushes designs to the full body height, so a footnote
+        # painted over the bottom row was a guaranteed overlap class
+        fn = fh = None
+        if spec.footnote:
+            from ..schema.components import TextBlockSpec
+            fn = TextBlockSpec(text=spec.footnote, size_role="micro",
+                               color_role="ink_muted")
+            fh = get_component("text_block").measure(fn, area.w, ctx)
+            elem_area = BBox(area.x, area.y, area.w,
+                             max(1, area.h - fh - theme.spacing(0.4)))
+        else:
+            elem_area = area
+
         geoms = _snap(spec.elements)
+        geoms = self._grow_starved(spec.elements, geoms, elem_area, ctx)
         order = sorted(range(len(spec.elements)),
                        key=lambda i: (spec.elements[i].z, i))
         for i in order:
             el = spec.elements[i]
             x, y, w, h = geoms[i]
-            box = BBox(area.x + round(x * area.w),
-                       area.y + round(y * area.h),
-                       max(1, round(w * area.w)),
-                       max(1, round(h * area.h)))
+            box = BBox(elem_area.x + round(x * elem_area.w),
+                       elem_area.y + round(y * elem_area.h),
+                       max(1, round(w * elem_area.w)),
+                       max(1, round(h * elem_area.h)))
             self._render_element(slide, el, box, ctx)
 
-        if spec.footnote:
-            from ..schema.components import TextBlockSpec
-            fn = TextBlockSpec(text=spec.footnote, size_role="micro",
-                               color_role="ink_muted")
-            comp = get_component("text_block")
-            fh = comp.measure(fn, area.w, ctx)
-            comp.render(slide, fn,
-                        BBox(area.x, area.bottom - fh, area.w, fh), ctx)
+        if fn is not None:
+            get_component("text_block").render(
+                slide, fn, BBox(area.x, area.bottom - fh, area.w, fh), ctx)
+
+    # -- geometry relief ----------------------------------------------------
+
+    @staticmethod
+    def _grow_starved(elements, geoms, area, ctx):
+        """Deterministic overflow relief: a COMPONENT needing more height
+        than its box grows downward into FREE canvas (no other element in
+        its x-span below it), capped at the body bottom. Kills the
+        'needs 1.24in but box is 1.00in' class with zero LLM calls; the
+        pre-measure warning still fires for whatever growth can't cover.
+        Text/shape/line elements are untouched — text fits itself."""
+        out = [tuple(g) for g in geoms]
+        for i, el in enumerate(elements):
+            if el.content.kind in ("canvas_text", "canvas_shape",
+                                   "canvas_line"):
+                continue
+            x, y, w, h = out[i]
+            try:
+                comp = get_component(el.content.kind)
+                natural = comp.measure(el.content,
+                                       max(1, round(w * area.w)), ctx)
+            except Exception:  # noqa: BLE001 — measuring must never block
+                continue
+            need = natural / area.h
+            if need <= h * 1.02:
+                continue
+            bottom = y + h
+            limit = 1.0
+            for j, (ox, oy, ow, oh) in enumerate(out):
+                if j != i and ox < x + w and ox + ow > x \
+                        and oy >= bottom - 1e-6:
+                    limit = min(limit, oy - 0.01)   # keep a hairline gap
+            grown = min(need, limit - y)
+            if grown > h:
+                out[i] = (x, y, w, grown)
+        return out
 
     # -- element dispatch ---------------------------------------------------
 
@@ -137,14 +183,19 @@ class CanvasSlide(SlideAssembler):
                           role=c.role, weight_pt=c.weight_pt, dash=c.dash)
         else:  # any registered component: box is its cell, flexers may fill
             comp = get_component(kind)
-            try:  # pre-measure: overflow paints over neighbours — make it
-                natural = comp.measure(c, box.w, ctx)   # a LOUD defect
+            try:  # pre-measure: a starved box is a DENSITY defect (content
+                natural = comp.measure(c, box.w, ctx)   # compresses/truncates)
                 if natural > box.h * 1.10:
+                    # most components FIT into their box (the engine's core
+                    # promise); the few that truly paint beyond it report
+                    # 'exceeds bbox'/'taller than provided bbox' themselves,
+                    # and the render audit catches any actual collision —
+                    # those are the repairable overlap signals, not this
                     from ..core.units import to_inch
                     ctx.report.warn(
-                        f"canvas: {kind} needs {to_inch(natural):.2f}in but "
-                        f"its box is {to_inch(box.h):.2f}in — it will "
-                        f"overflow onto neighbours")
+                        f"canvas: {kind} tight in its box (needs "
+                        f"{to_inch(natural):.2f}in, has {to_inch(box.h):.2f}"
+                        f"in) — content compresses or truncates")
             except Exception:  # noqa: BLE001 — measuring must never block
                 pass
             ctx.fill_hint = True

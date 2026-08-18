@@ -43,15 +43,16 @@ class IconStatRow(Component):
     # -- pure layout math (no side effects) -------------------------------
 
     def _fit_at(self, stat_spans: list[Span], desc_spans: list[Span],
-                width: int, row_h: int, ctx: RenderContext) -> _RowLayout:
+                width: int, row_h: int, ctx: RenderContext,
+                max_text_h: int = _PROBE_H) -> _RowLayout:
         gap = ctx.theme.spacing(0.6)
         remaining = max(0, width - row_h - gap)
         stat_w = round(remaining * _STAT_FRAC)
         desc_w = max(0, remaining - stat_w - gap)
-        stat_fit = fit_text(stat_spans, BBox(0, 0, stat_w, _PROBE_H),
+        stat_fit = fit_text(stat_spans, BBox(0, 0, stat_w, max_text_h),
                             ctx.font("body"), max_size=ctx.size("stat"),
                             min_size=_MIN_STAT_PT, measurer=ctx.measurer)
-        desc_fit = fit_text(desc_spans, BBox(0, 0, desc_w, _PROBE_H),
+        desc_fit = fit_text(desc_spans, BBox(0, 0, desc_w, max_text_h),
                             ctx.font("body"), max_size=ctx.size("small"),
                             min_size=_MIN_DESC_PT, measurer=ctx.measurer)
         return _RowLayout(row_h, gap, stat_w, desc_w, stat_fit, desc_fit)
@@ -81,6 +82,14 @@ class IconStatRow(Component):
                ctx: RenderContext) -> int:
         theme = ctx.theme
         lay = self._layout(data, bbox.w, ctx)
+        if lay.row_h > bbox.h:
+            # a canvas cell can be shorter than the natural row: CLAMP and
+            # refit — text shrinks/ellipsizes inside the row (reported as
+            # truncations); the row never paints over the neighbour below
+            row_h = max(_MIN_ROW_H, bbox.h)
+            lay = self._fit_at(parse_rich(data.stat, base_color_role="ink"),
+                               parse_rich(data.text, base_color_role="ink"),
+                               bbox.w, row_h, ctx, max_text_h=row_h)
         row = bbox.with_height(lay.row_h)
 
         # icon circle: diameter == row height
