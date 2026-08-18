@@ -13,6 +13,7 @@ import os
 import tempfile
 import uuid
 from pathlib import Path
+from typing import Literal
 
 from fastapi import (BackgroundTasks, Depends, FastAPI, File,
                      HTTPException, Request, Response, UploadFile)
@@ -204,6 +205,8 @@ class GenerateFromPrompt(BaseModel):
     theme: str = "consulting_navy"
     logo: str | None = None  # asset name from POST /assets -> meta.logo
     auto_approve: bool = False  # True: skip the outline gate (CLI behavior)
+    # 'best' = multi-candidate + vision judge; 'fast' = one candidate draft
+    quality: Literal["best", "fast"] = "best"
 
 
 class ApproveOutline(BaseModel):
@@ -421,8 +424,19 @@ def _run_generate(job_id: str, req: GenerateFromPrompt, outline) -> None:
         from ..schema.slide_types import DeckMeta
         meta = (DeckMeta(title=req.prompt[:150], logo=req.logo)
                 if req.logo else None)
+
+        def _progress(done: int, total: int, stage: str) -> None:
+            # visible progress ("Designing slide 7/14") — persisted so a
+            # page reload keeps the counter
+            job = _JOBS.get(job_id)
+            if job is not None and job.get("status") == "running":
+                job["progress"] = {"done": done, "total": total,
+                                   "stage": stage}
+                _persist(job_id)
+
         spec = generate_deck_spec(req.prompt, csv_text=req.csv_text,
-                                  theme=req.theme, meta=meta, outline=outline)
+                                  theme=req.theme, meta=meta, outline=outline,
+                                  quality=req.quality, progress_cb=_progress)
         _run_render(job_id, spec)
     except Exception as e:  # noqa: BLE001
         _JOBS[job_id] = {"status": "error", "error": str(e),

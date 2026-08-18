@@ -16,8 +16,11 @@ import hashlib
 import json
 import logging
 import os
+import re
 import shutil
 import tempfile
+import threading
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import get_args
 
@@ -42,6 +45,10 @@ log = logging.getLogger("deckengine")
 
 MAX_REPAIRS = 2
 DEFAULTS = {"openai": "gpt-5.4", "anthropic": "claude-sonnet-5"}
+# simple structured decisions (briefs, outline review) run on a fast model;
+# quality-critical calls (outline draft, slide emission, judge) never do
+FAST_DEFAULTS = {"openai": "gpt-5.4-mini",
+                 "anthropic": "claude-haiku-4-5-20251001"}
 
 _ARCHETYPES: dict[str, type[BaseModel]] = {
     m.model_fields["slide_type"].default: m for m in get_args(get_args(SlideSpec)[0])
@@ -85,15 +92,20 @@ def model_id() -> str:
     return os.environ.get("DECKENGINE_MODEL", DEFAULTS[provider()])
 
 
+def fast_model_id() -> str:
+    return os.environ.get("DECKENGINE_FAST_MODEL", FAST_DEFAULTS[provider()])
+
+
 def _structured_call(name: str, schema: dict, prompt: str,
-                     max_tokens: int = 16000) -> dict:
+                     max_tokens: int = 16000, model: str | None = None) -> dict:
     """One structured-output call, provider-dispatched, with transient-error
     retries (a network blip must never kill a 20-slide generation)."""
     import time as _time
     last: Exception | None = None
     for attempt in range(3):
         try:
-            return _structured_call_once(name, schema, prompt, max_tokens)
+            return _structured_call_once(name, schema, prompt, max_tokens,
+                                         model)
         except (json.JSONDecodeError, RuntimeError):
             raise  # real model failures go to the repair loop, not a retry
         except Exception as e:  # noqa: BLE001 — connection/rate-limit class
@@ -104,7 +116,8 @@ def _structured_call(name: str, schema: dict, prompt: str,
 
 
 def _structured_call_once(name: str, schema: dict, prompt: str,
-                          max_tokens: int = 16000) -> dict:
+                          max_tokens: int = 16000,
+                          model: str | None = None) -> dict:
     if provider() == "openai":
         from openai import OpenAI
         client = OpenAI()
@@ -112,7 +125,7 @@ def _structured_call_once(name: str, schema: dict, prompt: str,
                   "no markdown fences) that validates against this JSON Schema:\n"
                   + json.dumps(schema))
         resp = client.chat.completions.create(
-            model=model_id(),
+            model=model or model_id(),
             max_completion_tokens=max_tokens,
             response_format={"type": "json_object"},
             messages=[{"role": "system", "content": system},
@@ -125,7 +138,7 @@ def _structured_call_once(name: str, schema: dict, prompt: str,
     import anthropic
     client = anthropic.Anthropic()
     resp = client.messages.create(
-        model=model_id(), max_tokens=max_tokens, system=SYSTEM,
+        model=model or model_id(), max_tokens=max_tokens, system=SYSTEM,
         tools=[{"name": name, "description": f"Emit the {name}.",
                 "input_schema": schema}],
         tool_choice={"type": "tool", "name": name},
@@ -211,8 +224,11 @@ def generate_outline(prompt: str, facts: FactTable | None) -> Outline:
                    "all of them:\n" + "\n".join(f"- {x}" for x in problems))
     review += "\n\nOUTLINE:\n" + outline.model_dump_json(indent=2)
     try:
+        # the review is a structural edit kept only if it scores no worse —
+        # the fast model is enough for it (the draft stays on the main model)
         revised = Outline.model_validate(
-            _structured_call("emit_outline", schema, review))
+            _structured_call("emit_outline", schema, review,
+                             model=fast_model_id()))
         if len(_problems(revised)) <= len(problems):
             outline = revised
     except (ValidationError, RuntimeError) as e:  # review is best-effort
@@ -300,10 +316,13 @@ def generate_slide(archetype: str, intent: str, prompt: str,
     model_cls = _ARCHETYPES[archetype]
     schema = model_cls.model_json_schema()
     # cross-slide context: without it, slides duplicate each other's content
+    # (worded for parallel generation — the OTHER slides' claims, whether or
+    # not they are written yet, fence off their arguments and evidence)
     prior = ""
     if prior_slides:
-        prior = ("\n\nSlides ALREADY WRITTEN (do NOT repeat their content; "
-                 "this slide must add something new):\n" +
+        prior = ("\n\nOTHER SLIDES IN THIS DECK — never make their argument "
+                 "or reuse their headline evidence; prove ONLY this slide's "
+                 "claim:\n" +
                  "\n".join(f"- {t}" for t in prior_slides))
     # teach the format decision table where the chart choice is live
     table = ("\n\n" + decision_table_text()
@@ -340,71 +359,37 @@ def generate_slide(archetype: str, intent: str, prompt: str,
                               f"\n\nYour previous attempt failed validation:\n{e}\n"
                               "Fix ONLY these issues and emit the full JSON again.")
             continue
+        # ONE combined check pass (T5.6): every category's problems gather
+        # into a single list and a single repair call fixes them all — the
+        # per-category cascade cost up to 8+ sequential re-emits per slide
+        problems: list[str] = []
         if facts:
             suspects = verify_spec_numbers(slide.model_dump_json(), facts)
-            if suspects and attempt < MAX_REPAIRS:
-                attempt_prompt = (base_prompt +
-                                  f"\n\nThese numbers are NOT in the FACTS block: "
-                                  f"{suspects}. Replace them with fact display "
-                                  "values or remove them. Emit the full JSON again.")
-                continue
             if suspects:
-                log.warning("unverified numbers survived repairs: %s", suspects)
+                problems.append(
+                    f"[numbers] these numbers are NOT in the FACTS block: "
+                    f"{suspects} — replace them with fact display values or "
+                    f"remove them")
         else:
             # no-CSV mode: every figure must carry its provenance marker
-            mproblems = check_slide_markers(slide)
-            if mproblems and attempt < MAX_REPAIRS:
-                attempt_prompt = (base_prompt +
-                                  "\n\nProvenance problems — fix ALL of them "
-                                  "while keeping the same claims and layout:\n" +
-                                  "\n".join(f"- {p}" for p in mproblems) +
-                                  "\nEmit the full JSON again.")
-                continue
-            if mproblems:
-                log.warning("marker problems survived repairs: %s", mproblems)
-        wproblems = check_slide_writing(slide)
-        if wproblems and attempt < MAX_REPAIRS:
-            attempt_prompt = (base_prompt +
-                              "\n\nWriting problems — fix ALL of them while "
-                              "keeping the same facts and structure:\n" +
-                              "\n".join(f"- {p}" for p in wproblems) +
-                              "\nEmit the full JSON again.")
-            continue
-        if wproblems:
-            log.warning("writing problems survived repairs: %s", wproblems)
-        fproblems = check_slide_format(slide, facts)
-        if fproblems and attempt < MAX_REPAIRS:
-            attempt_prompt = (base_prompt +
-                              "\n\nChart format problems — fix ALL of them "
-                              "while keeping the same facts and claim:\n" +
-                              "\n".join(f"- {p}" for p in fproblems) +
-                              "\nEmit the full JSON again.")
-            continue
-        if fproblems:
-            log.warning("format problems survived repairs: %s", fproblems)
-        eproblems = check_slide_emphasis(slide)
-        if eproblems and attempt < MAX_REPAIRS:
-            attempt_prompt = (base_prompt +
-                              "\n\nEmphasis problems — fix ALL of them "
-                              "while keeping the same facts and layout:\n" +
-                              "\n".join(f"- {p}" for p in eproblems) +
-                              "\nEmit the full JSON again.")
-            continue
-        if eproblems:
-            log.warning("emphasis problems survived repairs: %s", eproblems)
+            problems += [f"[provenance] {p}"
+                         for p in check_slide_markers(slide)]
+        problems += [f"[writing] {p}" for p in check_slide_writing(slide)]
+        problems += [f"[format] {p}" for p in check_slide_format(slide, facts)]
+        problems += [f"[emphasis] {p}" for p in check_slide_emphasis(slide)]
         if slide.slide_type == "canvas":
-            cproblems = check_canvas_slide(slide)
-            if cproblems and attempt < MAX_REPAIRS:
-                attempt_prompt = (base_prompt +
-                                  "\n\nDesign problems — fix ALL of them "
-                                  "while keeping the same message and "
-                                  "overall composition:\n" +
-                                  "\n".join(f"- {p}" for p in cproblems) +
-                                  "\nEmit the full JSON again.")
-                continue
-            if cproblems:
-                log.warning("canvas problems survived repairs: %s",
-                            cproblems)
+            problems += [f"[design] {p}" for p in check_canvas_slide(slide)]
+        if not problems:
+            return slide
+        if attempt < MAX_REPAIRS:
+            attempt_prompt = (base_prompt +
+                              "\n\nProblems found — fix ALL of them at once "
+                              "while keeping the same facts, claims and "
+                              "layout intent:\n" +
+                              "\n".join(f"- {p}" for p in problems) +
+                              "\nEmit the full JSON again.")
+            continue
+        log.warning("problems survived repairs: %s", problems)
         return slide
     if slide is None:
         raise RuntimeError(f"slide {archetype} failed validation after "
@@ -488,10 +473,35 @@ def _design_brief(claim: str, visual_concept: str | None,
                          [describe_silhouette(s)
                           for s in recent_silhouettes[-4:]],
                          facts is not None),
-            max_tokens=2000)
+            max_tokens=2000, model=fast_model_id())
         return DesignBrief.model_validate(raw)
     except Exception as e:  # noqa: BLE001
         log.warning("design brief failed (%s); designing without one", e)
+        return None
+
+
+def _batch_briefs(items: list[tuple[str, str | None, str | None]],
+                  facts: FactTable | None) -> list | None:
+    """ONE fast-model call assigns every designed slide's brief together —
+    variety decided globally before any slide is written (T5.6). None on
+    any failure: generate_slide_best falls back to per-slide briefs."""
+    from .designer import DeckBriefs, batch_brief_prompt
+    if not items:
+        return []
+    try:
+        raw = _structured_call(
+            "design_briefs", DeckBriefs.model_json_schema(),
+            batch_brief_prompt(items, facts is not None),
+            max_tokens=8000, model=fast_model_id())
+        briefs = DeckBriefs.model_validate(raw).briefs
+        if len(briefs) != len(items):
+            log.warning("batch briefs returned %d briefs for %d slides; "
+                        "falling back to per-slide briefs",
+                        len(briefs), len(items))
+            return None
+        return list(briefs)
+    except Exception as e:  # noqa: BLE001
+        log.warning("batch briefs failed (%s); per-slide fallback", e)
         return None
 
 
@@ -513,23 +523,54 @@ def _brief_text(brief, alternate: bool) -> str:
     return "\n".join(lines)
 
 
+class JudgeBudget:
+    """Per-deck cap on vision-judge calls (T5.6): ties beyond the budget
+    fall to the deterministic pick. Thread-safe — waves share one budget."""
+    def __init__(self, n: int):
+        import threading
+        self.n = n
+        self._lock = threading.Lock()
+
+    def take(self) -> bool:
+        with self._lock:
+            if self.n <= 0:
+                return False
+            self.n -= 1
+            return True
+
+
+def judge_budget_default() -> int:
+    try:
+        return max(0, int(os.environ.get("DECKENGINE_JUDGE_BUDGET", "6")))
+    except ValueError:
+        return 6
+
+
 def generate_slide_best(archetype: str, claim: str, prompt: str,
                         facts: FactTable | None,
                         prior_slides: list[str] | None = None,
                         theme: str = "consulting_navy",
                         visual_concept: str | None = None,
-                        recent_silhouettes: list[str] | None = None) -> BaseModel:
+                        recent_silhouettes: list[str] | None = None,
+                        brief="auto", n_candidates: int | None = None,
+                        judge_budget: JudgeBudget | None = None) -> BaseModel:
     """N candidates -> render all -> deterministic score -> ONE pairwise
     vision-judge call only when the metrics can't separate the finalists.
     Canvas slides get a DESIGN BRIEF first; candidate 2 is briefed toward a
     different concept, and a candidate whose silhouette repeats the
-    previous slide's loses the tie."""
+    previous slide's loses the tie.
+
+    brief: 'auto' makes the per-slide brief call for canvas; a DesignBrief
+    uses the batch pre-pass result; None designs without one."""
     from .designer import silhouette
     recent = recent_silhouettes or []
     prev_sil = recent[-1] if recent else None
-    brief = (_design_brief(claim, visual_concept, recent, facts)
-             if archetype == "canvas" else None)
-    n = candidate_count()
+    if archetype != "canvas":
+        brief = None
+    elif brief == "auto":
+        brief = _design_brief(claim, visual_concept, recent, facts)
+    n = (max(1, min(3, n_candidates)) if n_candidates
+         else candidate_count())
     if n == 1:
         return generate_slide(archetype, claim, prompt, facts,
                               prior_slides=prior_slides,
@@ -571,6 +612,8 @@ def generate_slide_best(archetype: str, claim: str, prompt: str,
                  or best[1]["fill"] - runner[1]["fill"] > 0.05)
         if clear or best[1]["pptx"] is None or runner[1]["pptx"] is None:
             return best[0]
+        if judge_budget is not None and not judge_budget.take():
+            return best[0]  # budget spent: deterministic pick
         png_a = _export_png(best[1]["pptx"])
         png_b = _export_png(runner[1]["pptx"])
         if png_a is None or png_b is None:
@@ -589,13 +632,77 @@ def generate_slide_best(archetype: str, claim: str, prompt: str,
         shutil.rmtree(workdir, ignore_errors=True)
 
 
+def _wave_size() -> int:
+    """Concurrent slide generations (T5.6). 4 balances wall-clock against
+    provider rate limits; DECKENGINE_PARALLEL=1 restores sequential."""
+    try:
+        n = int(os.environ.get("DECKENGINE_PARALLEL", "4"))
+    except ValueError:
+        n = 4
+    return max(1, min(8, n))
+
+
+_MAX_SWEEP_REGENS = 3   # post-sweep regens are bounded: polish, not a loop
+
+_NUM_RE = re.compile(r"\d[\d,.]*\d|\d")
+_WORD_RE = re.compile(r"[a-z][a-z']{3,}")
+
+
+def _title_sig(title: str) -> tuple[set[str], set[str]]:
+    t = re.sub(r"\[\[src:[a-z]+\]\]", " ", title.lower())
+    t = t.replace("**", " ").replace("*", " ")
+    return set(_NUM_RE.findall(t)), set(_WORD_RE.findall(t))
+
+
+def _dupe_pairs(titles: list[str]) -> list[tuple[int, int]]:
+    """The content sweep's detector (deterministic, testable): pairs
+    (i, j), i < j, whose titles argue the same thing — a shared headline
+    figure plus half the content words, or near-identical wording. Each
+    offender j is flagged once, against its earliest match."""
+    sigs = [_title_sig(t) for t in titles]
+    out: list[tuple[int, int]] = []
+    for j in range(len(titles)):
+        for i in range(j):
+            ni, wi = sigs[i]
+            nj, wj = sigs[j]
+            if not wi or not wj:
+                continue
+            overlap = len(wi & wj) / min(len(wi), len(wj))
+            if (ni & nj and overlap >= 0.5) or overlap >= 0.8:
+                out.append((i, j))
+                break
+    return out
+
+
 def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
                        theme: str = "consulting_navy",
                        meta: DeckMeta | None = None,
-                       outline: Outline | None = None) -> DeckSpec:
-    """outline: pass a (human-approved/edited) claim chain to skip stage 1."""
-    log.info("spec generation via %s (%s)", provider(), model_id())
+                       outline: Outline | None = None,
+                       quality: str = "best",
+                       progress_cb=None) -> DeckSpec:
+    """outline: pass a (human-approved/edited) claim chain to skip stage 1.
+    quality: 'best' = multi-candidate + vision judge; 'fast' = one
+    candidate, no judge. progress_cb(done, total, stage) fires as work lands.
+
+    T5.6 shape: the STORY is fixed sequentially up front — governing
+    thought, claim chain, flow critic all precede any slide. Slides then
+    generate in PARALLEL waves, each fenced by every other slide's claim;
+    variety is assigned globally by the batch brief pre-pass and enforced
+    afterwards by two deterministic sweeps (adjacent silhouettes, repeated
+    headlines)."""
+    log.info("spec generation via %s (%s), quality=%s",
+             provider(), model_id(), quality)
     facts = FactTable.from_csv(csv_text) if csv_text else None
+
+    def _tick(done: int, total: int, stage: str) -> None:
+        if progress_cb is None:
+            return
+        try:
+            progress_cb(done, total, stage)
+        except Exception:  # noqa: BLE001 — progress must never kill a job
+            pass
+
+    _tick(0, 0, "outline")
     if outline is None:
         outline = generate_outline(prompt, facts)
     log.info("outline: %s", [o.slide_type for o in outline.slides])
@@ -607,41 +714,162 @@ def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
     designer_on = os.environ.get("DECKENGINE_DESIGNER", "1") != "0"
     _not_designed = ("title", "section_divider", "exec_summary")
     from .designer import silhouette
-    slides = []
-    prior: list[str] = []
-    recent_sils: list[str] = []
+    items = []
     for item in outline.slides:
         if item.slide_type not in _ARCHETYPES:
             log.warning("skipping unknown archetype %r", item.slide_type)
             continue
+        items.append(item)
+    if not items:
+        raise RuntimeError("model produced no usable slides")
+    total = len(items)
+    fast = quality == "fast"
+    n_cands = 1 if fast else None
+    budget = JudgeBudget(0 if fast else judge_budget_default())
+    # the claim-chain fence: every slide sees every OTHER slide's claim
+    claims = [f"[{it.slide_type}] {it.claim}" for it in items]
+
+    # batch design-brief pre-pass: ONE fast call assigns every designed
+    # slide a distinct concept — variety decided globally before any slide
+    canvas_idx = [i for i, it in enumerate(items)
+                  if designer_on and it.slide_type not in _not_designed]
+    briefs: dict[int, object] = {}
+    if canvas_idx:
+        got = _batch_briefs([(items[i].claim, items[i].visual_concept,
+                              items[i].section) for i in canvas_idx], facts)
+        if got:
+            briefs = dict(zip(canvas_idx, got))
+
+    lock = threading.Lock()
+    sils: dict[int, str] = {}
+
+    def _recent(i: int) -> list[str]:
+        with lock:
+            return [sils[k] for k in sorted(sils) if k != i][-6:]
+
+    def _gen_one(i: int) -> BaseModel | None:
+        item = items[i]
+        others = claims[:i] + claims[i + 1:]
         use_canvas = designer_on and item.slide_type not in _not_designed
         try:
             if use_canvas:
                 try:
                     slide = generate_slide_best(
                         "canvas", item.claim, deck_context, facts,
-                        prior_slides=prior, theme=theme,
+                        prior_slides=others, theme=theme,
                         visual_concept=item.visual_concept,
-                        recent_silhouettes=recent_sils)
+                        recent_silhouettes=_recent(i),
+                        brief=briefs.get(i, "auto"),
+                        n_candidates=n_cands, judge_budget=budget)
                 except RuntimeError as e:
                     log.warning("canvas design failed for %r (%s); "
                                 "archetype fallback %s",
                                 item.claim[:50], e, item.slide_type)
                     slide = generate_slide_best(
                         item.slide_type, item.claim, deck_context, facts,
-                        prior_slides=prior, theme=theme)
+                        prior_slides=others, theme=theme,
+                        n_candidates=n_cands, judge_budget=budget)
             else:
-                slide = generate_slide_best(item.slide_type, item.claim,
-                                            deck_context, facts,
-                                            prior_slides=prior, theme=theme)
+                slide = generate_slide_best(
+                    item.slide_type, item.claim, deck_context, facts,
+                    prior_slides=others, theme=theme,
+                    n_candidates=n_cands, judge_budget=budget)
         except RuntimeError as e:
             # one stubborn slide must NEVER kill a whole deck: ship without
             # it and record the gap (the claim chain stays reviewable)
             log.warning("skipping slide %r (%s): %s",
                         item.claim[:60], item.slide_type, e)
+            return None
+        with lock:
+            sils[i] = silhouette(slide)
+        return slide
+
+    # parallel waves: slide ORDER and the argument live in the outline, so
+    # generation order is free to be concurrent — results reassemble by index
+    results: dict[int, BaseModel] = {}
+    done = 0
+    _tick(0, total, "designing")
+    workers = min(_wave_size(), total)
+    if workers == 1:
+        for i in range(total):
+            slide = _gen_one(i)
+            if slide is not None:
+                results[i] = slide
+            done += 1
+            _tick(done, total, "designing")
+    else:
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futs = {pool.submit(_gen_one, i): i for i in range(total)}
+            for fut in as_completed(futs):
+                slide = fut.result()
+                if slide is not None:
+                    results[futs[fut]] = slide
+                done += 1
+                _tick(done, total, "designing")
+    if not results:
+        raise RuntimeError("model produced no usable slides")
+
+    # deterministic post-sweeps: the quality gates sequential order gave,
+    # now explicit. Each offender gets ONE targeted regen, bounded.
+    _tick(done, total, "polishing")
+    regens = 0
+    order = sorted(results)
+    # (i) adjacent identical silhouettes -> redesign the later slide
+    for a, b in zip(order, order[1:]):
+        if regens >= _MAX_SWEEP_REGENS:
+            break
+        if sils.get(a) and sils.get(a) == sils.get(b) \
+                and getattr(results[b], "slide_type", "") == "canvas":
+            item = items[b]
+            log.info("silhouette sweep: redesigning slide %d", b + 1)
+            try:
+                redo = generate_slide_best(
+                    "canvas", item.claim, deck_context, facts,
+                    prior_slides=claims[:b] + claims[b + 1:], theme=theme,
+                    visual_concept=item.visual_concept,
+                    recent_silhouettes=[sils[a]],
+                    brief=briefs.get(b, "auto"),
+                    n_candidates=n_cands, judge_budget=budget)
+            except RuntimeError as e:
+                log.warning("silhouette sweep regen failed: %s", e)
+                continue
+            regens += 1
+            if silhouette(redo) != sils[a]:   # keep only a real improvement
+                results[b] = redo
+                sils[b] = silhouette(redo)
+    # (ii) two slides arguing with the same headline -> rewrite the later
+    titles = [str(getattr(results[i], "title", "") or "") for i in order]
+    for a, b in _dupe_pairs(titles):
+        if regens >= _MAX_SWEEP_REGENS:
+            break
+        ia, ib = order[a], order[b]
+        item = items[ib]
+        log.info("content sweep: slide %d repeats slide %d — regenerating",
+                 ib + 1, ia + 1)
+        note = (f"[REPEAT DEFECT] slide {ia + 1} already argues "
+                f"{titles[a]!r} — prove ONLY your claim with DIFFERENT "
+                f"evidence and a different headline figure")
+        archetype = getattr(results[ib], "slide_type", item.slide_type)
+        try:
+            redo = generate_slide_best(
+                archetype, item.claim, deck_context, facts,
+                prior_slides=[note] + claims[:ib] + claims[ib + 1:],
+                theme=theme, visual_concept=item.visual_concept,
+                recent_silhouettes=_recent(ib),
+                brief=briefs.get(ib, "auto"),
+                n_candidates=n_cands, judge_budget=budget)
+        except RuntimeError as e:
+            log.warning("content sweep regen failed: %s", e)
             continue
-        recent_sils.append(silhouette(slide))
-        del recent_sils[:-6]
+        regens += 1
+        results[ib] = redo
+        sils[ib] = silhouette(redo)
+
+    # sequential tail: markers, kickers, appendix — deterministic, cheap
+    slides = []
+    for i in order:
+        slide = results[i]
+        item = items[i]
         if facts:
             # CSV facts are official by construction — mark their displays
             slide = inject_fact_markers(slide, facts)
@@ -650,10 +878,6 @@ def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
         if item.section and hasattr(slide, "kicker"):
             slide.kicker = item.section.strip()[:40] or None
         slides.append(slide)
-        title = getattr(slide, "title", None) or item.claim
-        prior.append(f"[{item.slide_type}] {title}")
-    if not slides:
-        raise RuntimeError("model produced no usable slides")
     if facts:
         appendix = sources_appendix(facts, slides)
         if appendix is not None:

@@ -65,6 +65,39 @@ def brief_prompt(claim: str, visual_concept: str | None,
     return "\n".join(lines)
 
 
+class DeckBriefs(BaseModel):
+    """All body-slide briefs assigned in ONE call (T5.6): the designer sees
+    every claim at once, so variety is decided globally upfront — stronger
+    than the per-slide rolling memory it replaces."""
+    briefs: list[DesignBrief]
+
+
+def batch_brief_prompt(items: list[tuple[str, str | None, str | None]],
+                       has_facts: bool) -> str:
+    """items: (claim, visual_concept, section) per designed body slide."""
+    lines = [
+        "You are the deck's DESIGNER. Assign EVERY body slide its design "
+        "brief now, all together — you can see the whole argument. Give "
+        "each slide a DISTINCT layout_concept: no two ADJACENT slides may "
+        "share a concept or read as the same silhouette on the page, and "
+        "across the deck rotate treatments (hero-stat, chart-led, "
+        "table-led, panel matrix, split, full-bleed band) so no design "
+        "repeats before three slides have passed.",
+        "Numbers policy: " + ("use only provided FACTS." if has_facts else
+                              "best real-world figures with provenance "
+                              "markers."),
+        f"\nEmit exactly {len(items)} briefs, one per slide, in this order:"]
+    for i, (claim, vc, section) in enumerate(items, start=1):
+        s = f"\nSLIDE {i}"
+        if section:
+            s += f" [{section}]"
+        s += f": {claim}"
+        if vc:
+            s += f"\n  outline's visual concept (refine or overrule): {vc}"
+        lines.append(s)
+    return "\n".join(lines)
+
+
 # -- silhouette memory --------------------------------------------------------
 
 def silhouette(slide) -> str:

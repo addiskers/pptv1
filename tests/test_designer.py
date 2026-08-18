@@ -62,7 +62,7 @@ def test_canvas_generation_makes_brief_then_design(monkeypatch):
     monkeypatch.setenv("DECKENGINE_CANDIDATES", "1")
     calls = []
 
-    def fake(name, schema, prompt, max_tokens=16000):
+    def fake(name, schema, prompt, max_tokens=16000, **kw):
         calls.append((name, prompt))
         if name == "design_brief":
             return dict(BRIEF)
@@ -86,7 +86,7 @@ def test_second_candidate_briefed_to_differ(monkeypatch):
     variant["elements"] = variant["elements"][:4]
     responses = [dict(BRIEF), json.loads(json.dumps(CANVAS)), variant]
 
-    def fake(name, schema, prompt, max_tokens=16000):
+    def fake(name, schema, prompt, max_tokens=16000, **kw):
         prompts.append((name, prompt))
         return responses.pop(0)
 
@@ -104,7 +104,7 @@ def test_second_candidate_briefed_to_differ(monkeypatch):
 def test_failed_brief_never_blocks(monkeypatch):
     monkeypatch.setenv("DECKENGINE_CANDIDATES", "1")
 
-    def fake(name, schema, prompt, max_tokens=16000):
+    def fake(name, schema, prompt, max_tokens=16000, **kw):
         if name == "design_brief":
             raise RuntimeError("brief exploded")
         return json.loads(json.dumps(CANVAS))
@@ -126,7 +126,7 @@ def test_repeat_silhouette_loses_tie(monkeypatch):
     responses = [dict(BRIEF), same, different]
     monkeypatch.setattr(
         sg, "_structured_call",
-        lambda n, s, p, max_tokens=16000: (
+        lambda n, s, p, max_tokens=16000, **kw: (
             responses.pop(0) if responses else json.loads(
                 json.dumps(different))))  # repairs re-emit the variant
     monkeypatch.setattr(
@@ -154,7 +154,9 @@ def test_deck_loop_designs_canvas_with_archetype_fallback(monkeypatch):
                     "claim": "Corridors hold the volume",
                     "visual_concept": "hero split"}]})
 
-    def fake(name, schema, prompt, max_tokens=16000):
+    def fake(name, schema, prompt, max_tokens=16000, **kw):
+        if name == "design_briefs":
+            return {"briefs": [dict(BRIEF)]}
         if name == "design_brief":
             return dict(BRIEF)
         if name == "emit_canvas":
@@ -180,7 +182,7 @@ def test_designer_off_keeps_archetypes(monkeypatch):
                    {"slide_type": "bullet_content", "claim": "C"}]})
     names = []
 
-    def fake(name, schema, prompt, max_tokens=16000):
+    def fake(name, schema, prompt, max_tokens=16000, **kw):
         names.append(name)
         if name == "emit_title":
             return {"slide_type": "title", "title": "Cover"}
@@ -188,5 +190,5 @@ def test_designer_off_keeps_archetypes(monkeypatch):
 
     monkeypatch.setattr(sg, "_structured_call", fake)
     sg.generate_deck_spec("prompt", outline=outline)
-    assert all(n != "design_brief" for n in names)
+    assert all(not n.startswith("design_brief") for n in names)
     assert any(n == "emit_bullet_content" for n in names)

@@ -141,6 +141,11 @@
   .toggle-row .t-txt b { display: block; color: var(--ink); }
   .toggle-row .t-txt span { color: var(--muted); font-size: 12.5px; }
 
+  /* quality segmented control */
+  .seg { display: flex; gap: 0; flex-shrink: 0; border: 1px solid var(--line-strong); border-radius: 999px; overflow: hidden; }
+  .seg button { border: 0; background: transparent; padding: 6px 14px; font: 600 12.5px inherit; color: var(--muted); cursor: pointer; }
+  .seg button.on { background: var(--navy); color: #fff; }
+
   .actions { margin-top: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
   .btn {
     border: 0; border-radius: var(--r-md); padding: 13px 26px; font: 600 15.5px inherit;
@@ -342,6 +347,14 @@
       </div>
 
       <div class="toggle-row">
+        <div class="seg" id="qualitySeg" role="group" aria-label="Generation quality">
+          <button type="button" class="on" data-q="best" onclick="setQuality('best')">Best</button>
+          <button type="button" data-q="fast" onclick="setQuality('fast')">Fast draft</button>
+        </div>
+        <div class="t-txt" id="qualityTxt"><b>Best — competing designs, judged</b><span>Every slide is designed twice and the stronger design wins. ~8-10 min for a full deck.</span></div>
+      </div>
+
+      <div class="toggle-row">
         <label class="switch"><input type="checkbox" id="review" checked><span class="slider"></span></label>
         <div class="t-txt"><b>Review the storyline before slides are written</b><span>The 30-second check where deck quality is decided. Turn off to build in one shot.</span></div>
       </div>
@@ -457,6 +470,15 @@
 <script>
 const $ = id => document.getElementById(id);
 let csvText = null, currentJob = null, selectedTheme = 'consulting_navy', pollTimer = null;
+let deckQuality = 'best';
+
+function setQuality(q) {
+  deckQuality = q;
+  document.querySelectorAll('#qualitySeg button').forEach(b => b.classList.toggle('on', b.dataset.q === q));
+  $('qualityTxt').innerHTML = q === 'best'
+    ? '<b>Best — competing designs, judged</b><span>Every slide is designed twice and the stronger design wins. ~8-10 min for a full deck.</span>'
+    : '<b>Fast draft — one design per slide</b><span>Single pass, no judging. ~4-5 min. Rework any slide afterwards for free.</span>';
+}
 let logoAsset = null;
 
 const EXAMPLES = [
@@ -617,7 +639,7 @@ async function generate() {
     'outline', []);
   try {
     const res = await fetch('/generate', {method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({prompt, csv_text: csvText, theme: selectedTheme, logo: logoAsset, auto_approve: !review})});
+      body: JSON.stringify({prompt, csv_text: csvText, theme: selectedTheme, logo: logoAsset, auto_approve: !review, quality: deckQuality})});
     if (!res.ok) throw new Error(await apiError(res));
     poll((await res.json()).job_id);
   } catch (e) { fail(e.message); }
@@ -682,6 +704,18 @@ function poll(jobId) {
     catch (e) { return; }
     if (job.status === 'running') {
       if ($('progress').classList.contains('hidden')) progress('Working…', '', 'slides', ['outline']);
+      const p = job.progress;
+      if (p && p.stage === 'designing' && p.total) {
+        $('p-title').textContent = 'Designing slide ' + Math.min(p.done + 1, p.total) + ' of ' + p.total + '…';
+        $('p-sub').textContent = deckQuality === 'fast'
+          ? 'One design per slide — fast draft.'
+          : 'Slides are designed in parallel; competing designs are scored and judged.';
+      } else if (p && p.stage === 'polishing') {
+        $('p-title').textContent = 'Polishing the deck…';
+        $('p-sub').textContent = 'Checking variety and de-duplicating arguments across slides.';
+      } else if (p && p.stage === 'outline') {
+        $('p-title').textContent = 'Planning the storyline…';
+      }
       return;
     }
     clearInterval(pollTimer);

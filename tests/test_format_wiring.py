@@ -40,7 +40,7 @@ def test_outline_prompt_teaches_and_review_polices(monkeypatch):
             ]}
     responses = [bad, good]
 
-    def fake(name, schema, prompt, max_tokens=16000):
+    def fake(name, schema, prompt, max_tokens=16000, **kw):
         prompts.append(prompt)
         return responses.pop(0)
 
@@ -68,14 +68,14 @@ def test_stage2_repairs_objective_chart_violation(monkeypatch):
     ).model_dump()
     responses = [bad, good]
 
-    def fake(name, schema, prompt, max_tokens=16000):
+    def fake(name, schema, prompt, max_tokens=16000, **kw):
         prompts.append(prompt)
         return responses.pop(0)
 
     monkeypatch.setattr(sg, "_structured_call", fake)
     slide = sg.generate_slide("chart_slide", "claim", "prompt", None)
     assert len(prompts) == 2
-    assert "Chart format problems" in prompts[1]
+    assert "[format]" in prompts[1]
     assert "FORMAT SELECTION" in prompts[0]          # taught for chart slides
     assert len(slide.chart.categories) == 4
 

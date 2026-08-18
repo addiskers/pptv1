@@ -77,13 +77,13 @@ def test_generate_slide_repairs_writing(monkeypatch):
     responses = [hedgy_slide().model_dump(), clean_slide().model_dump()]
     prompts = []
 
-    def fake_call(name, schema, prompt, max_tokens=16000):
+    def fake_call(name, schema, prompt, max_tokens=16000, **kw):
         prompts.append(prompt)
         return responses.pop(0)
 
     monkeypatch.setattr(sg, "_structured_call", fake_call)
     slide = sg.generate_slide("bullet_content", "claim", "prompt", None)
     assert len(prompts) == 2
-    assert "Writing problems" in prompts[1]
+    assert "[writing]" in prompts[1]
     assert "hedge" in prompts[1]
     assert slide.title.startswith("The commuter segment leads")

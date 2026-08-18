@@ -102,7 +102,7 @@ def test_generate_outline_claim_chain_and_review(monkeypatch):
     from deckengine.llm import spec_generator as sg
     calls = []
 
-    def fake_call(name, schema, prompt, max_tokens=16000):
+    def fake_call(name, schema, prompt, max_tokens=16000, **kw):
         calls.append(prompt)
         return {"governing_thought": "India quick commerce rewards scale now.",
                 "slides": [
@@ -136,7 +136,7 @@ def test_generate_outline_keeps_original_when_review_worse(monkeypatch):
            ]}
     responses = [good, bad]
 
-    def fake_call(name, schema, prompt, max_tokens=16000):
+    def fake_call(name, schema, prompt, max_tokens=16000, **kw):
         return responses.pop(0)
 
     from deckengine.llm import spec_generator as sg2
