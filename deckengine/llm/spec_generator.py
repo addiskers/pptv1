@@ -176,7 +176,10 @@ def generate_outline(prompt: str, facts: FactTable | None,
             f"The deck FLOW is FIXED: use '{flow.id}' — the audience asks "
             f"\"{flow.meta_question}\". Shape the claim chain to complete "
             "that flow's argument, closing on its ask/resolution."
-            + (f" This variant's angle: {angle_hint}" if angle_hint else ""))
+            + (f" This variant's angle: {angle_hint}" if angle_hint else "")
+            + " The COVER slide's claim must state THIS take — the answer "
+            "to this flow's meta-question in this angle's terms — never a "
+            "generic restatement of the request.")
     else:
         flow_para = (
             "FIRST choose the deck FLOW by the AUDIENCE'S META-QUESTION — "

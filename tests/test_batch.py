@@ -121,6 +121,35 @@ def test_batch_variants_get_distinct_flows_and_render(client, monkeypatch):
     assert len(set(langs)) == 3 and all(langs)
 
 
+def test_batch_covers_rotate_styles(client, monkeypatch, tmp_path):
+    """Five decks must not OPEN identically: each variant's title slide
+    gets a different cover composition, set deterministically."""
+    from deckengine.llm import spec_generator as sg
+    from deckengine.schema.slide_types import DeckSpec
+    flows = ["options_decision", "pyramid", "benchmark"]
+
+    def fake(name, schema, prompt, max_tokens=16000, **kw):
+        base = _fake_structured_call(flows)(name, schema, prompt,
+                                            max_tokens, **kw)
+        if name == "emit_outline":   # give each variant a title slide
+            base["slides"] = ([{"slide_type": "title", "claim": "Cover"}]
+                              + base["slides"][1:])
+        return base
+
+    monkeypatch.setattr(sg, "_structured_call", fake)
+    r = client.post("/generate-batch", json={"prompt": "brief", "n": 3})
+    batch_id = r.json()["batch_id"]
+    status = client.get(f"/batches/{batch_id}").json()
+    styles = []
+    for v in status["variants"]:
+        spec_p = api_main.JOBS_DIR / v["job_id"] / "spec.json"
+        spec = DeckSpec.model_validate_json(
+            spec_p.read_text(encoding="utf-8"))
+        title = next(s for s in spec.slides if s.slide_type == "title")
+        styles.append(title.style)
+    assert len(set(styles)) == 3      # three variants, three cover looks
+
+
 def test_variant_theme_rotation_distinct_choice_first():
     themes = api_main._variant_themes("emerald_gold", 5)
     assert themes[0] == "emerald_gold"

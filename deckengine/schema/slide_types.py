@@ -50,6 +50,13 @@ class TitleSlideSpec(SpeakerNotes):
     # full-bleed dark canvas with an oversized org wordmark bleeding off the
     # bottom edge, like a real cover slide (vs plain text on white)
     wordmark: str | None = Field(default=None, max_length=40)
+    # cover composition — variant batches rotate these so five decks never
+    # open on the same-looking slide: 'dark_hero' full-bleed dark + wordmark
+    # bleed (default); 'split_panel' dark title panel left, light field
+    # right; 'light_minimal' airy light cover with an accent rule;
+    # 'band_statement' light cover, full-width primary band carries the title
+    style: Literal["dark_hero", "split_panel", "light_minimal",
+                   "band_statement"] = "dark_hero"
 
 
 class SectionDividerSpec(SpeakerNotes):

@@ -614,10 +614,13 @@ def _run_batch(batch_id: str, job_ids: list[str], req: GenerateBatch) -> None:
             a.design_language = f.design_language
 
     themes = _variant_themes(req.theme, n)
+    # covers rotate composition too — five decks must not OPEN identically
+    cover_styles = ["dark_hero", "split_panel", "light_minimal",
+                    "band_statement"]
     governing: dict[str, str] = {}
     lock = threading.Lock()
 
-    def _one(job_id: str, angle, theme: str) -> None:
+    def _one(job_id: str, angle, theme: str, cover_style: str) -> None:
         def _tag(job: dict) -> dict:
             job["batch_id"] = batch_id
             job["flow_id"] = angle.flow_id
@@ -647,6 +650,9 @@ def _run_batch(batch_id: str, job_ids: list[str], req: GenerateBatch) -> None:
                 prompt, csv_text=req.csv_text, theme=theme, meta=meta,
                 outline=outline, quality=req.quality, progress_cb=_progress,
                 design_directive=design_directive(angle.design_language))
+            for s in spec.slides:
+                if s.slide_type == "title":
+                    s.style = cover_style   # deterministic, not model luck
         except Exception as e:  # noqa: BLE001 — one bad variant must not sink the batch
             _JOBS[job_id] = _tag(
                 {"status": "error", "error": str(e),
@@ -660,7 +666,10 @@ def _run_batch(batch_id: str, job_ids: list[str], req: GenerateBatch) -> None:
             _persist(job_id)
 
     with ThreadPoolExecutor(max_workers=_batch_parallel()) as pool:
-        list(pool.map(lambda t: _one(*t), zip(job_ids, angles, themes)))
+        list(pool.map(lambda t: _one(*t),
+                      zip(job_ids, angles, themes,
+                          (cover_styles[i % len(cover_styles)]
+                           for i in range(n)))))
 
     _tag_batch_diversity(batch_id, job_ids, governing)
 
