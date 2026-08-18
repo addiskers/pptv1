@@ -151,21 +151,39 @@ def _structured_call_once(name: str, schema: dict, prompt: str,
     raise RuntimeError("model returned no tool_use block")
 
 
-def generate_outline(prompt: str, facts: FactTable | None) -> Outline:
+def generate_outline(prompt: str, facts: FactTable | None,
+                     forced_flow: str | None = None,
+                     angle_hint: str | None = None) -> Outline:
     """Stage 1: claim-chain outline (story.Outline), then ONE holistic review
     pass with the deterministic check_outline problems riding along. The
-    revised outline is kept only if it doesn't score worse."""
+    revised outline is kept only if it doesn't score worse.
+
+    forced_flow/angle_hint: the variant batch (llm/variants.py) pins the
+    flow instead of leaving the choice to the model, so N variants of one
+    brief argue via N structurally different flows. narrative_arc is set
+    from forced_flow in CODE after validation — never left to depend on
+    the model actually complying with the instruction."""
     archetype_list = ", ".join(_ARCHETYPES)
     schema = Outline.model_json_schema()
-    from .narrative import flow_menu
+    from .narrative import FLOWS, flow_menu
+    if forced_flow and forced_flow in FLOWS:
+        flow = FLOWS[forced_flow]
+        flow_para = (
+            f"The deck FLOW is FIXED: use '{flow.id}' — the audience asks "
+            f"\"{flow.meta_question}\". Shape the claim chain to complete "
+            "that flow's argument, closing on its ask/resolution."
+            + (f" This variant's angle: {angle_hint}" if angle_hint else ""))
+    else:
+        flow_para = (
+            "FIRST choose the deck FLOW by the AUDIENCE'S META-QUESTION — "
+            "not the topic (the same data answers different questions with "
+            "different decks). Declare it in narrative_arc and shape the "
+            "claim chain to complete that flow's argument, closing on its "
+            "ask/resolution:\n" + flow_menu())
     p = (f"Plan a slide deck for this request:\n\n{prompt}\n\n"
          f"Available slide_type values: {archetype_list}.\n"
          f"{facts.prompt_block() if facts else ''}\n"
-         "FIRST choose the deck FLOW by the AUDIENCE'S META-QUESTION — not "
-         "the topic (the same data answers different questions with "
-         "different decks). Declare it in narrative_arc and shape the "
-         "claim chain to complete that flow's argument, closing on its "
-         "ask/resolution:\n" + flow_menu() + "\n\n"
+         + flow_para + "\n\n"
          "Emit the outline as a CLAIM CHAIN: a one-sentence governing_thought "
          "(the deck's answer), plus one entry per slide with slide_type and "
          "claim — the full-sentence assertion that slide proves (it becomes "
@@ -204,6 +222,8 @@ def generate_outline(prompt: str, facts: FactTable | None) -> Outline:
             "deck's weakest numbers.\n")
          + "\n" + decision_table_text())
     outline = Outline.model_validate(_structured_call("emit_outline", schema, p))
+    if forced_flow and forced_flow in FLOWS:
+        outline.narrative_arc = forced_flow  # deterministic, not model trust
 
     def _problems(o: Outline) -> list[str]:
         from .narrative import check_outline_flow
@@ -229,6 +249,8 @@ def generate_outline(prompt: str, facts: FactTable | None) -> Outline:
         revised = Outline.model_validate(
             _structured_call("emit_outline", schema, review,
                              model=fast_model_id()))
+        if forced_flow and forced_flow in FLOWS:
+            revised.narrative_arc = forced_flow
         if len(_problems(revised)) <= len(problems):
             outline = revised
     except (ValidationError, RuntimeError) as e:  # review is best-effort

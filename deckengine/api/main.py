@@ -118,17 +118,19 @@ def me(user: str = Depends(auth.current_user)) -> dict:
 
 
 def _decks_used(email: str) -> int:
-    """Decks this user has created (running + done; errors refund)."""
+    """Deck-quota UNITS this user has consumed (running + done; errors
+    refund). A variant batch's N jobs share one batch_id and count as ONE
+    unit — grouping by (batch_id or job_id) is what makes that work."""
     ids = set(_JOBS)
     if JOBS_DIR.is_dir():
         ids |= {d.name for d in JOBS_DIR.iterdir()
                 if (d / "meta.json").is_file()}
-    used = 0
+    units = set()
     for jid in ids:
         meta = _load_job(jid) or {}
         if meta.get("owner") == email and meta.get("status") != "error":
-            used += 1
-    return used
+            units.add(meta.get("batch_id") or jid)
+    return len(units)
 
 
 def _check_quota(user: str) -> None:
@@ -207,6 +209,50 @@ class GenerateFromPrompt(BaseModel):
     auto_approve: bool = False  # True: skip the outline gate (CLI behavior)
     # 'best' = multi-candidate + vision judge; 'fast' = one candidate draft
     quality: Literal["best", "fast"] = "best"
+    # id -> answer from POST /intake's questions; only the ones answered
+    intake_answers: dict[str, str] | None = None
+
+
+class IntakeRequest(BaseModel):
+    prompt: str
+    csv_text: str | None = None
+
+
+@app.post("/intake")
+def intake_questions(req: IntakeRequest,
+                     user: str = Depends(auth.current_user)) -> dict:
+    """Best-effort clarifying questions tailored to this brief. Never
+    touches quota (creates no job) and never blocks compose: any failure
+    just returns an empty list."""
+    try:
+        from ..llm.intake import IntakeQuestions, intake_prompt
+        from ..llm.spec_generator import _structured_call, fast_model_id
+        raw = _structured_call(
+            "intake_questions", IntakeQuestions.model_json_schema(),
+            intake_prompt(req.prompt, bool(req.csv_text)),
+            max_tokens=2000, model=fast_model_id())
+        return IntakeQuestions.model_validate(raw).model_dump()
+    except Exception as e:  # noqa: BLE001 — best-effort, never blocks compose
+        import logging
+        logging.getLogger("deckengine").warning(
+            "intake questions failed: %s", e)
+        return {"questions": []}
+
+
+def _fold_intake(prompt: str, answers: dict[str, str] | None) -> str:
+    """Fold answered clarifying questions into the brief the LLM sees.
+    Question ids are short human-readable slugs (e.g. 'audience',
+    'decision') — good enough as labels without round-tripping the
+    original question text."""
+    if not answers:
+        return prompt
+    lines = [f"- {k.replace('_', ' ')}: {v.strip()}"
+             for k, v in answers.items() if v and v.strip()]
+    if not lines:
+        return prompt
+    return (prompt + "\n\nSTAKEHOLDER CONTEXT (from clarifying questions — "
+            "honor these, they came from the person who requested this "
+            "deck):\n" + "\n".join(lines))
 
 
 class ApproveOutline(BaseModel):
@@ -241,6 +287,66 @@ def generate(req: GenerateFromPrompt, background: BackgroundTasks,
     else:
         background.add_task(_run_outline, job_id, req)
     return {"job_id": job_id}
+
+
+class GenerateBatch(BaseModel):
+    prompt: str
+    csv_text: str | None = None
+    theme: str = "consulting_navy"
+    logo: str | None = None
+    quality: Literal["best", "fast"] = "fast"
+    n: int = 5
+    intake_answers: dict[str, str] | None = None
+
+
+@app.post("/generate-batch")
+def generate_batch(req: GenerateBatch, background: BackgroundTasks,
+                   user: str = Depends(auth.current_user)) -> dict:
+    """N variants of ONE brief — each argues via a different narrative
+    flow, so they read as genuinely different decks, not N drafts of one
+    idea. Charged as a SINGLE quota unit: all N jobs share a batch_id and
+    _decks_used() counts distinct batch_ids, not distinct jobs."""
+    _check_quota(user)
+    n = max(2, min(5, req.n))
+    batch_id = uuid.uuid4().hex[:12]
+    job_ids = []
+    for _ in range(n):
+        job_id = uuid.uuid4().hex[:12]
+        job_ids.append(job_id)
+        _JOBS[job_id] = {"status": "running", "owner": user,
+                         "batch_id": batch_id, "request": req.model_dump()}
+        _persist(job_id)
+    background.add_task(_run_batch, batch_id, job_ids, req)
+    return {"batch_id": batch_id, "job_ids": job_ids}
+
+
+@app.get("/batches/{batch_id}")
+def batch_status(batch_id: str,
+                 user: str = Depends(auth.current_user)) -> dict:
+    variants = []
+    if JOBS_DIR.is_dir():
+        for d in sorted(JOBS_DIR.iterdir(), key=lambda p: p.name):
+            meta_p = d / "meta.json"
+            if not meta_p.is_file():
+                continue
+            m = json.loads(meta_p.read_text(encoding="utf-8"))
+            if m.get("batch_id") != batch_id:
+                continue
+            if not auth.is_service(user) and m.get("owner") != user:
+                raise HTTPException(404)
+            variants.append({"job_id": d.name, "status": m.get("status"),
+                             "progress": m.get("progress"),
+                             "title": m.get("title"),
+                             "flow_id": m.get("flow_id"),
+                             "angle": m.get("angle"),
+                             "warnings": len(m.get("warnings", [])),
+                             "similar_pairs": m.get("batch_similar_pairs")})
+    if not variants:
+        raise HTTPException(404)
+    total = len(variants)
+    done = sum(1 for v in variants if v["status"] in ("done", "error"))
+    return {"batch_id": batch_id, "done": done, "total": total,
+            "variants": variants}
 
 
 @app.post("/jobs/{job_id}/approve")
@@ -408,7 +514,8 @@ def _run_outline(job_id: str, req: GenerateFromPrompt) -> None:
         from ..llm.facts import FactTable
         from ..llm.spec_generator import generate_outline
         facts = FactTable.from_csv(req.csv_text) if req.csv_text else None
-        outline = generate_outline(req.prompt, facts)
+        outline = generate_outline(
+            _fold_intake(req.prompt, req.intake_answers), facts)
         _JOBS[job_id].update(status="awaiting_approval",
                              outline=outline.model_dump())
         _persist(job_id)
@@ -434,11 +541,117 @@ def _run_generate(job_id: str, req: GenerateFromPrompt, outline) -> None:
                                    "stage": stage}
                 _persist(job_id)
 
-        spec = generate_deck_spec(req.prompt, csv_text=req.csv_text,
-                                  theme=req.theme, meta=meta, outline=outline,
-                                  quality=req.quality, progress_cb=_progress)
+        spec = generate_deck_spec(
+            _fold_intake(req.prompt, req.intake_answers), csv_text=req.csv_text,
+            theme=req.theme, meta=meta, outline=outline,
+            quality=req.quality, progress_cb=_progress)
         _run_render(job_id, spec)
     except Exception as e:  # noqa: BLE001
         _JOBS[job_id] = {"status": "error", "error": str(e),
                          "owner": _JOBS.get(job_id, {}).get("owner")}
         _persist(job_id)
+
+
+# ---------------------------------------------------------------------------
+# variant batch: N decks from one brief, one quota unit
+# ---------------------------------------------------------------------------
+
+def _batch_parallel() -> int:
+    """Outer concurrency across variants — kept low because each variant
+    already runs its own internal slide-wave parallelism (T5.6); 2 outer
+    x 4 inner keeps total concurrent LLM calls sane."""
+    try:
+        return max(1, min(5, int(
+            os.environ.get("DECKENGINE_BATCH_PARALLEL", "2"))))
+    except ValueError:
+        return 2
+
+
+def _run_batch(batch_id: str, job_ids: list[str], req: GenerateBatch) -> None:
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+    from ..llm.facts import FactTable
+    from ..llm.spec_generator import (_structured_call, fast_model_id,
+                                      generate_deck_spec, generate_outline)
+    from ..llm.variants import DeckAngles, angle_prompt, fallback_angles
+    from ..schema.slide_types import DeckMeta
+
+    prompt = _fold_intake(req.prompt, req.intake_answers)
+    facts = FactTable.from_csv(req.csv_text) if req.csv_text else None
+    n = len(job_ids)
+    try:
+        raw = _structured_call(
+            "deck_angles", DeckAngles.model_json_schema(),
+            angle_prompt(prompt, n), max_tokens=4000, model=fast_model_id())
+        angles = DeckAngles.model_validate(raw).angles
+        if len(angles) != n or len({a.flow_id for a in angles}) != n:
+            angles = fallback_angles(n)
+    except Exception:  # noqa: BLE001 — the diversity floor never depends on this
+        angles = fallback_angles(n)
+
+    governing: dict[str, str] = {}
+    lock = threading.Lock()
+
+    def _one(job_id: str, angle) -> None:
+        try:
+            outline = generate_outline(
+                prompt, facts, forced_flow=angle.flow_id,
+                angle_hint=angle.emphasis_seed or angle.angle)
+            with lock:
+                governing[job_id] = outline.governing_thought
+            meta = (DeckMeta(title=req.prompt[:150], logo=req.logo)
+                    if req.logo else None)
+
+            def _progress(done: int, total: int, stage: str) -> None:
+                job = _JOBS.get(job_id)
+                if job is not None and job.get("status") == "running":
+                    job["progress"] = {"done": done, "total": total,
+                                       "stage": stage}
+                    job["flow_id"] = angle.flow_id
+                    job["angle"] = angle.angle
+                    _persist(job_id)
+
+            spec = generate_deck_spec(
+                prompt, csv_text=req.csv_text, theme=req.theme, meta=meta,
+                outline=outline, quality=req.quality, progress_cb=_progress)
+        except Exception as e:  # noqa: BLE001 — one bad variant must not sink the batch
+            _JOBS[job_id] = {"status": "error", "error": str(e),
+                             "owner": _JOBS.get(job_id, {}).get("owner"),
+                             "batch_id": batch_id, "flow_id": angle.flow_id,
+                             "angle": angle.angle}
+            _persist(job_id)
+            return
+        _run_render(job_id, spec)          # replaces _JOBS[job_id] wholesale
+        job = _JOBS.get(job_id)             # so batch tags are re-applied after
+        if job is not None:
+            job["batch_id"] = batch_id
+            job["flow_id"] = angle.flow_id
+            job["angle"] = angle.angle
+            _persist(job_id)
+
+    with ThreadPoolExecutor(max_workers=_batch_parallel()) as pool:
+        list(pool.map(lambda pair: _one(*pair), zip(job_ids, angles)))
+
+    _tag_batch_diversity(batch_id, job_ids, governing)
+
+
+def _tag_batch_diversity(batch_id: str, job_ids: list[str],
+                         governing: dict[str, str]) -> None:
+    """QA signal, not an auto-fix (T5.6's within-deck sweeps regen a
+    slide in seconds; regenerating a whole duplicate DECK costs minutes,
+    too expensive to trigger speculatively). Flags pairs whose governing
+    thought still reads alike despite the forced-flow diversity floor."""
+    from ..llm.spec_generator import _dupe_pairs
+    ordered = [jid for jid in job_ids if jid in governing]
+    if len(ordered) < 2:
+        return
+    pairs = _dupe_pairs([governing[jid] for jid in ordered])
+    if not pairs:
+        return
+    tagged = [[ordered[i], ordered[j]] for i, j in pairs]
+    for jid in job_ids:
+        job = _JOBS.get(jid) or _load_job(jid)
+        if job is not None:
+            job["batch_similar_pairs"] = tagged
+            _JOBS[jid] = job
+            _persist(jid)

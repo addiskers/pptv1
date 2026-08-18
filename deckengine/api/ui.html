@@ -205,6 +205,33 @@
   .slot .claim { width: 100%; border: 0; background: transparent; font: 15px/1.45 inherit; color: var(--ink); resize: vertical; padding: 0; min-height: 24px; }
   .slot .claim:focus { outline: none; }
 
+  /* intake questions */
+  .qtext { font: 15px/1.4 inherit; color: var(--ink); margin-bottom: 8px; }
+  .qinput { width: 100%; border: 1px solid var(--line-strong); border-radius: 8px; padding: 9px 11px;
+    font: 14px inherit; color: var(--ink); background: var(--surface); }
+  .qinput:focus { outline: none; border-color: var(--slate); }
+  .qchips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .qchip { border: 1px solid var(--line-strong); background: var(--surface); border-radius: 999px;
+    padding: 7px 14px; font: 600 13px inherit; color: var(--ink); cursor: pointer; transition: all .12s; }
+  .qchip:hover { border-color: var(--slate); }
+  .qchip.on { background: var(--navy); border-color: var(--navy); color: #fff; }
+
+  /* variant batch */
+  .banner { background: var(--accent-soft); border: 1px solid var(--line-strong); border-radius: var(--r-md);
+    padding: 11px 14px; font-size: 13px; color: var(--navy); margin: 4px 0 18px; }
+  .banner.hidden { display: none; }
+  .variant-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; margin: 10px 0 6px; }
+  .vcard { border: 1px solid var(--line); border-radius: var(--r-md); padding: 14px; background: var(--surface-2);
+    display: flex; flex-direction: column; gap: 8px; min-height: 150px; }
+  .vcard .vflow { font-size: 10.5px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+    color: var(--slate); background: #e9edf0; border-radius: 4px; padding: 2px 7px; display: inline-block; width: fit-content; }
+  .vcard .vangle { font-size: 13px; color: var(--muted); line-height: 1.4; flex: 1; }
+  .vcard .vtitle { font: 600 14.5px inherit; color: var(--ink); line-height: 1.35; }
+  .vcard .vstatus { font-size: 12px; color: var(--faint); }
+  .vcard .vactions { display: flex; gap: 8px; margin-top: 2px; }
+  .vcard .vactions a, .vcard .vactions button { font-size: 12.5px; padding: 6px 12px; }
+  .vcard.errored { border-color: #e0b0a8; background: #fdf3f1; }
+
   /* results */
   .result-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 4px; }
   .result-head .check { width: 40px; height: 40px; background: #f0f6f3; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -360,11 +387,15 @@
       </div>
 
       <div class="actions">
-        <button class="btn btn-primary" id="go" onclick="generate()">
+        <button class="btn btn-primary" id="go" onclick="beginGenerate('single')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           Generate deck
         </button>
-        <span class="hint">Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> · needs an LLM key set on the server</span>
+        <button class="btn btn-ghost" onclick="beginGenerate('batch')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          Generate 5 variants
+        </button>
+        <span class="hint">Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> · 5 variants run as fast drafts and count as 1 deck · needs an LLM key set on the server</span>
       </div>
 
       <details class="adv">
@@ -390,6 +421,19 @@
         <span class="s" data-step="approve">Your review</span>
         <span class="s" data-step="slides">Writing slides</span>
         <span class="s" data-step="render">Rendering</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTAKE QUESTIONS -->
+  <section id="intake" class="stage hidden">
+    <div class="card gate">
+      <h2 class="serif">A couple of quick questions</h2>
+      <p class="lede">Answering these sharpens the deck — audience, the decision it needs to drive, tone. Skip anything you'd rather leave to the engine.</p>
+      <div class="storyline" id="intakeQs"></div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="submitIntake()">Continue</button>
+        <button class="btn btn-ghost" onclick="submitIntake(true)">Skip all</button>
       </div>
     </div>
   </section>
@@ -432,6 +476,19 @@
       </div>
       <details class="warns" id="warnbox"><summary></summary><div class="body" id="warnbody"></div></details>
       <div class="previews" id="previews"></div>
+    </div>
+  </section>
+
+  <!-- BATCH PROGRESS / RESULTS -->
+  <section id="batch" class="stage hidden">
+    <div class="card">
+      <h2 class="serif" id="batch-title">Designing 5 variants…</h2>
+      <p class="lede" id="batch-sub">Each one argues the brief a different way — pick the strongest.</p>
+      <div class="banner hidden" id="batch-banner"></div>
+      <div class="variant-grid" id="variantGrid"></div>
+      <div class="actions">
+        <button class="btn btn-ghost" type="button" onclick="resetToCompose()">New deck</button>
+      </div>
     </div>
   </section>
 </main>
@@ -511,7 +568,7 @@ const EXAMPLES = [
   lz.ondrop = e => { e.preventDefault(); lz.classList.remove('drag'); if (e.dataTransfer.files[0]) uploadLogo(e.dataTransfer.files[0]); };
   lf.onchange = e => { if (e.target.files[0]) uploadLogo(e.target.files[0]); };
   $('prompt').addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') generate();
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') beginGenerate('single');
   });
 })();
 
@@ -579,7 +636,7 @@ function clearLogo(e) {
 }
 
 function show(stage) {
-  ['compose','progress','gate','result'].forEach(s => $(s).classList.toggle('hidden', s !== stage));
+  ['compose','intake','progress','gate','result','batch'].forEach(s => $(s).classList.toggle('hidden', s !== stage));
   if (stage !== 'compose') $(stage).scrollIntoView({behavior:'smooth', block:'start'});
 }
 function resetToCompose() { if (pollTimer) clearInterval(pollTimer); show('compose'); }
@@ -629,9 +686,73 @@ async function apiError(res) {
 initAuth();
 
 // ---- generate flow ----
-async function generate() {
+let pendingMode = 'single';   // 'single' | 'batch' — which action the intake step continues to
+
+async function beginGenerate(mode) {
   const prompt = $('prompt').value.trim();
   if (!prompt) { $('prompt').focus(); return toast('Describe the deck you want first.', true); }
+  pendingMode = mode || 'single';
+  const btn = $('go');
+  btn.disabled = true;
+  const oldLabel = btn.innerHTML;
+  btn.innerHTML = 'Checking your brief…';
+  try {
+    const res = await fetch('/intake', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({prompt, csv_text: csvText})});
+    const data = res.ok ? await res.json() : {questions: []};
+    if (data.questions && data.questions.length) {
+      showIntake(data.questions);
+    } else {
+      await _startGeneration({});
+    }
+  } catch (e) {
+    await _startGeneration({});   // intake is best-effort — never block compose
+  } finally {
+    btn.disabled = false; btn.innerHTML = oldLabel;
+  }
+}
+
+function showIntake(questions) {
+  const box = $('intakeQs'); box.innerHTML = '';
+  questions.forEach((q, i) => {
+    const row = document.createElement('div');
+    row.className = 'slot';
+    row.dataset.qid = q.id;
+    let inputHtml;
+    if (q.kind === 'choice' && q.options && q.options.length) {
+      inputHtml = '<div class="qchips">' + q.options.map(o =>
+        '<button type="button" class="qchip" onclick="toggleChip(this)">' + o.replace(/</g,'&lt;') + '</button>').join('') + '</div>';
+    } else {
+      inputHtml = '<input class="qinput" type="text" placeholder="' + (q.placeholder || '').replace(/"/g,'&quot;') + '">';
+    }
+    row.innerHTML = '<div class="num">' + (i+1) + '</div><div class="body">' +
+      '<div class="qtext">' + q.question.replace(/</g,'&lt;') + '</div>' + inputHtml + '</div>';
+    box.appendChild(row);
+  });
+  show('intake');
+}
+
+function toggleChip(el) {
+  el.parentElement.querySelectorAll('.qchip').forEach(c => c.classList.toggle('on', c === el));
+}
+
+async function submitIntake(skip) {
+  const answers = {};
+  if (!skip) {
+    document.querySelectorAll('#intakeQs .slot').forEach(row => {
+      const id = row.dataset.qid;
+      const chip = row.querySelector('.qchip.on');
+      const input = row.querySelector('.qinput');
+      const val = chip ? chip.textContent.trim() : (input ? input.value.trim() : '');
+      if (val) answers[id] = val;
+    });
+  }
+  await _startGeneration(answers);
+}
+
+async function _startGeneration(intakeAnswers) {
+  const prompt = $('prompt').value.trim();
+  if (pendingMode === 'batch') return _startBatch(prompt, intakeAnswers);
   const review = $('review').checked;
   progress('Planning the storyline…',
     review ? 'Stage 1 drafts the claim chain. You approve it before any slide is written.'
@@ -639,10 +760,71 @@ async function generate() {
     'outline', []);
   try {
     const res = await fetch('/generate', {method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({prompt, csv_text: csvText, theme: selectedTheme, logo: logoAsset, auto_approve: !review, quality: deckQuality})});
+      body: JSON.stringify({prompt, csv_text: csvText, theme: selectedTheme, logo: logoAsset, auto_approve: !review, quality: deckQuality, intake_answers: intakeAnswers})});
     if (!res.ok) throw new Error(await apiError(res));
     poll((await res.json()).job_id);
   } catch (e) { fail(e.message); }
+}
+
+// ---- variant batch flow ----
+let currentBatch = null;
+
+async function _startBatch(prompt, intakeAnswers) {
+  $('batch-title').textContent = 'Designing 5 variants…';
+  $('batch-sub').textContent = 'Each one argues the brief a different way — pick the strongest. This counts as one deck against your quota.';
+  $('batch-banner').classList.add('hidden');
+  $('variantGrid').innerHTML = '';
+  show('batch');
+  try {
+    const res = await fetch('/generate-batch', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({prompt, csv_text: csvText, theme: selectedTheme, logo: logoAsset, quality: 'fast', n: 5, intake_answers: intakeAnswers})});
+    if (!res.ok) throw new Error(await apiError(res));
+    const data = await res.json();
+    pollBatch(data.batch_id);
+  } catch (e) { fail(e.message); }
+}
+
+function pollBatch(batchId) {
+  currentBatch = batchId;
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    let data;
+    try { data = await (await fetch('/batches/' + batchId)).json(); }
+    catch (e) { return; }
+    renderVariantGrid(data);
+    if (data.done >= data.total) clearInterval(pollTimer);
+  }, 1500);
+}
+
+function renderVariantGrid(data) {
+  $('batch-title').textContent = data.done >= data.total
+    ? data.total + ' variants ready' : 'Designing ' + data.total + ' variants… (' + data.done + '/' + data.total + ')';
+  const anySimilar = data.variants.some(v => v.similar_pairs && v.similar_pairs.length);
+  $('batch-banner').classList.toggle('hidden', !anySimilar);
+  if (anySimilar) $('batch-banner').textContent = 'Two or more variants read similarly despite the different narrative flows — worth a closer look before picking one.';
+  const grid = $('variantGrid'); grid.innerHTML = '';
+  data.variants.forEach((v, i) => {
+    const card = document.createElement('div');
+    card.className = 'vcard' + (v.status === 'error' ? ' errored' : '');
+    const flowLabel = (v.flow_id || 'designing').replace(/_/g,' ');
+    let body;
+    if (v.status === 'done') {
+      body = '<div class="vtitle">' + (v.title || 'Variant ' + (i+1)).replace(/</g,'&lt;') + '</div>' +
+        '<div class="vangle">' + (v.angle || '').replace(/</g,'&lt;') + '</div>' +
+        '<div class="vstatus">' + (v.warnings || 0) + ' warning' + (v.warnings === 1 ? '' : 's') + '</div>' +
+        '<div class="vactions"><a class="btn btn-green" href="/download/' + v.job_id + '" download>Download</a></div>';
+    } else if (v.status === 'error') {
+      body = '<div class="vtitle">Failed</div><div class="vangle">This variant could not be generated. The others are unaffected.</div>';
+    } else {
+      const p = v.progress;
+      const sub = p && p.stage === 'designing' && p.total ? 'Designing slide ' + Math.min(p.done + 1, p.total) + '/' + p.total
+        : p && p.stage === 'polishing' ? 'Polishing…' : 'Planning the storyline…';
+      body = '<div class="vangle">' + (v.angle || 'Assigning this variant\'s angle…').replace(/</g,'&lt;') + '</div>' +
+        '<div class="vstatus">' + sub + '</div>';
+    }
+    card.innerHTML = '<div class="vflow">' + flowLabel + '</div>' + body;
+    grid.appendChild(card);
+  });
 }
 
 async function renderSpec() {
