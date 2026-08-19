@@ -444,6 +444,10 @@ def candidate_count() -> int:
     return max(1, min(3, n))
 
 
+_MIN_FILL = 0.55  # body-zone fill floor (matches eval MIN_FILL_FLOOR):
+                  # below it, dead space is a DEFECT, not a tiebreaker
+
+
 def _render_candidate(slide, theme: str, workdir: Path, tag: str) -> dict:
     """Free deterministic score: render the slide alone, read the report.
     A candidate that cannot render at all loses outright."""
@@ -457,8 +461,13 @@ def _render_candidate(slide, theme: str, workdir: Path, tag: str) -> dict:
     except Exception as e:  # noqa: BLE001 — deterministic loss, not a crash
         log.warning("candidate %s failed to render: %s", tag, e)
         return {"defects": 999, "fill": 0.0, "pptx": None}
-    return {"defects": len(report.warnings) + len(report.truncations),
-            "fill": round(min(report.fills) if report.fills else 1.0, 3),
+    fill = round(min(report.fills) if report.fills else 1.0, 3)
+    # a half-empty slide is the #1 machine-made tell: score dead space as
+    # a hard defect so a filled candidate always beats a hollow one
+    fill_defects = 2 if fill < 0.40 else (1 if fill < _MIN_FILL else 0)
+    return {"defects": (len(report.warnings) + len(report.truncations)
+                        + fill_defects),
+            "fill": fill,
             "pptx": out}
 
 

@@ -1,0 +1,30 @@
+{
+ "slide_type": "canvas",
+ "title": "The margin gap decomposes into three drivers — and **utilization** [[src:recon]] alone explains more than half of it",
+ "subtitle": "MECE decomposition of the 6.2pp gap to the best-in-class benchmark",
+ "kicker": "root causes",
+ "render_title": true,
+ "notes": "Say: read the tree left to right — the question, then the three branches. Point at the highlighted utilization branch and its 3.4pp figure. Expect a challenge on whether the branches overlap; they are measured independently.",
+ "elements": [
+  {"x": 0.0, "y": 0.04, "w": 1.0, "h": 0.66, "z": 0,
+   "content": {"kind": "tree", "variant": "issue",
+               "root": "Why do we run **6.2pp** [[src:recon]] below best-in-class margin?",
+               "children": [
+                 {"label": "Utilization: lines run at 68% vs 84% benchmark",
+                  "children": ["Changeover time 2.1x peer median [[src:est]]",
+                               "Unplanned downtime concentrated on line 2"],
+                  "value": "3.4pp"},
+                 {"label": "Mix: low-margin SKUs still 41% of volume",
+                  "children": ["Tail SKUs unpriced for logistics cost"],
+                  "value": "1.9pp"},
+                 {"label": "Procurement: single-sourced resins",
+                  "children": ["No index-linked contracts"],
+                  "value": "0.9pp"}],
+               "highlight_index": 0}},
+  {"x": 0.0, "y": 0.76, "w": 1.0, "h": 0.22, "z": 0,
+   "content": {"kind": "callout_band", "label": "SO WHAT",
+               "segments": ["Fix utilization first: **3.4pp** [[src:recon]] of the gap sits in two addressable causes",
+                            "Mix and procurement follow in year two — sequencing beats parallel starts"]}}
+ ],
+ "footnote": "Gap decomposition from plant MES data and peer benchmarks, FY25 [[src:recon]]."
+}

@@ -75,6 +75,15 @@ def main() -> int:
     for name, s in scores.items():
         b = baseline.get(name)
         if not b:
+            # ABSOLUTE floor for decks with no blessed baseline: new pinned
+            # specs must ship with zero dead-space zones. (Legacy entries
+            # keep the ratchet below — their content is pinned and cannot
+            # be retro-filled by engine changes.)
+            if s["zones_below_floor"] > 0:
+                failures.append(
+                    f"{name}: NEW deck has {s['zones_below_floor']} zone(s) "
+                    f"below the {MIN_FILL_FLOOR} fill floor "
+                    f"(min_fill {s['min_fill']}) — fix before accepting")
             continue
         for metric, worse_is_higher in (("warnings", True), ("truncations", True),
                                         ("overflows", True),

@@ -568,6 +568,24 @@ class OnionSpec(BaseModel):
     highlight_index: int | None = Field(default=None, ge=0, le=4)
 
 
+class TempleSpec(BaseModel):
+    """Goal roof on capability pillars over a foundation band — the
+    strategy-house form."""
+    kind: Literal["temple"] = "temple"
+    goal: RichStr = Field(max_length=80)
+    pillars: list[RichStr] = Field(min_length=2, max_length=5)
+    foundation: RichStr | None = Field(default=None, max_length=80)
+    highlight_index: int | None = Field(default=None, ge=0, le=4)
+
+
+class IcebergSpec(BaseModel):
+    """Visible symptom above the waterline vs the hidden mass below —
+    'what you see is not what drives it'."""
+    kind: Literal["iceberg"] = "iceberg"
+    visible: list[RichStr] = Field(min_length=1, max_length=2)
+    hidden: list[RichStr] = Field(min_length=2, max_length=4)
+
+
 ComponentSpec = Union[
     TextBlockSpec, StatRowSpec, BadgeChipSpec, SectionHeaderSpec, MiniTableSpec,
     DataTableSpec, IconStatRowSpec, KpiCardStripSpec, CalloutBandSpec,
@@ -577,5 +595,5 @@ ComponentSpec = Union[
     IconTileRowSpec, ArrowCalloutSpec, BraceGroupSpec, ImageBlockSpec,
     FunnelSpec, Matrix2x2Spec, HarveyBallsSpec, PyramidSpec, GanttRowSpec,
     XYChartSpec, HubSpokeSpec, StaircaseSpec, VennSpec,
-    CycleSpec, TreeSpec, OnionSpec,
+    CycleSpec, TreeSpec, OnionSpec, TempleSpec, IcebergSpec,
 ]

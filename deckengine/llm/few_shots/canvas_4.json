@@ -1,0 +1,33 @@
+{
+ "slide_type": "canvas",
+ "title": "The marketplace flywheel is already turning: each quarter of seller growth compounds into **19%** [[src:recon]] cheaper fulfilment",
+ "subtitle": "Why scale advantages here are structural, not promotional",
+ "kicker": "the engine",
+ "render_title": true,
+ "notes": "Say: start at the top of the wheel and walk it clockwise once. Point at the highlighted stage — unit costs — because that is where the loop becomes a moat. Expect the question: what breaks the loop?",
+ "elements": [
+  {"x": 0.0, "y": 0.02, "w": 0.58, "h": 0.96, "z": 0,
+   "content": {"kind": "cycle",
+               "stages": ["More sellers join", "Selection widens",
+                          "Buyers return more often", "Volumes rise",
+                          "Unit costs fall"],
+               "hub": "Scale flywheel", "highlight_index": 4}},
+  {"x": 0.62, "y": 0.02, "w": 0.38, "h": 0.10, "z": 0,
+   "content": {"kind": "canvas_text", "text": "Proof the loop is live",
+               "size_role": "h2", "color_role": "primary"}},
+  {"x": 0.62, "y": 0.14, "w": 0.38, "h": 0.26, "z": 0,
+   "content": {"kind": "stat_row", "stats": [
+     {"value": "2.4x", "label": "seller base vs two years ago [[src:recon]]"},
+     {"value": "-19%", "label": "fulfilment cost per order [[src:recon]]"}]}},
+  {"x": 0.62, "y": 0.44, "w": 0.38, "h": 0.44, "z": 0,
+   "content": {"kind": "bullet_list", "size_role": "small", "items": [
+     {"text": "Repeat-buyer share climbed from **31%** [[src:est]] to **47%** [[src:est]] as selection widened."},
+     {"text": "Every 10-point rise in seller count cut delivery distance **8%** [[src:est]] — density is the mechanism."},
+     {"text": "Competitors subsidise demand; the loop makes ours self-funding."}]}},
+  {"x": 0.62, "y": 0.90, "w": 0.38, "h": 0.08, "z": 0,
+   "content": {"kind": "canvas_text",
+               "text": "Source: platform ops data, FY24-FY26 [[src:recon]]",
+               "size_role": "micro", "color_role": "ink_muted"}}
+ ],
+ "footnote": null
+}

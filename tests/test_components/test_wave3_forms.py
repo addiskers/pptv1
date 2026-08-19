@@ -125,6 +125,65 @@ def test_onion_core_inside_rail_outside():
         assert label in texts
 
 
+def _temple():
+    from deckengine.schema.components import TempleSpec
+    return TempleSpec(goal="Category leadership",
+                      pillars=["Agronomy", "Linkages", "Financing"],
+                      foundation="Execution discipline", highlight_index=1)
+
+
+def _iceberg():
+    from deckengine.schema.components import IcebergSpec
+    return IcebergSpec(visible=["Falling prices"],
+                       hidden=["Fragmented aggregation", "No grading",
+                               "Distress sales"])
+
+
+def test_temple_iceberg_parity_and_content():
+    ctx = make_ctx()
+    for kind, spec in (("temple", _temple()), ("iceberg", _iceberg())):
+        comp = get_component(kind)
+        _, slide = blank_slide()
+        m = comp.measure(spec, inch(9), ctx)
+        c = comp.render(slide, spec, BBox(0, 0, inch(9), inch(6)), ctx)
+        assert abs(m - c) <= pt(1), kind
+        import re
+        texts = re.sub(r"\s+", " ", " ".join(
+            r.text for s in slide.shapes if s.has_text_frame
+            for p in s.text_frame.paragraphs for r in p.runs))
+        if kind == "temple":
+            for t in ("Category leadership", "Agronomy", "Linkages",
+                      "Financing", "Execution discipline"):
+                assert t in texts
+        else:
+            for t in ("Falling prices", "Fragmented aggregation",
+                      "Distress sales"):
+                assert t in texts
+
+
+def test_temple_highlighted_pillar_accented():
+    ctx = make_ctx()
+    _, slide = blank_slide()
+    get_component("temple").render(slide, _temple(),
+                                   BBox(0, 0, inch(9), inch(4)), ctx)
+    fills = [str(s.fill.fore_color.rgb) for s in slide.shapes
+             if s.shape_type == MSO_SHAPE_TYPE.AUTO_SHAPE
+             and s.fill.type is not None]
+    assert ctx.theme.color("accent") in fills
+
+
+def test_iceberg_mass_rotated_and_waterline_dashed():
+    ctx = make_ctx()
+    _, slide = blank_slide()
+    get_component("iceberg").render(slide, _iceberg(),
+                                    BBox(0, 0, inch(9), inch(4)), ctx)
+    shapes = [s for s in slide.shapes
+              if s.shape_type == MSO_SHAPE_TYPE.AUTO_SHAPE]
+    assert any(abs(s.rotation - 180) < 0.1 for s in shapes)  # sunken mass
+    lines = [s for s in slide.shapes if s.shape_type == MSO_SHAPE_TYPE.LINE]
+    assert len(lines) == 1                                   # waterline
+
+
 # -- routing + canon ---------------------------------------------------------
 
 def test_wave3_routing():
@@ -143,10 +202,21 @@ def test_wave3_routing():
                                      "decomposition_tree")
 
 
+def test_wave3b_routing():
+    assert first_rule(signals_from(
+        "The strategy rests on three capability pillars")).id \
+        == "pillars_temple"
+    assert first_rule(signals_from(
+        "Falling prices are the symptom; the drivers sit beneath the "
+        "surface")).id == "hidden_iceberg"
+
+
 def test_wave3_canon_flips():
     for form, engine in (("flywheel", "cycle"),
                          ("issue_tree", "tree"),
                          ("driver_tree", "tree"),
-                         ("onion", "onion")):
+                         ("onion", "onion"),
+                         ("temple", "temple"),
+                         ("iceberg", "iceberg")):
         assert CANON[form].status == "primitive", form
         assert engine in (CANON[form].engine or ""), form

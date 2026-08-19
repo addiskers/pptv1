@@ -80,6 +80,13 @@ _BRIDGE = re.compile(
     r"\b(?:bridge|walks?\s+from|waterfall)\b"
     r"|\bfrom\b.{1,60}?\bto\b.{1,80}?\b(?:driven|explained|built)\b",
     re.I | re.S)
+_TEMPLE = re.compile(
+    r"\b(?:pillars?|rests?\s+on|foundations?\s+of|underpin\w*"
+    r"|strategy\s+house)\b", re.I)
+_ICEBERG = re.compile(
+    r"\b(?:icebergs?|beneath\s+the\s+surface|below\s+the\s+(?:water)?line"
+    r"|hidden\s+(?:mass|costs?|drivers?)"
+    r"|underlying\s+(?:causes?|drivers?|issues?))\b", re.I)
 _CYCLE = re.compile(
     r"\b(?:flywheels?|virtuous|self-?reinforc\w*|reinforcing\s+loop"
     r"|compound(?:s|ing)\s+(?:loop|cycle)|momentum\s+builds?)\b"
@@ -164,6 +171,8 @@ class Signals:
     cycle: bool = False
     tree: bool = False
     onion: bool = False
+    temple: bool = False
+    iceberg: bool = False
 
 
 def _option_count(text: str) -> int:
@@ -246,7 +255,9 @@ def signals_from(claim: str, facts: FactTable | None = None) -> Signals:
         two_units=bool(_TWO_UNITS.search(text)),
         cycle=bool(_CYCLE.search(text)),
         tree=bool(_TREE.search(text)),
-        onion=bool(_ONION.search(text)))
+        onion=bool(_ONION.search(text)),
+        temple=bool(_TEMPLE.search(text)),
+        iceberg=bool(_ICEBERG.search(text)))
 
 
 @dataclass(frozen=True)
@@ -379,6 +390,20 @@ RULES: tuple[FormatRule, ...] = (
         rationale="plans live on an axis",
         detect=lambda s: s.roadmap and s.n_periods >= 2,
         target_slide_types=("custom_layout", "canvas", "timeline_slide")),
+    FormatRule(
+        id="pillars_temple",
+        when="a goal resting on capability pillars",
+        then="temple leaf (goal roof, pillars, base)",
+        rationale="the house IS the strategy",
+        detect=lambda s: s.temple,
+        target_slide_types=("custom_layout", "canvas")),
+    FormatRule(
+        id="hidden_iceberg",
+        when="visible symptom vs hidden drivers",
+        then="iceberg leaf (tip above, mass below)",
+        rationale="the ratio argues",
+        detect=lambda s: s.iceberg,
+        target_slide_types=("custom_layout", "canvas")),
     FormatRule(
         id="reinforcing_cycle",
         when="a self-reinforcing loop / flywheel",

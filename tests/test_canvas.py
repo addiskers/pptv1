@@ -96,6 +96,38 @@ def test_dark_shape_label_contrast():
     assert any("label_color_role" in p for p in check_canvas_slide(s))
 
 
+def test_light_label_on_light_fill_flagged():
+    s = _canvas([_shape(0.1, 0.1, 0.3, 0.2, fill_role="surface",
+                        label="ghost text", label_color_role="inverse_ink"),
+                 _text(0.6, 0.6, 0.3, 0.2, "x")])
+    assert any("label_color_role='ink'" in p for p in check_canvas_slide(s))
+
+
+def test_light_text_on_light_bg_flagged():
+    s = _canvas([_text(0.1, 0.1, 0.5, 0.2, "ghost", color_role="inverse_ink"),
+                 _text(0.1, 0.5, 0.3, 0.2, "fine")])
+    assert any("light background" in p for p in check_canvas_slide(s))
+    # the same text contained in a dark panel is readable: no problem
+    s2 = _canvas([_shape(0.05, 0.05, 0.6, 0.4, fill_role="primary"),
+                  _text(0.1, 0.1, 0.4, 0.2, "fine", z=1,
+                        color_role="inverse_ink")])
+    assert not [p for p in check_canvas_slide(s2) if "light background" in p]
+
+
+def test_component_inside_dark_panel_flagged():
+    comp = {"x": 0.1, "y": 0.15, "w": 0.35, "h": 0.3, "z": 1,
+            "content": {"kind": "bullet_list",
+                        "items": [{"text": "ink text on navy panel"}]}}
+    s = _canvas([_shape(0.05, 0.05, 0.5, 0.5, fill_role="primary_dark"),
+                 comp, _text(0.6, 0.6, 0.3, 0.2, "x")])
+    assert any("unreadable on dark fills" in p for p in check_canvas_slide(s))
+    # the same component on a light panel is the classic legal pattern
+    s2 = _canvas([_shape(0.05, 0.05, 0.5, 0.5, fill_role="surface"),
+                  dict(comp), _text(0.6, 0.6, 0.3, 0.2, "x")])
+    assert not [p for p in check_canvas_slide(s2)
+                if "unreadable on dark fills" in p]
+
+
 # -- renderer ----------------------------------------------------------------
 
 def _build(spec_dict, tmp_path):

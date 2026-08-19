@@ -20,6 +20,7 @@ from ..schema.canvas import CanvasElement, CanvasSlideSpec
 _DARK_FILLS = frozenset({"primary", "primary_dark", "accent", "negative",
                          "positive", "ink"})
 _DARK_TEXT = frozenset({"ink", "ink_muted", "primary", "primary_dark"})
+_LIGHT_TEXT = frozenset({"inverse_ink"})  # unreadable on light fills/bg
 _OVERLAP_FRAC = 0.10   # intersection / smaller area above this = collision
 _CONTAIN_FRAC = 0.90   # inner mostly inside outer = containment
 _SLIVER_W = 0.06       # text narrower than this will ellipsize hard
@@ -45,9 +46,16 @@ def _contained_in(inner: CanvasElement, outer: CanvasElement) -> bool:
         (inner.w * inner.h) <= (outer.w * outer.h)
 
 
+# only flat rectangles read as backdrops; an arrow/chevron/oval crossing
+# text reads as a collision, not a panel (seen live: text half-on/half-off
+# giant chevron arrows)
+_PANEL_SHAPES = frozenset({"rect", "rounded"})
+
+
 def _is_panel(el: CanvasElement) -> bool:
     return (el.content.kind == "canvas_shape"
-            and not (el.content.label or "").strip())
+            and not (el.content.label or "").strip()
+            and (el.content.shape or "rect") in _PANEL_SHAPES)
 
 
 def _bears_text(el: CanvasElement) -> bool:
@@ -106,6 +114,24 @@ def check_canvas_slide(slide: CanvasSlideSpec) -> list[str]:
                     f"{_label(el, i)} has {el.content.label_color_role!r} "
                     f"label on a {el.content.fill_role!r} fill: set "
                     f"label_color_role='inverse_ink' or lighten the fill")
+            elif (el.content.fill_role or "") not in _DARK_FILLS \
+                    and el.content.label_color_role in _LIGHT_TEXT:
+                problems.append(
+                    f"{_label(el, i)} has {el.content.label_color_role!r} "
+                    f"label on a light {el.content.fill_role!r} fill: set "
+                    f"label_color_role='ink' or use a dark fill")
+            continue
+        if role in _LIGHT_TEXT:
+            on_dark = slide.bg_fill_role in _DARK_FILLS or any(
+                p.content.kind == "canvas_shape" and p is not el
+                and p.z <= el.z
+                and (p.content.fill_role or "") in _DARK_FILLS
+                and _contained_in(el, p) for p in els)
+            if not on_dark:
+                problems.append(
+                    f"{_label(el, i)} uses color_role={role!r} on a light "
+                    f"background: set color_role='ink' or place it on a "
+                    f"dark panel")
             continue
         if role not in _DARK_TEXT:
             continue
@@ -132,6 +158,25 @@ def check_canvas_slide(slide: CanvasSlideSpec) -> list[str]:
                     f"{el.content.color_role!r} on the dark "
                     f"bg_fill_role={slide.bg_fill_role!r}: use "
                     f"'inverse_ink' or place it on a light panel")
+                break
+
+    # 2b) components inside dark panels: component leaves render theme-ink
+    # text on light surfaces by design, so a component contained in a dark
+    # panel is unreadable (seen live: option columns inside a navy panel)
+    for i, el in enumerate(els):
+        if el.content.kind in ("canvas_text", "canvas_shape", "canvas_line"):
+            continue
+        for p in els:
+            if p is el or p.content.kind != "canvas_shape":
+                continue
+            if p.z <= el.z and (p.content.fill_role or "") in _DARK_FILLS \
+                    and _contained_in(el, p):
+                problems.append(
+                    f"{_label(el, i)} sits inside a dark "
+                    f"{p.content.fill_role!r} panel: components render dark "
+                    f"ink text and are unreadable on dark fills — move it "
+                    f"off the panel or use a light panel fill like "
+                    f"'surface'")
                 break
 
     # 3) sliver text: a narrow column of long text ellipsizes to nothing

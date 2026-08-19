@@ -370,8 +370,13 @@ class NativeChart(Component):
                 point.format.fill.fore_color.rgb = RGBColor.from_string(
                     theme.color(role))
 
-    def _num_format(self, suffix: str) -> str:
-        return f'#,##0.#"{suffix}"' if suffix else '#,##0.#'
+    def _num_format(self, suffix: str, values=None) -> str:
+        # '#,##0.#' renders integer points with a dangling decimal point
+        # ("948.k" on the rendered slide): derive decimals from the data
+        needs_dec = bool(values) and any(
+            abs(v - round(v)) > 1e-9 for v in values)
+        base = "#,##0.0" if needs_dec else "#,##0"
+        return f'{base}"{suffix}"' if suffix else base
 
     def _value_labels(self, chart, data, series, forecast, ctx):
         theme = ctx.theme
@@ -381,9 +386,10 @@ class NativeChart(Component):
         want = st.value_labels
         if want is None:
             want = data.chart_type == "bar" and not multi
+        vals = [v for _, vs in series for v in vs if v is not None]
         if st.endpoint_labels and data.chart_type == "line":
             # per-point first+last on each plotted series
-            fmt = self._num_format(data.value_suffix)
+            fmt = self._num_format(data.value_suffix, vals)
             csize = max(6.0, theme.size_micro - (1.5 if st.compact else 0))
             for ser in chart.series:
                 n = len(list(ser.values))
@@ -396,7 +402,7 @@ class NativeChart(Component):
             return
         fmt = f'0"{data.value_suffix}"' if (
             data.chart_type == "bar" and st.value_labels is None
-        ) else self._num_format(data.value_suffix)
+        ) else self._num_format(data.value_suffix, vals)
         for plot in chart.plots:
             plot.has_data_labels = True
             dl = plot.data_labels
@@ -563,7 +569,9 @@ class NativeChart(Component):
             point.format.fill.fore_color.rgb = RGBColor.from_string(
                 theme.color(roles[i]))
         # signed value labels on the visible series (original deltas)
-        fmt = self._num_format(data.value_suffix)
+        fmt = self._num_format(data.value_suffix,
+                               [v for s in data.series for v in s.values
+                                if v is not None])
         add_point_data_labels(val_ser, list(range(n)), fmt, size,
                               theme.color("ink"))
         self._axes(chart, data, ctx)
