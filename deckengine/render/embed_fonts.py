@@ -13,8 +13,8 @@ Microsoft face on Windows, the metric clone on Linux (clones are SIL-OFL:
 embedding is explicitly permitted).
 
 Fonts whose OS/2 fsType forbids embedding (restricted license bit 0x2) are
-skipped with a warning. Enabled via DECKENGINE_EMBED_FONTS=1 (the EC2
-service environment sets it; see deploy/setup_ec2.sh).
+skipped with a warning. ON by default; DECKENGINE_EMBED_FONTS=0 opts out
+for trusted-viewer environments where smaller files matter more.
 """
 from __future__ import annotations
 

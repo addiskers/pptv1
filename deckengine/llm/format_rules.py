@@ -80,6 +80,17 @@ _BRIDGE = re.compile(
     r"\b(?:bridge|walks?\s+from|waterfall)\b"
     r"|\bfrom\b.{1,60}?\bto\b.{1,80}?\b(?:driven|explained|built)\b",
     re.I | re.S)
+_CYCLE = re.compile(
+    r"\b(?:flywheels?|virtuous|self-?reinforc\w*|reinforcing\s+loop"
+    r"|compound(?:s|ing)\s+(?:loop|cycle)|momentum\s+builds?)\b"
+    r"|\bloops?\s+(?:back|into)\b", re.I)
+_TREE = re.compile(
+    r"\b(?:issue\s+tree|driver\s+tree|MECE|decompos\w*"
+    r"|breaks?\s+down\s+into|drivers?\s+of|org(?:ani[sz]ation)?\s+"
+    r"(?:chart|structure)|reporting\s+lines?)\b", re.I)
+_ONION = re.compile(
+    r"\b(?:concentric|onion|layers?\s+of|at\s+the\s+core"
+    r"|core\b.{0,30}\bperiphery|inner\s+core)\b", re.I)
 _OVERLAP = re.compile(
     r"\b(?:overlaps?|intersections?|sweet\s+spot|synerg\w*|convergence)\b"
     r"|\bwhere\s+\w+(?:\s+\w+)?\s+meets\b", re.I)
@@ -150,6 +161,9 @@ class Signals:
     ecosystem: bool = False
     value_build: bool = False
     two_units: bool = False
+    cycle: bool = False
+    tree: bool = False
+    onion: bool = False
 
 
 def _option_count(text: str) -> int:
@@ -229,7 +243,10 @@ def signals_from(claim: str, facts: FactTable | None = None) -> Signals:
         overlap=bool(_OVERLAP.search(text)),
         ecosystem=bool(_ECOSYSTEM.search(text)),
         value_build=bool(_VALUE_BUILD.search(text)),
-        two_units=bool(_TWO_UNITS.search(text)))
+        two_units=bool(_TWO_UNITS.search(text)),
+        cycle=bool(_CYCLE.search(text)),
+        tree=bool(_TREE.search(text)),
+        onion=bool(_ONION.search(text)))
 
 
 @dataclass(frozen=True)
@@ -362,6 +379,27 @@ RULES: tuple[FormatRule, ...] = (
         rationale="plans live on an axis",
         detect=lambda s: s.roadmap and s.n_periods >= 2,
         target_slide_types=("custom_layout", "canvas", "timeline_slide")),
+    FormatRule(
+        id="reinforcing_cycle",
+        when="a self-reinforcing loop / flywheel",
+        then="cycle leaf (stages clockwise; hub names the engine)",
+        rationale="loops argue in circles",
+        detect=lambda s: s.cycle,
+        target_slide_types=("custom_layout", "canvas")),
+    FormatRule(
+        id="decomposition_tree",
+        when="a question/KPI decomposed into branches",
+        then="tree leaf (variant issue|driver|org; driver adds +/x chips)",
+        rationale="MECE lives as a tree",
+        detect=lambda s: s.tree,
+        target_slide_types=("custom_layout", "canvas")),
+    FormatRule(
+        id="layers_onion",
+        when="concentric layers core->periphery",
+        then="onion leaf (core labeled inside, layers on a rail)",
+        rationale="containment argues by nesting",
+        detect=lambda s: s.onion,
+        target_slide_types=("custom_layout", "canvas")),
     FormatRule(
         id="overlap_venn",
         when="overlap of 2-3 sets / the sweet spot",

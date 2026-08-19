@@ -530,6 +530,44 @@ class VennSpec(BaseModel):
     intersection: RichStr | None = Field(default=None, max_length=60)
 
 
+class CycleSpec(BaseModel):
+    """Flywheel / reinforcing loop — 3-8 stages around a ring of arrow
+    segments; the momentum form. Stage labels ride OUTSIDE the ring at
+    segment centroids; an optional hub label sits in the center."""
+    kind: Literal["cycle"] = "cycle"
+    stages: list[RichStr] = Field(min_length=3, max_length=8)
+    hub: RichStr | None = Field(default=None, max_length=40)
+    highlight_index: int | None = Field(default=None, ge=0, le=7)
+
+
+class TreeNodeSpec(BaseModel):
+    label: RichStr = Field(max_length=60)
+    children: list[PlainStr] = Field(default_factory=list, max_length=3)
+    value: PlainStr | None = Field(default=None, max_length=16)
+
+
+class TreeSpec(BaseModel):
+    """Issue tree / driver tree / org chart — a root decomposed into 2-4
+    branches, each with up to 3 leaves (the MECE depth consulting shows).
+    'driver' adds +/x operator chips on the branch connectors; 'org' lays
+    the tree top-down instead of left-right."""
+    kind: Literal["tree"] = "tree"
+    root: RichStr = Field(max_length=80)
+    children: list[TreeNodeSpec] = Field(min_length=2, max_length=4)
+    variant: Literal["issue", "driver", "org"] = "issue"
+    # driver only: one operator joining the branches, '+' (sum) or 'x'
+    operator: Literal["+", "x"] = "+"
+    highlight_index: int | None = Field(default=None, ge=0, le=3)
+
+
+class OnionSpec(BaseModel):
+    """Concentric layers, core first (core -> periphery). Labels sit on a
+    right rail with leader lines — inner rings are too thin for text."""
+    kind: Literal["onion"] = "onion"
+    layers: list[RichStr] = Field(min_length=2, max_length=5)
+    highlight_index: int | None = Field(default=None, ge=0, le=4)
+
+
 ComponentSpec = Union[
     TextBlockSpec, StatRowSpec, BadgeChipSpec, SectionHeaderSpec, MiniTableSpec,
     DataTableSpec, IconStatRowSpec, KpiCardStripSpec, CalloutBandSpec,
@@ -539,4 +577,5 @@ ComponentSpec = Union[
     IconTileRowSpec, ArrowCalloutSpec, BraceGroupSpec, ImageBlockSpec,
     FunnelSpec, Matrix2x2Spec, HarveyBallsSpec, PyramidSpec, GanttRowSpec,
     XYChartSpec, HubSpokeSpec, StaircaseSpec, VennSpec,
+    CycleSpec, TreeSpec, OnionSpec,
 ]

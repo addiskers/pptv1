@@ -100,11 +100,13 @@ def test_canon_covers_the_families():
 def test_canon_gaps_include_user_named_forms():
     g = set(gaps())
     # still-open gaps (mekko/radar barely appear in the census; backlog)
-    assert {"mekko", "radar", "flywheel", "sankey", "gauge"} <= g
-    # graduated to primitives: pyramid+gantt (T5), then the census wave
+    assert {"mekko", "radar", "sankey", "gauge"} <= g
+    # graduated to primitives: pyramid+gantt (T5), the census wave, then
+    # wave 3 (cycle/tree/onion — the SmartArt-class drawn forms)
     for form in ("pyramid", "gantt", "venn", "bubble", "scatter",
                  "quadrant_scatter", "staircase", "hub_spoke",
-                 "combo_line_column"):
+                 "combo_line_column", "flywheel", "issue_tree",
+                 "driver_tree", "onion"):
         assert CANON[form].status == "primitive", form
 
 

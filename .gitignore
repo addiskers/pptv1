@@ -19,3 +19,4 @@ data/.secret
 
 # durable job storage on servers
 data/jobs/
+assets/cache_rings/

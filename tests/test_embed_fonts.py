@@ -29,7 +29,8 @@ def _build(tmp_path):
     return out
 
 
-def test_embed_adds_parts_rels_and_flag(tmp_path):
+def test_embed_adds_parts_rels_and_flag(tmp_path, monkeypatch):
+    monkeypatch.setenv("DECKENGINE_EMBED_FONTS", "0")  # embed manually below
     out = _build(tmp_path)
     warnings: list[str] = []
     n = embed_fonts(out, warn=warnings.append)
@@ -59,8 +60,8 @@ def test_embed_adds_parts_rels_and_flag(tmp_path):
     assert prs.slides[0].shapes
 
 
-def test_embed_flag_wires_into_build(tmp_path, monkeypatch):
-    monkeypatch.setenv("DECKENGINE_EMBED_FONTS", "1")
+def test_embed_on_by_default(tmp_path, monkeypatch):
+    monkeypatch.delenv("DECKENGINE_EMBED_FONTS", raising=False)
     out = tmp_path / "auto.pptx"
     report = build_deck(DeckSpec.model_validate(SPEC), out)
     with zipfile.ZipFile(out) as zf:
@@ -68,8 +69,8 @@ def test_embed_flag_wires_into_build(tmp_path, monkeypatch):
     assert not [w for w in report.warnings if "embed" in w]
 
 
-def test_embed_off_by_default(tmp_path, monkeypatch):
-    monkeypatch.delenv("DECKENGINE_EMBED_FONTS", raising=False)
+def test_embed_opt_out(tmp_path, monkeypatch):
+    monkeypatch.setenv("DECKENGINE_EMBED_FONTS", "0")
     out = tmp_path / "plain.pptx"
     build_deck(DeckSpec.model_validate(SPEC), out)
     with zipfile.ZipFile(out) as zf:

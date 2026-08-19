@@ -452,7 +452,8 @@ def _render_candidate(slide, theme: str, workdir: Path, tag: str) -> dict:
     try:
         report = build_deck(DeckSpec(theme=theme,
                                      meta=DeckMeta(title="candidate"),
-                                     slides=[slide]), out)
+                                     slides=[slide]), out,
+                            embed_fonts=False)
     except Exception as e:  # noqa: BLE001 — deterministic loss, not a crash
         log.warning("candidate %s failed to render: %s", tag, e)
         return {"defects": 999, "fill": 0.0, "pptx": None}
@@ -598,7 +599,7 @@ def _render_problems(slide, theme: str) -> list[str]:
         report = build_deck(DeckSpec(theme=theme,
                                      meta=DeckMeta(title="rt"),
                                      slides=[slide]),
-                            workdir / "rt.pptx")
+                            workdir / "rt.pptx", embed_fonts=False)
     except Exception as e:  # noqa: BLE001 — a non-rendering slide is the worst defect
         return [f"[render] the slide failed to render at all: {e}"]
     finally:

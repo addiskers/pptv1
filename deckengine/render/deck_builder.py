@@ -25,7 +25,10 @@ from .. import slides as _slides  # noqa: F401
 log = logging.getLogger("deckengine")
 
 
-def build_deck(spec: DeckSpec, out_path: str | Path) -> BuildReport:
+def build_deck(spec: DeckSpec, out_path: str | Path, *,
+               embed_fonts: bool | None = None) -> BuildReport:
+    """embed_fonts: None = env default (on unless DECKENGINE_EMBED_FONTS=0);
+    False skips embedding for throwaway renders (candidate scoring)."""
     theme = load_theme(spec.theme)
     default_registry().validate_theme(theme)  # fail loudly before drawing anything
     report = BuildReport()
@@ -88,13 +91,16 @@ def build_deck(spec: DeckSpec, out_path: str | Path) -> BuildReport:
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     prs.save(str(out_path))
-    if os.environ.get("DECKENGINE_EMBED_FONTS") == "1":
-        # a viewer without our fonts must never substitute-and-rewrap;
-        # embed whatever the registry resolved (real faces on Windows,
-        # metric clones on Linux)
-        from .embed_fonts import embed_fonts
+    if embed_fonts is None:
+        embed_fonts = os.environ.get("DECKENGINE_EMBED_FONTS") != "0"
+    if embed_fonts:
+        # ON by default: a viewer without our fonts must never
+        # substitute-and-rewrap; embed whatever the registry resolved
+        # (real faces on Windows, metric clones on Linux).
+        # DECKENGINE_EMBED_FONTS=0 opts out (smaller files, trusted viewers).
+        from .embed_fonts import embed_fonts as _embed
         try:
-            n = embed_fonts(out_path, warn=report.warn)
+            n = _embed(out_path, warn=report.warn)
             log.info("embedded %d font file(s) into %s", n, out_path.name)
         except Exception as exc:  # embedding is best-effort, never fatal
             report.warn(f"font embedding failed: {exc}")

@@ -179,10 +179,10 @@ def test_option_and_criteria_counts():
 
 def test_decision_table_text_cap_and_content():
     text = decision_table_text()
-    # rules + the variant-hint tier; raised 2000 -> 2600 when the census
-    # wave (combo/scatter/venn/hub/staircase routing) landed — the table
-    # grows WITH the form library by design
-    assert len(text) <= 2600
+    # rules + the variant-hint tier; raised 2000 -> 2600 (census wave)
+    # -> 3000 (wave 3: cycle/tree/onion) — the table grows WITH the form
+    # library by design
+    assert len(text) <= 3000
     lines = text.splitlines()
     assert lines[0].startswith("FORMAT SELECTION")
     assert "2x2" in text and "waterfall" in text and "line" in text
