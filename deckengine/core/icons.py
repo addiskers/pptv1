@@ -1,9 +1,11 @@
-"""Programmatic monochrome icon set.
+"""Monochrome icon set: real Lucide glyphs, PIL drawers as fallback.
 
-Icons are drawn with PIL at request time and cached per (name, color, size) —
-no licensed assets, no emoji tell, recolorable to any theme role. Drawn at 4x
-and downsampled for clean anti-aliasing. get_icon_tile wraps any glyph in a
-rounded-square color tile for card/badge treatments.
+Preferred source is assets/icons/lucide/*.png — professional stroke icons
+(Lucide, ISC license) pre-rasterized to 512px black-on-transparent alpha
+masks and tinted to any theme role at request time. Icons missing a mask
+fall back to the original hand-drawn PIL glyphs, so the set degrades
+gracefully offline. Everything is cached per (name, color, size).
+get_icon_tile wraps any glyph in a rounded-square color tile.
 """
 from __future__ import annotations
 
@@ -13,6 +15,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 CACHE_DIR = Path(__file__).resolve().parents[2] / "assets" / "icons" / "cache"
+LUCIDE_DIR = Path(__file__).resolve().parents[2] / "assets" / "icons" / "lucide"
 
 ICON_NAMES = ("person", "people", "money", "growth", "chart", "leaf",
               "building", "target", "globe", "bulb", "shield", "clock",
@@ -21,17 +24,37 @@ ICON_NAMES = ("person", "people", "money", "growth", "chart", "leaf",
               "flag", "pin", "cart", "drop", "rocket", "network", "lock")
 
 
+def _lucide_mask(name: str) -> Path | None:
+    p = LUCIDE_DIR / f"{name}.png"
+    return p if p.is_file() else None
+
+
+def _tinted_glyph(mask_path: Path, color: tuple, px: int) -> Image.Image:
+    """Tint a pre-rasterized black-on-transparent mask via its alpha."""
+    with Image.open(mask_path) as m:
+        alpha = m.convert("RGBA").getchannel("A").resize(
+            (px, px), Image.LANCZOS)
+    glyph = Image.new("RGBA", (px, px), (0, 0, 0, 0))
+    glyph.paste(Image.new("RGBA", (px, px), color), mask=alpha)
+    return glyph
+
+
 def get_icon(name: str, hex_color: str, px: int = 128) -> Path:
     if name not in ICON_NAMES:
         raise KeyError(f"unknown icon {name!r}; choose from {ICON_NAMES}")
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    out = CACHE_DIR / f"{name}_{hex_color.lower()}_{px}.png"
+    mask = _lucide_mask(name)
+    tag = "_lc" if mask else ""
+    out = CACHE_DIR / f"{name}_{hex_color.lower()}_{px}{tag}.png"
     if out.is_file():
+        return out
+    color = tuple(int(hex_color[i:i + 2], 16) for i in (0, 2, 4)) + (255,)
+    if mask:
+        _tinted_glyph(mask, color, px).save(out)
         return out
     s = px * 4
     img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
-    color = tuple(int(hex_color[i:i + 2], 16) for i in (0, 2, 4)) + (255,)
     w = max(3, round(s * 0.075))  # stroke width
     _DRAWERS[name](d, s, color, w)
     img = img.resize((px, px), Image.LANCZOS)
@@ -44,9 +67,11 @@ def get_icon_tile(name: str, fg_hex: str, bg_hex: str, px: int = 128,
     if name not in ICON_NAMES:
         raise KeyError(f"unknown icon {name!r}; choose from {ICON_NAMES}")
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    mask = _lucide_mask(name)
+    tag = "_lc" if mask else ""
     out = (CACHE_DIR
            / (f"tile_{name}_{fg_hex.lower()}_{bg_hex.lower()}_{px}"
-              f"_r{radius_frac:g}.png"))
+              f"_r{radius_frac:g}{tag}.png"))
     if out.is_file():
         return out
     s = px * 4
@@ -57,11 +82,14 @@ def get_icon_tile(name: str, fg_hex: str, bg_hex: str, px: int = 128,
                         radius=round(s * radius_frac), fill=bg)
     inset = round(s * 0.24)
     gs = s - 2 * inset
-    glyph = Image.new("RGBA", (gs, gs), (0, 0, 0, 0))
-    gd = ImageDraw.Draw(glyph)
     fg = tuple(int(fg_hex[i:i + 2], 16) for i in (0, 2, 4)) + (255,)
-    w = max(3, round(gs * 0.075))
-    _DRAWERS[name](gd, gs, fg, w)
+    if mask:
+        glyph = _tinted_glyph(mask, fg, gs)
+    else:
+        glyph = Image.new("RGBA", (gs, gs), (0, 0, 0, 0))
+        gd = ImageDraw.Draw(glyph)
+        w = max(3, round(gs * 0.075))
+        _DRAWERS[name](gd, gs, fg, w)
     img.alpha_composite(glyph, (inset, inset))
     img = img.resize((px, px), Image.LANCZOS)
     img.save(out)
