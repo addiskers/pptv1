@@ -80,6 +80,21 @@ _BRIDGE = re.compile(
     r"\b(?:bridge|walks?\s+from|waterfall)\b"
     r"|\bfrom\b.{1,60}?\bto\b.{1,80}?\b(?:driven|explained|built)\b",
     re.I | re.S)
+_OVERLAP = re.compile(
+    r"\b(?:overlaps?|intersections?|sweet\s+spot|synerg\w*|convergence)\b"
+    r"|\bwhere\s+\w+(?:\s+\w+)?\s+meets\b", re.I)
+_ECOSYSTEM = re.compile(
+    r"\b(?:ecosystems?|hub|orbits?|spokes?|platform\s+(?:core|play\w*)"
+    r"|partners?\s+(?:around|network|constellation))\b", re.I)
+_VALUE_BUILD = re.compile(
+    r"\b(?:staircase|stairway|step-?wise|step-?change"
+    r"|maturity\s+(?:ladder|journey|levels?)|ambition\s+levels?"
+    r"|climbs?\s+(?:from|to)\b)", re.I)
+_UNIT_RATIO = r"(?:margins?|rates?|intensity|penetration|yield|%)"
+_UNIT_LEVEL = r"(?:revenue|sales|volume|output|units|gmv|ebitda|capacity)"
+_TWO_UNITS = re.compile(
+    rf"\b{_UNIT_RATIO}\b.{{0,60}}\b{_UNIT_LEVEL}\b"
+    rf"|\b{_UNIT_LEVEL}\b.{{0,60}}\b{_UNIT_RATIO}\b", re.I)
 _HERO_VERB = re.compile(
     r"\b(?:reach(?:es|ed)?|hits?|worth|totals?)\s+"
     r"(?:(?:a|an|some|record)\s+)*[$€£]?\d", re.I)
@@ -131,6 +146,10 @@ class Signals:
     share_facts: int = 0
     entity_count: int = 0
     hierarchy: bool = False
+    overlap: bool = False
+    ecosystem: bool = False
+    value_build: bool = False
+    two_units: bool = False
 
 
 def _option_count(text: str) -> int:
@@ -206,7 +225,11 @@ def signals_from(claim: str, facts: FactTable | None = None) -> Signals:
         criteria_count=_criteria_count(text),
         n_periods=n_periods,
         share_facts=share_facts,
-        entity_count=entity_count)
+        entity_count=entity_count,
+        overlap=bool(_OVERLAP.search(text)),
+        ecosystem=bool(_ECOSYSTEM.search(text)),
+        value_build=bool(_VALUE_BUILD.search(text)),
+        two_units=bool(_TWO_UNITS.search(text)))
 
 
 @dataclass(frozen=True)
@@ -262,6 +285,13 @@ RULES: tuple[FormatRule, ...] = (
         detect=lambda s: s.composition,
         target_slide_types=("chart_slide", "custom_layout")),
     FormatRule(
+        id="combo_two_units",
+        when="two units on one timeline (level + ratio)",
+        then="native_chart:combo; style.combo_line_series names the % line",
+        rationale="one timeline, two scales",
+        detect=lambda s: s.two_units and s.trend and s.n_periods >= 2,
+        target_slide_types=("chart_slide", "custom_layout", "canvas")),
+    FormatRule(
         id="trend_line",
         when="change across periods",
         then="chart_slide + line, sort='none' (column if 2)",
@@ -285,10 +315,11 @@ RULES: tuple[FormatRule, ...] = (
     FormatRule(
         id="correlation_scatter",
         when="X moves with Y",
-        then="paired bars (scatter not yet renderable)",
-        rationale="pair the movements",
+        then="xy_chart (x/y points; size=bubble; quadrants=true "
+             "for strategy)",
+        rationale="position shows the relationship",
         detect=lambda s: s.correlation,
-        target_slide_types=("chart_slide", "custom_layout")),
+        target_slide_types=("custom_layout", "canvas")),
     FormatRule(
         id="hero_number",
         when="one dominant number",
@@ -331,6 +362,27 @@ RULES: tuple[FormatRule, ...] = (
         rationale="plans live on an axis",
         detect=lambda s: s.roadmap and s.n_periods >= 2,
         target_slide_types=("custom_layout", "canvas", "timeline_slide")),
+    FormatRule(
+        id="overlap_venn",
+        when="overlap of 2-3 sets / the sweet spot",
+        then="venn leaf (intersection carries the point)",
+        rationale="overlap argues by geometry",
+        detect=lambda s: s.overlap,
+        target_slide_types=("custom_layout", "canvas")),
+    FormatRule(
+        id="ecosystem_hub",
+        when="a center with radiating elements",
+        then="hub_spoke leaf (highlight_index on the key spoke)",
+        rationale="orbits show the platform",
+        detect=lambda s: s.ecosystem,
+        target_slide_types=("custom_layout", "canvas")),
+    FormatRule(
+        id="value_staircase",
+        when="step-wise build to an outcome",
+        then="staircase leaf (last step accented)",
+        rationale="the climb is the story",
+        detect=lambda s: s.value_build,
+        target_slide_types=("custom_layout", "canvas")),
     # LAST by design — the fallback of fallbacks: dense_reference and every
     # data-shaped rule above must keep priority over it.
     FormatRule(

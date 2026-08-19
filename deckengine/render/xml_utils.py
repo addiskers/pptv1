@@ -98,6 +98,71 @@ def _txpr(dLbl, font_pt: float, color_hex: str) -> None:
     dLbl.append(txPr)
 
 
+def split_combo(chart, line_names: list[str]) -> list[str]:
+    """Turn a clustered-column chart into a column+line COMBO with a
+    secondary value axis (two units on one timeline — revenue bars +
+    margin% line, the census's #1 missing chart form).
+
+    python-pptx cannot author combos, so we operate on the chartSpace XML:
+    the <c:ser> whose names are in line_names move from <c:barChart> into a
+    new <c:lineChart> that references a NEW hidden category axis + a NEW
+    right-hand value axis (the standard PowerPoint combo axis pattern).
+    Returns the series names actually moved (unknown names are skipped so a
+    bad name degrades to a plain column chart, never a broken file).
+    """
+    plotArea = chart._chartSpace.find(qn("c:chart")).find(qn("c:plotArea"))
+    barChart = plotArea.find(qn("c:barChart"))
+    if barChart is None:
+        return []
+
+    def _ser_name(ser) -> str:
+        v = ser.find(qn("c:tx"))
+        return "".join(x.text or "" for x in v.iter(qn("c:v"))) if v is not None else ""
+
+    movers = [s for s in barChart.findall(qn("c:ser"))
+              if _ser_name(s) in line_names]
+    if not movers:
+        return []
+
+    old_ax_ids = [int(a.get("val")) for a in barChart.findall(qn("c:axId"))]
+    nid = max(old_ax_ids, default=100) + 1
+    cat2, val2 = nid, nid + 1
+
+    lineChart = plotArea.makeelement(qn("c:lineChart"), {})
+    g = lineChart.makeelement(qn("c:grouping"), {"val": "standard"})
+    lineChart.append(g)
+    for ser in movers:
+        barChart.remove(ser)
+        # a moved bar ser keeps c:tx/c:order/c:idx/spPr/cat/val — all valid
+        # inside lineChart; add smooth=0 so PowerPoint draws straight legs
+        ser.append(ser.makeelement(qn("c:smooth"), {"val": "0"}))
+        lineChart.append(ser)
+    lineChart.append(lineChart.makeelement(qn("c:marker"), {"val": "1"}))
+    for ax in (cat2, val2):
+        lineChart.append(lineChart.makeelement(qn("c:axId"),
+                                               {"val": str(ax)}))
+    barChart.addnext(lineChart)
+
+    def _axis(tag: str, ax_id: int, cross_id: int, pos: str,
+              delete: str) -> object:
+        el = plotArea.makeelement(qn(f"c:{tag}"), {})
+        el.append(el.makeelement(qn("c:axId"), {"val": str(ax_id)}))
+        sc = el.makeelement(qn("c:scaling"), {})
+        sc.append(sc.makeelement(qn("c:orientation"), {"val": "minMax"}))
+        el.append(sc)
+        el.append(el.makeelement(qn("c:delete"), {"val": delete}))
+        el.append(el.makeelement(qn("c:axPos"), {"val": pos}))
+        el.append(el.makeelement(qn("c:crossAx"), {"val": str(cross_id)}))
+        return el
+
+    # hidden duplicate category axis + visible right-hand value axis
+    plotArea.append(_axis("catAx", cat2, val2, "b", "1"))
+    val_el = _axis("valAx", val2, cat2, "r", "0")
+    val_el.append(val_el.makeelement(qn("c:crosses"), {"val": "max"}))
+    plotArea.append(val_el)
+    return [_ser_name(s) for s in movers]
+
+
 def add_soft_shadow(shape, *, blur_emu: int = 40000, dist_emu: int = 24000,
                     direction: int = 5400000, alpha_pct: int = 62,
                     color: str = "1A1A1A") -> None:

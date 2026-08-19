@@ -18,6 +18,7 @@ from __future__ import annotations
 
 from pptx.chart.data import CategoryChartData
 from pptx.dml.color import RGBColor
+from pptx.oxml.ns import qn
 from pptx.enum.chart import XL_CHART_TYPE, XL_LEGEND_POSITION
 from pptx.util import Emu, Pt
 
@@ -28,7 +29,8 @@ from ..core.pptx_shapes import add_hline, add_shape
 from ..core.pptx_text import (add_text_box, make_text_frame,
                               write_fit_result, write_spans_paragraph)
 from ..core.units import inch
-from ..render.xml_utils import add_point_data_labels, set_series_line_dash
+from ..render.xml_utils import (add_point_data_labels, set_series_line_dash,
+                                split_combo)
 from ..schema.components import NativeChartSpec
 from ..schema.rich import parse_rich
 from .base import Component, RenderContext, register
@@ -198,6 +200,10 @@ class NativeChart(Component):
                         else XL_CHART_TYPE.COLUMN_STACKED_100)
             return (XL_CHART_TYPE.BAR_STACKED if horizontal
                     else XL_CHART_TYPE.COLUMN_STACKED)
+        if data.chart_type == "combo":
+            # built as clustered columns, then split_combo moves the line
+            # series into its own plot with a secondary axis
+            return XL_CHART_TYPE.COLUMN_CLUSTERED
         return (XL_CHART_TYPE.BAR_CLUSTERED if horizontal
                 else XL_CHART_TYPE.COLUMN_CLUSTERED)
 
@@ -228,9 +234,23 @@ class NativeChart(Component):
         chart = slide.shapes.add_chart(
             self._xl_type(data, horizontal), Emu(frame.x), Emu(frame.y),
             Emu(frame.w), Emu(frame.h), cd).chart
-        self._style(chart, data, cats, series, forecast, horizontal, ctx)
+        combo_lines: list[str] = []
+        if data.chart_type == "combo" and len(series) >= 2:
+            want = st.combo_line_series or series[-1][0]
+            if not any(nm == want for nm, _ in series):
+                ctx.report.warn(
+                    f"native_chart: combo_line_series {want!r} not found; "
+                    "using the last series")
+                want = series[-1][0]
+            combo_lines = split_combo(chart, [want])
+        elif data.chart_type == "combo":
+            ctx.report.warn("native_chart: combo needs >=2 series; "
+                            "rendering as columns")
+        self._style(chart, data, cats, series, forecast, horizontal, ctx,
+                    combo_lines=combo_lines)
 
-    def _style(self, chart, data, cats, series, forecast, horizontal, ctx):
+    def _style(self, chart, data, cats, series, forecast, horizontal, ctx,
+               combo_lines: list[str] = ()):
         theme = ctx.theme
         st = data.style
         chart.has_title = False
@@ -265,12 +285,27 @@ class NativeChart(Component):
         series_rag = (rag_map([nm for nm, _ in series])
                       if len(series) > 1 and highlight_ser is None else None)
         for si, plot_series in enumerate(chart.series):
-            nm = plot_names[si] if si < len(plot_names) else ""
+            if combo_lines:
+                # after split_combo the plot order shifted: read each
+                # series' real name from its XML instead of by position
+                tx = plot_series._element.find(qn("c:tx"))
+                nm = "".join(v.text or "" for v in tx.iter(qn("c:v"))) \
+                    if tx is not None else ""
+            else:
+                nm = plot_names[si] if si < len(plot_names) else ""
             base_nm = nm.replace(" (forecast)", "")
+            if nm in combo_lines:
+                # the combo's line series: accent line on the secondary axis
+                plot_series.format.line.color.rgb = RGBColor.from_string(
+                    theme.color("accent"))
+                plot_series.format.line.width = Pt(2.25)
+                continue
             if highlight_ser is not None:
                 role = "accent" if base_nm == highlight_ser else _MUTE_ROLE
             elif series_rag and base_nm in series_rag:
                 role = series_rag[base_nm]
+            elif combo_lines:
+                role = "primary"   # combo columns stay calm under the line
             else:
                 role = _SERIES_ROLES[si % len(_SERIES_ROLES)]
             hexc = RGBColor.from_string(theme.color(role))

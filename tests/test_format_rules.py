@@ -84,12 +84,12 @@ def test_ranking_needs_entities():
     assert _rule("Commuter leads the pack on volume", None) is None
 
 
-def test_distribution_and_correlation_teach_only():
+def test_distribution_and_correlation_route():
     r = _rule("Incomes range from $900 to $1,500 across states")
     assert r.id == "distribution_histogram"
     r2 = _rule("Adoption scales with income")
     assert r2.id == "correlation_scatter"
-    assert "scatter" in r2.then        # teach-only: names the gap
+    assert "xy_chart" in r2.then       # scatter graduated to a primitive
 
 
 def test_hero_number_fires_and_near_miss():
@@ -179,7 +179,10 @@ def test_option_and_criteria_counts():
 
 def test_decision_table_text_cap_and_content():
     text = decision_table_text()
-    assert len(text) <= 2000  # rules + the variant-hint tier
+    # rules + the variant-hint tier; raised 2000 -> 2600 when the census
+    # wave (combo/scatter/venn/hub/staircase routing) landed — the table
+    # grows WITH the form library by design
+    assert len(text) <= 2600
     lines = text.splitlines()
     assert lines[0].startswith("FORMAT SELECTION")
     assert "2x2" in text and "waterfall" in text and "line" in text

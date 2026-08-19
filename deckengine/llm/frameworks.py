@@ -139,7 +139,6 @@ def framework_menu() -> str:
         for f in FRAMEWORKS.values())
 
 
-# DUMMY selection prompt — the paragraph that would join the outline
 # prompt when this registry is wired in.
 SELECTION_PROMPT = (
     "FRAMEWORK (optional): if — and only if — one section of this deck "

@@ -289,6 +289,11 @@ class ChartStyleSpec(BaseModel):
     direction: Literal["vertical", "horizontal"] = "vertical"
     compact: bool = Field(default=False, description=(
         "micro sizing for multi-chart slides: smaller fonts, no legend"))
+    combo_line_series: PlainStr | None = Field(
+        default=None, max_length=40, description=(
+            "chart_type='combo' only: which series renders as the LINE "
+            "over the columns (two units on one timeline, e.g. revenue "
+            "bars + margin% line); null = the last series"))
 
 
 class NativeChartSpec(BaseModel):
@@ -298,7 +303,8 @@ class NativeChartSpec(BaseModel):
     opening level and the last category is the closing total (the engine
     verifies the arithmetic and floats the middle bars)."""
     kind: Literal["native_chart"] = "native_chart"
-    chart_type: Literal["bar", "stacked_bar", "line", "donut", "waterfall"]
+    chart_type: Literal["bar", "stacked_bar", "line", "donut", "waterfall",
+                        "combo"]
     categories: list[PlainStr] = Field(min_length=1, max_length=24)
     series: list[ChartSeriesSpec] = Field(min_length=1, max_length=6)
     sort: Literal["desc", "asc", "none"] = Field(
@@ -461,6 +467,69 @@ class GanttRowSpec(BaseModel):
     highlight_index: int | None = Field(default=None, ge=0, le=7)
 
 
+class XYPointSpec(BaseModel):
+    label: PlainStr = Field(max_length=32)
+    x: float
+    y: float
+    size: float | None = Field(default=None, gt=0,
+                               description="bubble area weight; None -> dot")
+
+
+class XYChartSpec(BaseModel):
+    """Scatter / bubble / quadrant-scatter — the relationship family (does X
+    relate to Y; the BCG growth-share engine). Points are POSITIONED data:
+    every point carries its own x/y (and optional size -> bubble)."""
+    kind: Literal["xy_chart"] = "xy_chart"
+    points: list[XYPointSpec] = Field(min_length=3, max_length=16)
+    x_label: PlainStr = Field(max_length=40)
+    y_label: PlainStr = Field(max_length=40)
+    quadrants: bool = Field(
+        default=False, description="draw midlines + make it a 2x2 strategy "
+                                   "scatter")
+    quadrant_labels: list[PlainStr] | None = Field(
+        default=None, min_length=4, max_length=4,
+        description="TL, TR, BL, BR corner captions (quadrants=True only)")
+    highlight: PlainStr | None = Field(
+        default=None, description="point label to accent; the rest muted")
+    value_suffix: PlainStr = Field(default="", max_length=8)
+
+
+class SpokeSpec(BaseModel):
+    label: RichStr = Field(max_length=48)
+    sub: PlainStr | None = Field(default=None, max_length=60)
+
+
+class HubSpokeSpec(BaseModel):
+    """Hub circle + 3-8 radiating labeled nodes — ecosystem / capability /
+    partner wheels."""
+    kind: Literal["hub_spoke"] = "hub_spoke"
+    hub: RichStr = Field(max_length=48)
+    spokes: list[SpokeSpec] = Field(min_length=3, max_length=8)
+    highlight_index: int | None = Field(default=None, ge=0, le=7)
+
+
+class StairStepSpec(BaseModel):
+    label: RichStr = Field(max_length=60)
+    value: PlainStr | None = Field(default=None, max_length=16)
+
+
+class StaircaseSpec(BaseModel):
+    """Ascending steps — the 'stairway to value' maturity/buildup form."""
+    kind: Literal["staircase"] = "staircase"
+    steps: list[StairStepSpec] = Field(min_length=3, max_length=6)
+    highlight_index: int | None = Field(
+        default=None, ge=0, le=5,
+        description="accented step; None accents the LAST (the outcome)")
+
+
+class VennSpec(BaseModel):
+    """2-3 overlapping translucent circles; the intersection carries the
+    point (overlap/synergy/sweet-spot claims)."""
+    kind: Literal["venn"] = "venn"
+    circles: list[RichStr] = Field(min_length=2, max_length=3)
+    intersection: RichStr | None = Field(default=None, max_length=60)
+
+
 ComponentSpec = Union[
     TextBlockSpec, StatRowSpec, BadgeChipSpec, SectionHeaderSpec, MiniTableSpec,
     DataTableSpec, IconStatRowSpec, KpiCardStripSpec, CalloutBandSpec,
@@ -469,4 +538,5 @@ ComponentSpec = Union[
     ChevronPathwaySpec, NumberedBlockSpec, TwoToneHeaderSpec, NativeChartSpec,
     IconTileRowSpec, ArrowCalloutSpec, BraceGroupSpec, ImageBlockSpec,
     FunnelSpec, Matrix2x2Spec, HarveyBallsSpec, PyramidSpec, GanttRowSpec,
+    XYChartSpec, HubSpokeSpec, StaircaseSpec, VennSpec,
 ]

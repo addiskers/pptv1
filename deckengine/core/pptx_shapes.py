@@ -84,6 +84,19 @@ def add_vline(slide, x: int, y: int, h: int, theme: Theme, *,
     return ln
 
 
+def add_line(slide, x1: int, y1: int, x2: int, y2: int, theme: Theme, *,
+             role: str = "grid", weight_pt: float = 0.75,
+             dash: str | None = None):
+    """Free-angle straight connector (hub-spoke rays, leader lines)."""
+    ln = slide.shapes.add_connector(MSO_CONNECTOR.STRAIGHT, Emu(x1), Emu(y1),
+                                    Emu(x2), Emu(y2))
+    ln.line.color.rgb = RGBColor.from_string(theme.color(role))
+    ln.line.width = Pt(weight_pt)
+    if dash:
+        _set_dash(ln.line, dash)
+    return ln
+
+
 def add_icon(slide, bbox: BBox, name: str, theme: Theme, *,
              color_role: str = "inverse_ink") -> None:
     """Place a themed monochrome icon centered in bbox (square, fit to min side)."""
