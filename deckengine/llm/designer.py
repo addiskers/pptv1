@@ -73,8 +73,11 @@ class DeckBriefs(BaseModel):
 
 
 def batch_brief_prompt(items: list[tuple[str, str | None, str | None]],
-                       has_facts: bool) -> str:
-    """items: (claim, visual_concept, section) per designed body slide."""
+                       has_facts: bool,
+                       fw_lines: list[str | None] | None = None) -> str:
+    """items: (claim, visual_concept, section) per designed body slide.
+    fw_lines: optional per-item framework line — that slide's layout
+    concept is FIXED by its framework's form, not open for rotation."""
     lines = [
         "You are the deck's DESIGNER. Assign EVERY body slide its design "
         "brief now, all together — you can see the whole argument. Give "
@@ -94,6 +97,10 @@ def batch_brief_prompt(items: list[tuple[str, str | None, str | None]],
         s += f": {claim}"
         if vc:
             s += f"\n  outline's visual concept (refine or overrule): {vc}"
+        fw = fw_lines[i - 1] if fw_lines and i <= len(fw_lines) else None
+        if fw:
+            s += (f"\n  this slide argues through the {fw} — build the "
+                  f"layout_concept around that form")
         lines.append(s)
     return "\n".join(lines)
 

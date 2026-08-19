@@ -116,6 +116,21 @@ class FactTable:
                           f"{source_label} · row {i}")
         return table
 
+    # -- structure introspection (framework evidence gate) -------------------
+
+    def column_slugs(self) -> set[str]:
+        """Numeric-column slugs, recovered from the '{slug}_sum' aggregate
+        ids that from_csv() emits only for numeric columns."""
+        return {m.group(1) for fid in self.facts
+                if (m := re.match(r"(.+)_sum$", fid))}
+
+    def unit_count(self) -> int:
+        """Rows in the source CSV (units in a portfolio), recovered from
+        per-row 'row{i}_' fact ids; 0 when no rows were ingested."""
+        idx = [int(m.group(1)) for fid in self.facts
+               if (m := re.match(r"row(\d+)_", fid))]
+        return max(idx) + 1 if idx else 0
+
     # -- verification --------------------------------------------------------
 
     def whitelist(self) -> set[str]:

@@ -204,6 +204,8 @@
     color: var(--slate); background: #e9edf0; border-radius: 4px; padding: 2px 7px; display: inline-block; margin-bottom: 6px; }
   .slot .claim { width: 100%; border: 0; background: transparent; font: 15px/1.45 inherit; color: var(--ink); resize: vertical; padding: 0; min-height: 24px; }
   .slot .claim:focus { outline: none; }
+  .fwline { font-size: 12px; color: var(--muted, #888); margin-top: 3px; }
+  .fwline a { color: inherit; text-decoration: underline; cursor: pointer; }
 
   /* intake questions */
   .qtext { font: 15px/1.4 inherit; color: var(--ink); margin-bottom: 8px; }
@@ -863,7 +865,12 @@ async function loadDemo() {
   catch (e) { toast('Could not load demo spec.', true); }
 }
 
+let gateOutline = null;  // full outline object: approve must round-trip
+                         // EVERY field (section, visual_concept, framework,
+                         // narrative_arc), not just type+claim
+
 function showGate(job) {
+  gateOutline = job.outline;
   $('gov').value = job.outline.governing_thought || '';
   const box = $('storyline'); box.innerHTML = '';
   (job.outline.slides || []).forEach((s, i) => {
@@ -876,15 +883,31 @@ function showGate(job) {
     const ta = row.querySelector('.claim');
     ta.value = s.claim || '';
     autosize(ta); ta.addEventListener('input', () => autosize(ta));
+    if (s.framework) {
+      // remove-only by design: users may reject the engine's analytical
+      // lens, never pick one by name
+      const fw = document.createElement('div');
+      fw.className = 'fwline';
+      fw.innerHTML = 'Framework: ' + s.framework.replace(/_/g, ' ') +
+        ' &mdash; <a>remove</a>';
+      fw.querySelector('a').addEventListener('click', () => {
+        gateOutline.slides[i].framework = null;
+        fw.remove();
+      });
+      row.querySelector('.body').appendChild(fw);
+    }
   });
   show('gate');
 }
 function autosize(ta) { ta.style.height = 'auto'; ta.style.height = ta.scrollHeight + 'px'; }
 
 async function approveOutline() {
+  const claims = [...document.querySelectorAll('#storyline .claim')];
   const outline = {
+    ...(gateOutline || {}),
     governing_thought: $('gov').value,
-    slides: [...document.querySelectorAll('#storyline .claim')].map(el => ({slide_type: el.dataset.type, claim: el.value}))
+    slides: ((gateOutline && gateOutline.slides) || []).map((s, i) =>
+      ({...s, claim: claims[i] ? claims[i].value : s.claim}))
   };
   progress('Writing and rendering the slides…',
     'Each claim becomes a slide title backed by evidence — the right chart chosen per claim.',

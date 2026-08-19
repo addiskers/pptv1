@@ -36,6 +36,39 @@ class OutlineSlide(BaseModel):
                     "left with oversized stat, proof chart right, three "
                     "chips below'). Vary it slide to slide; null on "
                     "title/divider slides.")
+    decision_type: str | None = Field(
+        default=None, max_length=30,
+        description="The DECISION this slide's SECTION drives, one id from "
+                    "the decision vocabulary in the prompt — constant "
+                    "across a section's slides like the section tag; "
+                    "'none' when the section merely informs; null on "
+                    "title/divider slides.")
+    framework: str | None = Field(
+        default=None, max_length=40,
+        description="Leave null — assigned by the engine after the "
+                    "outline, never by the model.")
+
+    @field_validator("decision_type", mode="before")
+    @classmethod
+    def _norm_decision(cls, v):
+        """Advisory: normalize; unknown ids coerce to None, never fail
+        (stage 1 has no repair loop — the trim-never-fail doctrine)."""
+        if isinstance(v, str):
+            from .frameworks import DECISION_TYPE_IDS
+            v = v.strip().lower().replace(" ", "_").replace("-", "_")[:30]
+            return v if v in DECISION_TYPE_IDS else None
+        return v
+
+    @field_validator("framework", mode="before")
+    @classmethod
+    def _norm_framework(cls, v):
+        """Engine-assigned ids survive the approve-gate round trip;
+        anything else (model hallucination) coerces to None."""
+        if isinstance(v, str):
+            from .frameworks import FRAMEWORKS
+            v = v.strip().lower().replace(" ", "_").replace("-", "_")[:40]
+            return v if v in FRAMEWORKS else None
+        return v
 
     @field_validator("section", "visual_concept", "claim", mode="before")
     @classmethod

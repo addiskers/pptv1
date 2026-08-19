@@ -44,8 +44,10 @@ def intake_prompt(prompt: str, has_csv: bool) -> str:
            "availability.\n\n" if has_csv else "")
         + "Ask up to 5 questions that would MEASURABLY change what gets "
         "written — never generic filler. Good candidates: who the "
-        "reader is and what they already know, the decision or action "
-        "this deck must drive, tone (a single firm recommendation vs "
+        "reader is and what they already know, **what decision the "
+        "audience should walk out ready to make** (the single highest-"
+        "leverage answer — it drives the deck's argument and analytical "
+        "lens), tone (a single firm recommendation vs "
         "balanced options), scope boundaries (geography, segment, "
         "timeframe), and any known constraint or claim to avoid. Skip "
         "any question the brief already answers. If the brief is "

@@ -34,6 +34,10 @@ from .format_rules import (check_outline_chart_density,
 from .canvas_rules import check_canvas_slide
 from .emphasis import check_slide_emphasis
 from .exemplar_retrieval import select_exemplars
+from .frameworks import (FRAMEWORKS, Framework, TieChoices,
+                         assign_frameworks, check_framework_slide,
+                         check_framework_verdicts, decision_menu,
+                         framework_directive, ties_prompt)
 from .provenance import (append_legend_once, check_slide_markers,
                          inject_fact_markers, marker_coverage,
                          methodology_appendix)
@@ -227,15 +231,27 @@ def generate_outline(prompt: str, facts: FactTable | None,
             "must be exactly: 'What we would want to be challenged on' and "
             "'Where we are least confident' — honest, specific, tied to the "
             "deck's weakest numbers.\n")
-         + "\n" + decision_table_text())
+         + "\nTag every BODY slide's 'decision_type' with the decision its "
+           "SECTION must land — one id from this vocabulary, constant "
+           "within a section (like the section tag), 'none' when the "
+           "section merely informs, null on title/divider slides:\n"
+         + decision_menu()
+         + "\n\n" + decision_table_text())
     outline = Outline.model_validate(_structured_call("emit_outline", schema, p))
     if forced_flow and forced_flow in FLOWS:
         outline.narrative_arc = forced_flow  # deterministic, not model trust
+    # stage 2 of framework selection is CODE (evidence-gated); only a
+    # surviving 2-way tie spends one fast call, memoized so the post-review
+    # re-assignment below costs zero calls
+    tie_memo: dict[frozenset, str] = {}
+    assign_frameworks(outline, prompt, facts,
+                      choose=_choose_ties_llm(prompt, tie_memo))
 
     def _problems(o: Outline) -> list[str]:
         from .narrative import check_outline_flow
         out = (check_outline(o) + check_outline_formats(o, facts)
-               + check_outline_chart_density(o) + check_outline_flow(o))
+               + check_outline_chart_density(o) + check_outline_flow(o)
+               + check_framework_verdicts(o))
         if not facts and not any(s.slide_type == "exec_summary"
                                  for s in o.slides):
             out.append(
@@ -258,11 +274,45 @@ def generate_outline(prompt: str, facts: FactTable | None,
                              model="fast"))
         if forced_flow and forced_flow in FLOWS:
             revised.narrative_arc = forced_flow
+        # re-assign BEFORE comparing problems (memo hits: zero calls) —
+        # otherwise the revised outline scores spuriously better whenever
+        # the fast model dropped the framework fields
+        assign_frameworks(revised, prompt, facts,
+                          choose=_choose_ties_llm(prompt, tie_memo))
         if len(_problems(revised)) <= len(problems):
             outline = revised
     except (ValidationError, RuntimeError) as e:  # review is best-effort
         log.warning("outline review pass failed, keeping original: %s", e)
     return outline
+
+
+def _choose_ties_llm(brief: str, memo: dict):
+    """Tie chooser for assign_frameworks: ONE batched fast call for all
+    unresolved ties, memoized by candidate pair so repeat assignment
+    passes (post-review, batch variants) never pay again."""
+    def choose(ties):
+        picks: dict[str, str] = {}
+        unresolved = []
+        for t in ties:
+            key = frozenset((t[2].id, t[3].id))
+            if key in memo:
+                picks[t[0]] = memo[key]
+            else:
+                unresolved.append(t)
+        if unresolved:
+            raw = _structured_call(
+                "framework_ties", TieChoices.model_json_schema(),
+                ties_prompt(unresolved, brief),
+                max_tokens=1000, model="fast")
+            chosen = {c.section: c.framework_id
+                      for c in TieChoices.model_validate(raw).choices}
+            for t in unresolved:
+                fid = chosen.get(t[0])
+                if fid in (t[2].id, t[3].id):
+                    picks[t[0]] = fid
+                    memo[frozenset((t[2].id, t[3].id))] = fid
+        return picks
+    return choose
 
 
 _FEW_SHOTS_DIR = Path(__file__).parent / "few_shots"
@@ -341,7 +391,8 @@ _CANVAS_HELP = (
 def generate_slide(archetype: str, intent: str, prompt: str,
                    facts: FactTable | None,
                    prior_slides: list[str] | None = None,
-                   design_brief: str | None = None) -> BaseModel:
+                   design_brief: str | None = None,
+                   framework: Framework | None = None) -> BaseModel:
     model_cls = _ARCHETYPES[archetype]
     schema = model_cls.model_json_schema()
     # cross-slide context: without it, slides duplicate each other's content
@@ -406,6 +457,9 @@ def generate_slide(archetype: str, intent: str, prompt: str,
         problems += [f"[writing] {p}" for p in check_slide_writing(slide)]
         problems += [f"[format] {p}" for p in check_slide_format(slide, facts)]
         problems += [f"[emphasis] {p}" for p in check_slide_emphasis(slide)]
+        if framework is not None:
+            problems += [f"[framework] {p}"
+                         for p in check_framework_slide(slide, framework)]
         if slide.slide_type == "canvas":
             problems += [f"[design] {p}" for p in check_canvas_slide(slide)]
         if not problems:
@@ -520,17 +574,19 @@ def _design_brief(claim: str, visual_concept: str | None,
 
 
 def _batch_briefs(items: list[tuple[str, str | None, str | None]],
-                  facts: FactTable | None) -> list | None:
+                  facts: FactTable | None,
+                  fw_lines: list[str | None] | None = None) -> list | None:
     """ONE fast-model call assigns every designed slide's brief together —
     variety decided globally before any slide is written (T5.6). None on
-    any failure: generate_slide_best falls back to per-slide briefs."""
+    any failure: generate_slide_best falls back to per-slide briefs.
+    fw_lines: optional per-item framework directive one-liner (or None)."""
     from .designer import DeckBriefs, batch_brief_prompt
     if not items:
         return []
     try:
         raw = _structured_call(
             "design_briefs", DeckBriefs.model_json_schema(),
-            batch_brief_prompt(items, facts is not None),
+            batch_brief_prompt(items, facts is not None, fw_lines=fw_lines),
             max_tokens=8000, model="fast")
         briefs = DeckBriefs.model_validate(raw).briefs
         if len(briefs) != len(items):
@@ -679,7 +735,8 @@ def generate_slide_best(archetype: str, claim: str, prompt: str,
                         visual_concept: str | None = None,
                         recent_silhouettes: list[str] | None = None,
                         brief="auto", n_candidates: int | None = None,
-                        judge_budget: JudgeBudget | None = None) -> BaseModel:
+                        judge_budget: JudgeBudget | None = None,
+                        framework: Framework | None = None) -> BaseModel:
     """Candidate generation + judging (see _pick_slide_best), then the
     render-truth repair pass: the winner is rendered for real and any
     overlap/overflow it still carries becomes one final repair call."""
@@ -687,7 +744,8 @@ def generate_slide_best(archetype: str, claim: str, prompt: str,
         archetype, claim, prompt, facts, prior_slides=prior_slides,
         theme=theme, visual_concept=visual_concept,
         recent_silhouettes=recent_silhouettes, brief=brief,
-        n_candidates=n_candidates, judge_budget=judge_budget)
+        n_candidates=n_candidates, judge_budget=judge_budget,
+        framework=framework)
     return _maybe_render_repair(slide, claim, prompt, facts, theme)
 
 
@@ -698,7 +756,8 @@ def _pick_slide_best(archetype: str, claim: str, prompt: str,
                      visual_concept: str | None = None,
                      recent_silhouettes: list[str] | None = None,
                      brief="auto", n_candidates: int | None = None,
-                     judge_budget: JudgeBudget | None = None) -> BaseModel:
+                     judge_budget: JudgeBudget | None = None,
+                     framework: Framework | None = None) -> BaseModel:
     """N candidates -> render all -> deterministic score -> ONE pairwise
     vision-judge call only when the metrics can't separate the finalists.
     Canvas slides get a DESIGN BRIEF first; candidate 2 is briefed toward a
@@ -714,19 +773,28 @@ def _pick_slide_best(archetype: str, claim: str, prompt: str,
         brief = None
     elif brief == "auto":
         brief = _design_brief(claim, visual_concept, recent, facts)
+    def _brief_with_fw(alternate: bool) -> str:
+        text = _brief_text(brief, alternate)
+        if framework is not None:
+            text = (text + "\n\n" if text else "") \
+                + framework_directive(framework)
+        return text
+
     n = (max(1, min(3, n_candidates)) if n_candidates
          else candidate_count())
     if n == 1:
         return generate_slide(archetype, claim, prompt, facts,
                               prior_slides=prior_slides,
-                              design_brief=_brief_text(brief, False))
+                              design_brief=_brief_with_fw(False),
+                              framework=framework)
     cands = []
     for i in range(n):
         p = prompt if i == 0 else prompt + _VARIANT_NUDGE
         try:
             cands.append(generate_slide(
                 archetype, claim, p, facts, prior_slides=prior_slides,
-                design_brief=_brief_text(brief, alternate=i > 0)))
+                design_brief=_brief_with_fw(alternate=i > 0),
+                framework=framework))
         except RuntimeError as e:
             log.warning("candidate %d for %s failed: %s", i, archetype, e)
     if not cands:
@@ -880,6 +948,13 @@ def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
     # the claim-chain fence: every slide sees every OTHER slide's claim
     claims = [f"[{it.slide_type}] {it.claim}" for it in items]
 
+    # frameworks assigned on the outline (engine-side, evidence-gated)
+    # ride into briefs and slide prompts; FRAMEWORKS lookup also guards
+    # against stale ids on human-edited outlines
+    fw_of: dict[int, Framework] = {
+        i: FRAMEWORKS[it.framework] for i, it in enumerate(items)
+        if getattr(it, "framework", None) in FRAMEWORKS}
+
     # batch design-brief pre-pass: ONE fast call assigns every designed
     # slide a distinct concept — variety decided globally before any slide
     canvas_idx = [i for i, it in enumerate(items)
@@ -887,7 +962,11 @@ def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
     briefs: dict[int, object] = {}
     if canvas_idx:
         got = _batch_briefs([(items[i].claim, items[i].visual_concept,
-                              items[i].section) for i in canvas_idx], facts)
+                              items[i].section) for i in canvas_idx], facts,
+                            fw_lines=[
+                                (f"{fw_of[i].label} — the {fw_of[i].render_as}"
+                                 f" IS the layout") if i in fw_of else None
+                                for i in canvas_idx])
         if got:
             briefs = dict(zip(canvas_idx, got))
 
@@ -911,7 +990,8 @@ def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
                         visual_concept=item.visual_concept,
                         recent_silhouettes=_recent(i),
                         brief=briefs.get(i, "auto"),
-                        n_candidates=n_cands, judge_budget=budget)
+                        n_candidates=n_cands, judge_budget=budget,
+                        framework=fw_of.get(i))
                 except RuntimeError as e:
                     log.warning("canvas design failed for %r (%s); "
                                 "archetype fallback %s",
@@ -919,12 +999,14 @@ def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
                     slide = generate_slide_best(
                         item.slide_type, item.claim, deck_context, facts,
                         prior_slides=others, theme=theme,
-                        n_candidates=n_cands, judge_budget=budget)
+                        n_candidates=n_cands, judge_budget=budget,
+                        framework=fw_of.get(i))
             else:
                 slide = generate_slide_best(
                     item.slide_type, item.claim, deck_context, facts,
                     prior_slides=others, theme=theme,
-                    n_candidates=n_cands, judge_budget=budget)
+                    n_candidates=n_cands, judge_budget=budget,
+                    framework=fw_of.get(i))
         except RuntimeError as e:
             # one stubborn slide must NEVER kill a whole deck: ship without
             # it and record the gap (the claim chain stays reviewable)
@@ -980,7 +1062,8 @@ def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
                     visual_concept=item.visual_concept,
                     recent_silhouettes=[sils[a]],
                     brief=briefs.get(b, "auto"),
-                    n_candidates=n_cands, judge_budget=budget)
+                    n_candidates=n_cands, judge_budget=budget,
+                    framework=fw_of.get(b))
             except RuntimeError as e:
                 log.warning("silhouette sweep regen failed: %s", e)
                 continue
@@ -1008,7 +1091,8 @@ def generate_deck_spec(prompt: str, *, csv_text: str | None = None,
                 theme=theme, visual_concept=item.visual_concept,
                 recent_silhouettes=_recent(ib),
                 brief=briefs.get(ib, "auto"),
-                n_candidates=n_cands, judge_budget=budget)
+                n_candidates=n_cands, judge_budget=budget,
+                framework=fw_of.get(ib))
         except RuntimeError as e:
             log.warning("content sweep regen failed: %s", e)
             continue
