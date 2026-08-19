@@ -379,10 +379,10 @@
 
       <div class="toggle-row">
         <div class="seg" id="qualitySeg" role="group" aria-label="Generation quality">
-          <button type="button" class="on" data-q="best" onclick="setQuality('best')">Best</button>
-          <button type="button" data-q="fast" onclick="setQuality('fast')">Fast draft</button>
+          <button type="button" class="on" data-q="fast" onclick="setQuality('fast')">Fast draft</button>
+          <button type="button" data-q="best" onclick="setQuality('best')">Best</button>
         </div>
-        <div class="t-txt" id="qualityTxt"><b>Best — competing designs, judged</b><span>Every slide is designed twice and the stronger design wins. ~8-10 min for a full deck.</span></div>
+        <div class="t-txt" id="qualityTxt"><b>Fast draft — one design per slide</b><span>Single pass, no judging. ~4-5 min. Lowest API cost. Rework any slide afterwards for free.</span></div>
       </div>
 
       <div class="toggle-row">
@@ -536,14 +536,14 @@
 <script>
 const $ = id => document.getElementById(id);
 let csvText = null, currentJob = null, selectedTheme = 'consulting_navy', pollTimer = null;
-let deckQuality = 'best';
+let deckQuality = 'fast';
 
 function setQuality(q) {
   deckQuality = q;
   document.querySelectorAll('#qualitySeg button').forEach(b => b.classList.toggle('on', b.dataset.q === q));
   $('qualityTxt').innerHTML = q === 'best'
-    ? '<b>Best — competing designs, judged</b><span>Every slide is designed twice and the stronger design wins. ~8-10 min for a full deck.</span>'
-    : '<b>Fast draft — one design per slide</b><span>Single pass, no judging. ~4-5 min. Rework any slide afterwards for free.</span>';
+    ? '<b>Best — competing designs, judged</b><span>Every slide is designed twice and a vision judge picks the winner. ~8-10 min and roughly 2-3x the API cost of a fast draft.</span>'
+    : '<b>Fast draft — one design per slide</b><span>Single pass, no judging. ~4-5 min. Lowest API cost. Rework any slide afterwards for free.</span>';
 }
 let logoAsset = null;
 

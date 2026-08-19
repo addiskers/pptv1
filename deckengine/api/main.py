@@ -207,8 +207,10 @@ class GenerateFromPrompt(BaseModel):
     theme: str = "consulting_navy"
     logo: str | None = None  # asset name from POST /assets -> meta.logo
     auto_approve: bool = False  # True: skip the outline gate (CLI behavior)
-    # 'best' = multi-candidate + vision judge; 'fast' = one candidate draft
-    quality: Literal["best", "fast"] = "best"
+    # 'best' = multi-candidate + vision judge (EXPENSIVE: roughly 2x the
+    # LLM spend of 'fast' plus vision calls); 'fast' = one candidate.
+    # Default fast — cost burned a real user; 'best' is an explicit choice.
+    quality: Literal["best", "fast"] = "fast"
     # id -> answer from POST /intake's questions; only the ones answered
     intake_answers: dict[str, str] | None = None
     # True: diagram slides use REAL PowerPoint SmartArt (editable via the
