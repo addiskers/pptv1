@@ -586,6 +586,23 @@ class IcebergSpec(BaseModel):
     hidden: list[RichStr] = Field(min_length=2, max_length=4)
 
 
+class SmartNodeSpec(BaseModel):
+    label: PlainStr = Field(max_length=60)
+    children: list[PlainStr] = Field(default_factory=list, max_length=4)
+
+
+class SmartDiagramSpec(BaseModel):
+    """REAL PowerPoint SmartArt (opt-in): edits via the SmartArt UI, adds
+    nodes natively. THE exemption from the measured-text contract — the
+    frame is fixed and SmartArt autofits inside it; server previews show
+    an empty frame until the file is opened in PowerPoint. Default decks
+    use the drawn forms (cycle/tree/hub_spoke) instead."""
+    kind: Literal["smart_diagram"] = "smart_diagram"
+    layout: Literal["org_chart", "issue_tree", "cycle", "radial"]
+    nodes: list[SmartNodeSpec] = Field(min_length=2, max_length=8)
+    height_in: float = Field(default=3.2, ge=2.0, le=5.0)
+
+
 ComponentSpec = Union[
     TextBlockSpec, StatRowSpec, BadgeChipSpec, SectionHeaderSpec, MiniTableSpec,
     DataTableSpec, IconStatRowSpec, KpiCardStripSpec, CalloutBandSpec,
@@ -596,4 +613,5 @@ ComponentSpec = Union[
     FunnelSpec, Matrix2x2Spec, HarveyBallsSpec, PyramidSpec, GanttRowSpec,
     XYChartSpec, HubSpokeSpec, StaircaseSpec, VennSpec,
     CycleSpec, TreeSpec, OnionSpec, TempleSpec, IcebergSpec,
+    SmartDiagramSpec,
 ]

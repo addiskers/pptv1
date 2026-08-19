@@ -211,6 +211,10 @@ class GenerateFromPrompt(BaseModel):
     quality: Literal["best", "fast"] = "best"
     # id -> answer from POST /intake's questions; only the ones answered
     intake_answers: dict[str, str] | None = None
+    # True: diagram slides use REAL PowerPoint SmartArt (editable via the
+    # SmartArt UI; server previews show an empty frame until opened in
+    # PowerPoint). Default: the engine's drawn diagram forms.
+    smartart: bool = False
 
 
 class IntakeRequest(BaseModel):
@@ -297,6 +301,7 @@ class GenerateBatch(BaseModel):
     quality: Literal["best", "fast"] = "fast"
     n: int = 5
     intake_answers: dict[str, str] | None = None
+    smartart: bool = False  # see GenerateFromPrompt.smartart
 
 
 @app.post("/generate-batch")
@@ -543,10 +548,12 @@ def _run_generate(job_id: str, req: GenerateFromPrompt, outline) -> None:
                                    "stage": stage}
                 _persist(job_id)
 
+        from ..llm.variants import SMARTART_DIRECTIVE
         spec = generate_deck_spec(
             _fold_intake(req.prompt, req.intake_answers), csv_text=req.csv_text,
             theme=req.theme, meta=meta, outline=outline,
-            quality=req.quality, progress_cb=_progress)
+            quality=req.quality, progress_cb=_progress,
+            design_directive=SMARTART_DIRECTIVE if req.smartart else None)
         _run_render(job_id, spec)
     except Exception as e:  # noqa: BLE001
         _JOBS[job_id] = {"status": "error", "error": str(e),
@@ -646,10 +653,15 @@ def _run_batch(batch_id: str, job_ids: list[str], req: GenerateBatch) -> None:
                     _tag(job)
                     _persist(job_id)
 
+            from ..llm.variants import SMARTART_DIRECTIVE
+            dd = design_directive(angle.design_language)
+            if req.smartart:
+                dd = f"{dd} {SMARTART_DIRECTIVE}" if dd \
+                    else SMARTART_DIRECTIVE
             spec = generate_deck_spec(
                 prompt, csv_text=req.csv_text, theme=theme, meta=meta,
                 outline=outline, quality=req.quality, progress_cb=_progress,
-                design_directive=design_directive(angle.design_language))
+                design_directive=dd)
             for s in spec.slides:
                 if s.slide_type == "title":
                     s.style = cover_style   # deterministic, not model luck

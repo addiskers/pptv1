@@ -67,3 +67,13 @@ def plain(text: str) -> str:
     """Strip markup (for char-count sanity checks). Markers drop entirely —
     a provenance glyph is annotation, not content."""
     return "".join(s.text for s in parse_rich(text) if not s.marker)
+
+
+_MARKER_TOKEN = re.compile(r" ?\[\[src:(?:official|recon|est)\]\]")
+
+
+def strip_markers(text: str) -> str:
+    """Remove provenance tokens for DISPLAY surfaces (headlines) where the
+    glyph reads as a stray dot. The spec keeps its tokens — verification,
+    marker coverage, and the methodology appendix are unaffected."""
+    return _MARKER_TOKEN.sub("", text)

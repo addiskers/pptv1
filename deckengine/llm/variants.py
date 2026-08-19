@@ -104,3 +104,16 @@ def design_directive(language: str) -> str | None:
     for unknown/empty keys (single-deck generation stays unstyled)."""
     text = DESIGN_LANGUAGES.get(language)
     return text
+
+
+# opt-in (request.smartart): diagram slides use REAL PowerPoint SmartArt
+# instead of the engine's drawn forms — clients who edit via the SmartArt
+# UI asked for this; the trade-off (no server preview of the diagram) is
+# stated wherever the toggle appears.
+SMARTART_DIRECTIVE = (
+    "The client wants PowerPoint SmartArt: whenever a slide's message is a "
+    "cycle/flywheel, an org or issue hierarchy, or a hub-and-spoke, use a "
+    "smart_diagram leaf (layout: cycle | org_chart | issue_tree | radial, "
+    "nodes with children for hierarchy) INSTEAD of the drawn cycle/tree/"
+    "hub_spoke components. Mention in the speaker notes that the diagram "
+    "is editable via PowerPoint's SmartArt tools.")

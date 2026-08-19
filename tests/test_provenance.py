@@ -13,7 +13,8 @@ from deckengine.llm.provenance import (MARKER_KEYS, check_slide_markers,
 from deckengine.schema import components as comp_mod
 from deckengine.schema import slide_types as slides_mod
 from deckengine.schema.components import ChartSeriesSpec, NativeChartSpec
-from deckengine.schema.rich import MARKER_FONT, parse_rich, plain
+from deckengine.schema.rich import (MARKER_FONT, parse_rich, plain,
+                                    strip_markers)
 from deckengine.schema.slide_types import BulletContentSpec, ChartSlideSpec
 
 
@@ -47,6 +48,37 @@ def test_plain_drops_markers():
 def test_marker_inherits_base_color_role():
     spans = parse_rich("90% [[src:official]]", base_color_role="inverse_ink")
     assert [s.color_role for s in spans if s.marker] == ["inverse_ink"]
+
+
+def test_strip_markers_for_display_surfaces():
+    t = "Market reached **0.95M** [[src:recon]] registrations in 2024"
+    assert strip_markers(t) == \
+        "Market reached **0.95M** registrations in 2024"
+    # other markup untouched; unknown tiers stay literal
+    assert strip_markers("42 [[src:vibes]] **x**") == "42 [[src:vibes]] **x**"
+
+
+def test_title_block_renders_without_marker_glyphs(tmp_path):
+    from pptx import Presentation
+    from deckengine.render.deck_builder import build_deck
+    from deckengine.schema.slide_types import DeckSpec
+    deck = DeckSpec.model_validate({
+        "schema_version": 1, "theme": "consulting_navy",
+        "meta": {"title": "t", "date": "19 Aug 2026", "footer_org": "DE"},
+        "slides": [{"slide_type": "bullet_content",
+                    "title": "Sales hit **948k** [[src:recon]] this year",
+                    "subtitle": "Up 10% [[src:est]] vs plan",
+                    "bullets": [{"text": "Body keeps its marker: 5% "
+                                         "[[src:est]] uplift"}]}]})
+    out = tmp_path / "t.pptx"
+    build_deck(deck, out, embed_fonts=False)
+    slide = Presentation(str(out)).slides[0]
+    texts = [r.text for s in slide.shapes if s.has_text_frame
+             for p in s.text_frame.paragraphs for r in p.runs]
+    joined = "".join(texts)
+    assert "948k" in joined
+    # exactly one glyph survives — the BODY marker; none from title/subtitle
+    assert joined.count("◐") == 0 and joined.count("○") == 1
 
 
 # -- enforcement -----------------------------------------------------------
@@ -127,7 +159,9 @@ def test_marker_renders_in_symbol_font(tmp_path):
             if s.has_text_frame for p in s.text_frame.paragraphs
             for r in p.runs]
     glyphs = [r for r in runs if r.text in "●◐○"]
-    assert len(glyphs) == 2
+    # title glyph is stripped for display (stray-dot fix); the BODY glyph
+    # renders in the symbol face
+    assert len(glyphs) == 1
     assert all(r.font.name == "Segoe UI Symbol" for r in glyphs)
     assert not any("[[src:" in r.text for r in runs)
 

@@ -390,6 +390,11 @@
         <div class="t-txt"><b>Review the storyline before slides are written</b><span>The 30-second check where deck quality is decided. Turn off to build in one shot.</span></div>
       </div>
 
+      <div class="toggle-row">
+        <label class="switch"><input type="checkbox" id="smartart"><span class="slider"></span></label>
+        <div class="t-txt"><b>PowerPoint SmartArt for diagrams</b><span>Cycles, org charts and hierarchies become real SmartArt — editable via PowerPoint's SmartArt tools. Diagram previews appear only after opening the file in PowerPoint.</span></div>
+      </div>
+
       <div class="actions">
         <button class="btn btn-primary" id="go" onclick="beginGenerate('single')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
@@ -767,7 +772,7 @@ async function _startGeneration(intakeAnswers) {
     'outline', []);
   try {
     const res = await fetch('/generate', {method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({prompt, csv_text: csvText, theme: selectedTheme, logo: logoAsset, auto_approve: !review, quality: deckQuality, intake_answers: intakeAnswers})});
+      body: JSON.stringify({prompt, csv_text: csvText, theme: selectedTheme, logo: logoAsset, auto_approve: !review, quality: deckQuality, intake_answers: intakeAnswers, smartart: $('smartart').checked})});
     if (!res.ok) throw new Error(await apiError(res));
     poll((await res.json()).job_id);
   } catch (e) { fail(e.message); }
@@ -784,7 +789,7 @@ async function _startBatch(prompt, intakeAnswers) {
   show('batch');
   try {
     const res = await fetch('/generate-batch', {method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({prompt, csv_text: csvText, theme: selectedTheme, logo: logoAsset, quality: 'fast', n: 5, intake_answers: intakeAnswers})});
+      body: JSON.stringify({prompt, csv_text: csvText, theme: selectedTheme, logo: logoAsset, quality: 'fast', n: 5, intake_answers: intakeAnswers, smartart: $('smartart').checked})});
     if (!res.ok) throw new Error(await apiError(res));
     const data = await res.json();
     pollBatch(data.batch_id);

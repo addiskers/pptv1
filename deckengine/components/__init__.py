@@ -6,5 +6,6 @@ from . import (arrow_callout, badge_chip, brace_group, bullet_list,  # noqa: F40
                icon_tile_row, image_block, kpi_card_strip, layout_node,
                iceberg, legend_row, matrix_2x2, mini_table, native_chart,
                numbered_block, onion, progress_pill, pyramid,
-               section_header, staircase, stat_row, temple, text_block,
-               timeline_row, tree, two_tone_header, venn, xy_chart)
+               section_header, smart_diagram, staircase, stat_row, temple,
+               text_block, timeline_row, tree, two_tone_header, venn,
+               xy_chart)

@@ -27,14 +27,20 @@ class SlideAssembler(ABC):
         With a kicker (section eyebrow) the zone grows 0.18in — kicker-gated,
         so kicker-less decks keep their exact geometry.
         """
+        from ..schema.rich import strip_markers
         subtitle = getattr(spec, "subtitle", None)
         kicker = (getattr(spec, "kicker", None) or "").strip() or None
         title_h = 0.85 if not subtitle else 1.1
         if kicker:
             title_h += 0.18
         z = self.zones(title_h=title_h)
+        # headlines drop provenance glyphs (they read as stray dots at
+        # display size); the spec keeps its tokens for verification and
+        # the methodology appendix
         get_component("section_header").render(
-            slide, SectionHeaderSpec(title=spec.title, subtitle=subtitle,
+            slide, SectionHeaderSpec(title=strip_markers(spec.title),
+                                     subtitle=(strip_markers(subtitle)
+                                               if subtitle else None),
                                      kicker=kicker, rule=rule),
             z["title"], ctx)
         return z
