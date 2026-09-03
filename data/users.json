@@ -1,7 +1,6 @@
 {
  "users": {
   "sd@skyquestt.com": {
-   "pw": "pbkdf2_sha256$200000$03c47bbfdcb0b16af74f9d0dfbf9c812$cfd79c3577654dc98950d553c87e3a7950fef64ec529966bd17f08a919d6e55b",
    "quota": 8
   }
  }

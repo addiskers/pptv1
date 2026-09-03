@@ -81,9 +81,13 @@ def ui(request: Request):
 
 # -- auth ----------------------------------------------------------------
 
-class LoginRequest(BaseModel):
+class OtpRequest(BaseModel):
     email: str
-    password: str
+
+
+class OtpVerify(BaseModel):
+    email: str
+    code: str
 
 
 @app.get("/login", response_class=HTMLResponse)
@@ -91,16 +95,35 @@ def login_page() -> str:
     return _LOGIN.read_text(encoding="utf-8")
 
 
-@app.post("/login")
-def login(req: LoginRequest, response: Response) -> dict:
-    user = auth.get_user(req.email)
-    if not user or not auth.verify_password(req.password, user.get("pw", "")):
-        raise HTTPException(401, "Invalid email or password.")
+@app.post("/auth/send-otp")
+def send_otp(req: OtpRequest) -> dict:
+    """Send a 6-digit OTP to the given email (works for both sign-up and
+    login). Returns whether the account already exists so the UI can show
+    the right copy."""
+    email = req.email.lower().strip()
+    if not email or "@" not in email:
+        raise HTTPException(400, "Please enter a valid email address.")
+    exists = auth.user_exists(email)
+    code = auth.generate_otp(email)
+    auth.send_otp_email(email, code)
+    return {"ok": True, "is_new": not exists}
+
+
+@app.post("/auth/verify-otp")
+def verify_otp(req: OtpVerify, response: Response) -> dict:
+    """Verify the OTP. Creates the account if the user is new. Sets the
+    session cookie on success."""
+    email = req.email.lower().strip()
+    auth.verify_otp(email, req.code)
+    is_new = not auth.user_exists(email)
+    # create the account if it doesn't exist yet (sign-up flow)
+    if is_new:
+        auth.create_user(email)
     response.set_cookie(auth.SESSION_COOKIE,
-                        auth.make_session(req.email.lower().strip()),
+                        auth.make_session(email),
                         max_age=auth.SESSION_TTL, httponly=True,
                         samesite="lax")
-    return {"ok": True}
+    return {"ok": True, "is_new": is_new}
 
 
 @app.post("/logout")
@@ -140,9 +163,9 @@ def _check_quota(user: str) -> None:
     used = _decks_used(user)
     if used >= quota:
         raise HTTPException(
-            403, f"Deck limit reached ({used}/{quota}). Your account can "
-                 "create one presentation — contact SkyQuest to raise the "
-                 "limit.")
+            403, f"Deck limit reached ({used}/{quota}). Each account can "
+                 f"create {quota} presentation{'s' if quota != 1 else ''} — "
+                 "contact SkyQuest to raise your limit.")
 
 
 def _own_or_404(user: str, job: dict | None) -> dict:

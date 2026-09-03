@@ -68,7 +68,7 @@ def _fake_structured_call(flows):
 def client(tmp_path, monkeypatch):
     users = tmp_path / "users.json"
     users.write_text(json.dumps({"users": {
-        "u@example.com": {"pw": auth.hash_password("pw123"), "quota": 5},
+        "u@example.com": {"quota": 5},
     }}), encoding="utf-8")
     monkeypatch.setattr(auth, "USERS_FILE", users)
     monkeypatch.setattr(auth, "SECRET_FILE", tmp_path / ".secret")
@@ -79,8 +79,11 @@ def client(tmp_path, monkeypatch):
     monkeypatch.setenv("DECKENGINE_DESIGNER", "0")     # keep the mock simple
     monkeypatch.setenv("DECKENGINE_CANDIDATES", "1")
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    auth._OTP_STORE.clear()
     c = TestClient(app)
-    c.post("/login", json={"email": "u@example.com", "password": "pw123"})
+    c.post("/auth/send-otp", json={"email": "u@example.com"})
+    code = auth._OTP_STORE["u@example.com"]["code"]
+    c.post("/auth/verify-otp", json={"email": "u@example.com", "code": code})
     return c
 
 

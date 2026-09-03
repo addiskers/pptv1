@@ -3,13 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sign in — DeckEngine</title>
+<title>DeckEngine — Sign in</title>
 <style>
   :root {
     --bg: #f4f2ec; --surface: #ffffff; --surface-2: #faf9f5;
     --ink: #23262b; --muted: #6f6a61;
     --line: #e4e1d8; --line-strong: #d3cfc4;
     --navy: #2c3a47; --slate: #51626f; --accent: #c05621;
+    --green: #2d7a4f; --green-bg: #e8f5ec; --green-border: #b7dcc4;
     --shadow-lg: 0 18px 48px rgba(35,38,43,.16), 0 6px 16px rgba(35,38,43,.10);
   }
   * { box-sizing: border-box; margin: 0; }
@@ -20,14 +21,30 @@
     -webkit-font-smoothing: antialiased;
   }
   .panel {
-    width: 100%; max-width: 400px; background: var(--surface);
+    width: 100%; max-width: 420px; background: var(--surface);
     border: 1px solid var(--line); border-radius: 16px;
     box-shadow: var(--shadow-lg); padding: 36px 32px;
   }
   .mark { font: 700 24px Georgia, serif; color: var(--navy); text-align: center; }
   .mark b { color: var(--accent); }
   .sub { text-align: center; color: var(--muted); font-size: 13.5px;
-         margin: 6px 0 28px; }
+         margin: 6px 0 24px; line-height: 1.5; }
+
+  /* tabs */
+  .tabs {
+    display: flex; gap: 0; margin-bottom: 24px;
+    border: 1px solid var(--line-strong); border-radius: 10px;
+    overflow: hidden;
+  }
+  .tab {
+    flex: 1; padding: 11px 0; text-align: center; font-weight: 600;
+    font-size: 14px; cursor: pointer; background: var(--surface-2);
+    color: var(--muted); border: none; transition: all .15s;
+  }
+  .tab + .tab { border-left: 1px solid var(--line-strong); }
+  .tab.active { background: var(--navy); color: #fff; }
+  .tab:hover:not(.active) { background: var(--line); }
+
   label { display: block; font-weight: 600; font-size: 13px; color: var(--navy);
           margin: 16px 0 6px; }
   input {
@@ -37,59 +54,335 @@
   }
   input:focus { outline: none; border-color: var(--slate);
                 box-shadow: 0 0 0 3px rgba(81,98,111,.12); }
-  button {
-    width: 100%; margin-top: 24px; border: 0; border-radius: 10px;
+
+  /* OTP input */
+  .otp-row {
+    display: flex; gap: 8px; justify-content: center; margin: 16px 0 8px;
+  }
+  .otp-digit {
+    width: 48px; height: 56px; text-align: center; font: 700 22px/1 monospace;
+    border: 2px solid var(--line-strong); border-radius: 10px;
+    background: var(--surface-2); color: var(--ink);
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .otp-digit:focus {
+    outline: none; border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(44,58,71,.15);
+  }
+
+  button, .btn {
+    display: block; width: 100%; margin-top: 20px; border: 0; border-radius: 10px;
     background: var(--navy); color: #fff; font: 600 15px/1 inherit;
     padding: 14px; cursor: pointer; transition: background .15s;
+    text-align: center; text-decoration: none;
   }
-  button:hover { background: #22303b; }
+  button:hover, .btn:hover { background: #22303b; }
   button:disabled { opacity: .6; cursor: wait; }
+
+  .btn-outline {
+    background: transparent; color: var(--navy);
+    border: 1px solid var(--line-strong); margin-top: 12px;
+  }
+  .btn-outline:hover { background: var(--surface-2); }
+
   .err {
     display: none; margin-top: 14px; padding: 10px 12px; border-radius: 8px;
     background: #fbeaea; border: 1px solid #eac8c8; color: #8a2f2f;
     font-size: 13.5px;
   }
+  .success-msg {
+    display: none; margin-top: 14px; padding: 10px 12px; border-radius: 8px;
+    background: var(--green-bg); border: 1px solid var(--green-border);
+    color: var(--green); font-size: 13.5px;
+  }
+
+  .sent-to {
+    text-align: center; color: var(--muted); font-size: 13px;
+    margin: 4px 0 0; line-height: 1.5;
+  }
+  .sent-to strong { color: var(--ink); font-weight: 600; }
+
   .note { text-align: center; color: var(--muted); font-size: 12.5px;
-          margin-top: 22px; }
+          margin-top: 22px; line-height: 1.5; }
+
+  .resend { text-align: center; margin-top: 14px; }
+  .resend button {
+    background: none; border: none; color: var(--accent); cursor: pointer;
+    font: 600 13px inherit; padding: 0; margin: 0; width: auto; display: inline;
+  }
+  .resend button:hover { text-decoration: underline; }
+  .resend button:disabled { opacity: .5; cursor: wait; }
+  .resend .timer { color: var(--muted); font-size: 13px; }
+
+  .hidden { display: none !important; }
+
+  /* quota badge */
+  .quota-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface-2); border: 1px solid var(--line);
+    border-radius: 20px; padding: 4px 12px; font-size: 12px;
+    color: var(--muted); margin-top: 16px;
+  }
+  .quota-badge svg { width: 14px; height: 14px; }
 </style>
 </head>
 <body>
-  <form class="panel" id="f">
+  <div class="panel">
     <div class="mark">Deck<b>Engine</b></div>
-    <div class="sub">Sign in to generate your presentation</div>
-    <label for="email">Email</label>
-    <input id="email" type="email" autocomplete="username" required
-           placeholder="you@company.com">
-    <label for="pw">Password</label>
-    <input id="pw" type="password" autocomplete="current-password" required
-           placeholder="••••••••">
-    <button id="go" type="submit">Sign in</button>
-    <div class="err" id="err"></div>
-    <div class="note">Access is provisioned by SkyQuest. One deck per account.</div>
-  </form>
+    <div class="sub">Consulting-grade decks from a sentence</div>
+
+    <!-- Tab toggle -->
+    <div class="tabs">
+      <button class="tab active" id="tab-login" type="button">Sign In</button>
+      <button class="tab" id="tab-signup" type="button">Sign Up</button>
+    </div>
+
+    <!-- Step 1: Email -->
+    <form id="step-email">
+      <label for="email">Email address</label>
+      <input id="email" type="email" autocomplete="email" required
+             placeholder="you@company.com">
+      <button id="send-btn" type="submit">Send verification code</button>
+      <div class="err" id="err-email"></div>
+    </form>
+
+    <!-- Step 2: OTP verification -->
+    <div id="step-otp" class="hidden">
+      <div class="sent-to">
+        We sent a 6-digit code to<br><strong id="otp-email-display"></strong>
+      </div>
+      <div class="otp-row">
+        <input class="otp-digit" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+        <input class="otp-digit" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input class="otp-digit" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input class="otp-digit" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input class="otp-digit" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        <input class="otp-digit" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+      </div>
+      <button id="verify-btn" type="button" disabled>Verify &amp; continue</button>
+      <div class="err" id="err-otp"></div>
+      <div class="success-msg" id="success-otp"></div>
+
+      <div class="resend">
+        <span class="timer" id="resend-timer"></span>
+        <button id="resend-btn" type="button" class="hidden">Resend code</button>
+      </div>
+
+      <button class="btn-outline" id="change-email-btn" type="button">← Change email</button>
+    </div>
+
+    <div class="note">
+      Each account includes <strong>2 free presentations</strong>.
+      <br>Need more? Contact SkyQuest to raise your limit.
+      <div class="quota-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="3" width="20" height="18" rx="2"/>
+          <path d="M8 7v10M12 7v10M16 7v10"/>
+        </svg>
+        2 decks per account
+      </div>
+    </div>
+  </div>
+
 <script>
-  const f = document.getElementById("f"), err = document.getElementById("err"),
-        go = document.getElementById("go");
-  f.addEventListener("submit", async (e) => {
+(() => {
+  const $ = id => document.getElementById(id);
+  const stepEmail = $("step-email"), stepOtp = $("step-otp");
+  const emailInput = $("email"), sendBtn = $("send-btn");
+  const errEmail = $("err-email"), errOtp = $("err-otp"), successOtp = $("success-otp");
+  const otpDisplay = $("otp-email-display");
+  const verifyBtn = $("verify-btn");
+  const resendTimer = $("resend-timer"), resendBtn = $("resend-btn");
+  const changeEmailBtn = $("change-email-btn");
+  const tabLogin = $("tab-login"), tabSignup = $("tab-signup");
+  const digits = document.querySelectorAll(".otp-digit");
+
+  let currentEmail = "";
+  let isSignup = false;
+  let countdownId = null;
+
+  // Tab switching
+  tabLogin.addEventListener("click", () => {
+    isSignup = false;
+    tabLogin.classList.add("active"); tabSignup.classList.remove("active");
+    sendBtn.textContent = "Send verification code";
+  });
+  tabSignup.addEventListener("click", () => {
+    isSignup = true;
+    tabSignup.classList.add("active"); tabLogin.classList.remove("active");
+    sendBtn.textContent = "Send verification code";
+  });
+
+  // Step 1: Send OTP
+  stepEmail.addEventListener("submit", async e => {
     e.preventDefault();
-    err.style.display = "none";
-    go.disabled = true; go.textContent = "Signing in…";
+    errEmail.style.display = "none";
+    const email = emailInput.value.trim();
+    if (!email) return;
+    sendBtn.disabled = true;
+    sendBtn.textContent = "Sending…";
     try {
-      const r = await fetch("/login", {
+      const r = await fetch("/auth/send-otp", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({email: email.value.trim(), password: pw.value}),
+        body: JSON.stringify({email}),
       });
-      if (r.ok) { location.href = "/"; return; }
       const d = await r.json().catch(() => ({}));
-      err.textContent = d.detail || "Sign-in failed. Check your email and password.";
-      err.style.display = "block";
+      if (!r.ok) {
+        errEmail.textContent = d.detail || "Something went wrong.";
+        errEmail.style.display = "block";
+        sendBtn.disabled = false;
+        sendBtn.textContent = "Send verification code";
+        return;
+      }
+      currentEmail = email;
+      otpDisplay.textContent = email;
+      showOtpStep();
     } catch {
-      err.textContent = "Could not reach the server. Try again.";
-      err.style.display = "block";
+      errEmail.textContent = "Could not reach the server. Try again.";
+      errEmail.style.display = "block";
+      sendBtn.disabled = false;
+      sendBtn.textContent = "Send verification code";
     }
-    go.disabled = false; go.textContent = "Sign in";
   });
+
+  function showOtpStep() {
+    stepEmail.classList.add("hidden");
+    stepOtp.classList.remove("hidden");
+    digits.forEach(d => { d.value = ""; });
+    digits[0].focus();
+    errOtp.style.display = "none";
+    successOtp.style.display = "none";
+    verifyBtn.disabled = true;
+    startResendTimer();
+  }
+
+  // OTP digit inputs — auto-advance, paste support
+  digits.forEach((d, i) => {
+    d.addEventListener("input", e => {
+      d.value = d.value.replace(/\D/g, "").slice(0, 1);
+      if (d.value && i < digits.length - 1) digits[i + 1].focus();
+      checkOtpFilled();
+    });
+    d.addEventListener("keydown", e => {
+      if (e.key === "Backspace" && !d.value && i > 0) {
+        digits[i - 1].focus();
+        digits[i - 1].value = "";
+        checkOtpFilled();
+      }
+      if (e.key === "Enter" && getOtp().length === 6) doVerify();
+    });
+    d.addEventListener("paste", e => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData("text").replace(/\D/g, "");
+      for (let j = 0; j < digits.length && j < text.length; j++) {
+        digits[j].value = text[j];
+      }
+      if (text.length >= digits.length) digits[digits.length - 1].focus();
+      checkOtpFilled();
+    });
+  });
+
+  function getOtp() {
+    return Array.from(digits).map(d => d.value).join("");
+  }
+
+  function checkOtpFilled() {
+    verifyBtn.disabled = getOtp().length < 6;
+  }
+
+  // Step 2: Verify OTP
+  verifyBtn.addEventListener("click", doVerify);
+
+  async function doVerify() {
+    const code = getOtp();
+    if (code.length < 6) return;
+    errOtp.style.display = "none";
+    successOtp.style.display = "none";
+    verifyBtn.disabled = true;
+    verifyBtn.textContent = "Verifying…";
+    try {
+      const r = await fetch("/auth/verify-otp", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({email: currentEmail, code}),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) {
+        errOtp.textContent = d.detail || "Verification failed.";
+        errOtp.style.display = "block";
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = "Verify & continue";
+        return;
+      }
+      successOtp.textContent = d.is_new
+        ? "Account created! Redirecting…"
+        : "Signed in! Redirecting…";
+      successOtp.style.display = "block";
+      setTimeout(() => { location.href = "/"; }, 800);
+    } catch {
+      errOtp.textContent = "Could not reach the server. Try again.";
+      errOtp.style.display = "block";
+      verifyBtn.disabled = false;
+      verifyBtn.textContent = "Verify & continue";
+    }
+  }
+
+  // Change email
+  changeEmailBtn.addEventListener("click", () => {
+    stepOtp.classList.add("hidden");
+    stepEmail.classList.remove("hidden");
+    sendBtn.disabled = false;
+    sendBtn.textContent = "Send verification code";
+    emailInput.focus();
+    clearInterval(countdownId);
+  });
+
+  // Resend timer (30s cooldown)
+  function startResendTimer() {
+    let sec = 30;
+    resendBtn.classList.add("hidden");
+    resendTimer.textContent = `Resend in ${sec}s`;
+    resendTimer.classList.remove("hidden");
+    clearInterval(countdownId);
+    countdownId = setInterval(() => {
+      sec--;
+      if (sec <= 0) {
+        clearInterval(countdownId);
+        resendTimer.classList.add("hidden");
+        resendBtn.classList.remove("hidden");
+      } else {
+        resendTimer.textContent = `Resend in ${sec}s`;
+      }
+    }, 1000);
+  }
+
+  resendBtn.addEventListener("click", async () => {
+    resendBtn.disabled = true;
+    try {
+      const r = await fetch("/auth/send-otp", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({email: currentEmail}),
+      });
+      if (r.ok) {
+        startResendTimer();
+        errOtp.style.display = "none";
+        digits.forEach(d => { d.value = ""; });
+        digits[0].focus();
+        verifyBtn.disabled = true;
+      } else {
+        const d = await r.json().catch(() => ({}));
+        errOtp.textContent = d.detail || "Could not resend. Try again.";
+        errOtp.style.display = "block";
+      }
+    } catch {
+      errOtp.textContent = "Could not reach the server.";
+      errOtp.style.display = "block";
+    }
+    resendBtn.disabled = false;
+  });
+})();
 </script>
 </body>
 </html>
