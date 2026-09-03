@@ -114,15 +114,76 @@ def test_failed_brief_never_blocks(monkeypatch):
     assert slide.slide_type == "canvas"
 
 
+# -- hard design defects: no silent ship past repair ------------------------
+
+def test_hard_defect_survives_repair_raises_not_ships(monkeypatch):
+    """A physically broken layout (text-on-text overlap) that the model
+    never fixes across MAX_REPAIRS attempts must raise, not ship — fast
+    mode (n=1) has no candidate scoring to catch it later."""
+    monkeypatch.setenv("DECKENGINE_CANDIDATES", "1")
+    broken = json.loads(json.dumps(CANVAS))
+    broken["elements"][1]["x"] = broken["elements"][4]["x"]
+    broken["elements"][1]["y"] = broken["elements"][4]["y"]
+    broken["elements"][1]["w"] = broken["elements"][4]["w"]
+    broken["elements"][1]["h"] = broken["elements"][4]["h"]
+
+    def fake(name, schema, prompt, max_tokens=16000, **kw):
+        if name == "design_brief":
+            return dict(BRIEF)
+        return json.loads(json.dumps(broken))  # every attempt re-emits it
+
+    monkeypatch.setattr(sg, "_structured_call", fake)
+    try:
+        sg.generate_slide_best("canvas", "claim", "ctx", None)
+        assert False, "expected RuntimeError"
+    except RuntimeError as e:
+        assert "unrecoverable" in str(e)
+
+
+def test_hard_defect_raise_is_what_generate_deck_spec_catches(monkeypatch):
+    """generate_deck_spec._gen_one catches exactly RuntimeError from the
+    canvas call and retries with the archetype mold (see spec_generator.py
+    _gen_one) — confirm the raise type matches what that except clause
+    expects, and that the archetype path itself succeeds on clean input."""
+    broken = json.loads(json.dumps(CANVAS))
+    broken["elements"][1]["x"] = broken["elements"][4]["x"]
+    broken["elements"][1]["y"] = broken["elements"][4]["y"]
+    broken["elements"][1]["w"] = broken["elements"][4]["w"]
+    broken["elements"][1]["h"] = broken["elements"][4]["h"]
+
+    def fake_canvas(name, schema, prompt, max_tokens=16000, **kw):
+        if name == "design_brief":
+            return dict(BRIEF)
+        return json.loads(json.dumps(broken))
+
+    monkeypatch.setattr(sg, "_structured_call", fake_canvas)
+    raised = False
+    try:
+        sg.generate_slide_best("canvas", "claim", "ctx", None)
+    except RuntimeError:
+        raised = True
+    assert raised
+
+    monkeypatch.setattr(
+        sg, "_structured_call",
+        lambda name, schema, prompt, max_tokens=16000, **kw: dict(BULLETS))
+    fallback = sg.generate_slide_best("bullet_content", "claim", "ctx", None)
+    assert fallback.slide_type == "bullet_content"
+
+
 # -- silhouette scoring ------------------------------------------------------
 
 def test_repeat_silhouette_loses_tie(monkeypatch):
     monkeypatch.setenv("DECKENGINE_CANDIDATES", "2")
     same = json.loads(json.dumps(CANVAS))
     different = json.loads(json.dumps(CANVAS))
+    # shift the right column one grid step left: changes the silhouette
+    # signature while every element keeps its own w/h, so it stays a
+    # valid (non-overlapping) design — CANVAS is packed edge-to-edge, so
+    # clamped per-element resizing (the old approach) collided elements
     for el in different["elements"]:
-        el["y"] = min(0.75, el["y"] + 0.25)
-        el["h"] = min(1 - el["y"], el["h"])
+        if el["x"] >= 0.4:
+            el["x"] = round(el["x"] - 0.083, 4)
     responses = [dict(BRIEF), same, different]
     monkeypatch.setattr(
         sg, "_structured_call",

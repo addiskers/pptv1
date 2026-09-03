@@ -77,6 +77,19 @@ def _label(el: CanvasElement, i: int) -> str:
     return f"{k} element {i + 1}"
 
 
+# problems whose text starts with one of these prefixes are HARD: the
+# violation is a physical fact (an element too small for its own
+# component, or two text blocks painting over each other), not a style
+# judgment — unlike contrast/coverage/sliver advisories, these guarantee
+# visible corruption if they ship. hard_canvas_problems() lets callers
+# treat them as unrecoverable instead of "survived repair, ship anyway".
+_HARD_MARKERS = ("overlaps", "needs >=")
+
+
+def hard_canvas_problems(problems: list[str]) -> list[str]:
+    return [p for p in problems if any(m in p for m in _HARD_MARKERS)]
+
+
 def check_canvas_slide(slide: CanvasSlideSpec) -> list[str]:
     """Design problems for one canvas slide (deterministic, free)."""
     problems: list[str] = []

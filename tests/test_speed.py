@@ -214,9 +214,13 @@ def test_exhausted_budget_skips_judge_deterministic_pick(monkeypatch,
                                                          tmp_path):
     monkeypatch.setenv("DECKENGINE_CANDIDATES", "2")
     variant = json.loads(json.dumps(CANVAS))
+    # shift the right column one grid step left: changes the silhouette
+    # signature while every element keeps its own w/h, so it stays a
+    # valid (non-overlapping) design — CANVAS is packed edge-to-edge, so
+    # clamped per-element resizing (the old approach) collided elements
     for el in variant["elements"]:
-        el["y"] = min(0.75, el["y"] + 0.25)
-        el["h"] = min(1 - el["y"], el["h"])
+        if el["x"] >= 0.4:
+            el["x"] = round(el["x"] - 0.083, 4)
     responses = [dict(BRIEF), json.loads(json.dumps(CANVAS)), variant]
     monkeypatch.setattr(
         sg, "_structured_call",

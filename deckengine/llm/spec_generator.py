@@ -31,7 +31,7 @@ from .facts import FactTable, verify_spec_numbers
 from .format_rules import (check_outline_chart_density,
                            check_outline_formats, check_slide_format,
                            decision_table_text)
-from .canvas_rules import check_canvas_slide
+from .canvas_rules import check_canvas_slide, hard_canvas_problems
 from .emphasis import check_slide_emphasis
 from .exemplar_retrieval import select_exemplars
 from .frameworks import (FRAMEWORKS, Framework, TieChoices,
@@ -460,8 +460,10 @@ def generate_slide(archetype: str, intent: str, prompt: str,
         if framework is not None:
             problems += [f"[framework] {p}"
                          for p in check_framework_slide(slide, framework)]
+        canvas_problems: list[str] = []
         if slide.slide_type == "canvas":
-            problems += [f"[design] {p}" for p in check_canvas_slide(slide)]
+            canvas_problems = check_canvas_slide(slide)
+            problems += [f"[design] {p}" for p in canvas_problems]
         if not problems:
             return slide
         if attempt < MAX_REPAIRS:
@@ -472,6 +474,19 @@ def generate_slide(archetype: str, intent: str, prompt: str,
                               "\n".join(f"- {p}" for p in problems) +
                               "\nEmit the full JSON again.")
             continue
+        # HARD design problems (an element too small for its own component,
+        # or text painting over text) are physical facts, not style nits —
+        # letting them ship guarantees visible corruption. Fast mode (1
+        # candidate) has no scoring step to catch this later, so treat
+        # survival past MAX_REPAIRS as a failure: the caller's archetype
+        # fallback (generate_slide_best) then tries the reliable mold
+        # instead of a broken freeform layout.
+        hard = hard_canvas_problems(canvas_problems)
+        if hard:
+            raise RuntimeError(
+                f"slide {archetype} still has {len(hard)} unrecoverable "
+                f"design defect(s) after {MAX_REPAIRS + 1} attempts: "
+                f"{hard}")
         log.warning("problems survived repairs: %s", problems)
         return slide
     if slide is None:

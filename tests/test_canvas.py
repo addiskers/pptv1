@@ -114,6 +114,31 @@ def test_light_text_on_light_bg_flagged():
     assert not [p for p in check_canvas_slide(s2) if "light background" in p]
 
 
+def test_hard_problems_are_overlap_and_min_height_only():
+    from deckengine.llm.canvas_rules import hard_canvas_problems
+    # overlap ("overlaps") and min-height ("needs >=") are physical facts:
+    # the element WILL paint over its neighbor or its own component WILL
+    # overflow. contrast/coverage/sliver are style advisories, not hard —
+    # a slide can ship legible even if a shade is technically off-brand.
+    overlap = _canvas([_text(0.1, 0.1, 0.4, 0.2, "alpha"),
+                       _text(0.2, 0.15, 0.4, 0.2, "beta")])
+    assert hard_canvas_problems(check_canvas_slide(overlap))
+
+    too_small = _canvas([
+        {"x": 0.1, "y": 0.1, "w": 0.3, "h": 0.1, "z": 0,
+         "content": {"kind": "callout_band", "label": "x", "icon": "$",
+                     "segments": ["a", "b"]}},
+        _text(0.6, 0.6, 0.3, 0.2, "x")])
+    assert hard_canvas_problems(check_canvas_slide(too_small))
+
+    contrast_only = _canvas(
+        [_text(0.1, 0.2, 0.5, 0.2, "lost text"),
+         _text(0.1, 0.5, 0.5, 0.2, "more", color_role="inverse_ink")],
+        bg_fill_role="primary_dark")
+    probs = check_canvas_slide(contrast_only)
+    assert probs and not hard_canvas_problems(probs)
+
+
 def test_component_inside_dark_panel_flagged():
     comp = {"x": 0.1, "y": 0.15, "w": 0.35, "h": 0.3, "z": 1,
             "content": {"kind": "bullet_list",
