@@ -275,6 +275,10 @@ class ExecSummary(SlideAssembler):
             items.append(item("text_block", TextBlockSpec(
                 text=f"[[primary]]{sec.heading}[[/]]", size_role="h2"),
                 gap_before=0.4 if i == 0 else 1.4))
+            # flex: a short deck (few sections, short paragraphs) must not
+            # leave the bottom of the slide empty — the body text absorbs
+            # underflow surplus (text_block measures naturally so growth
+            # reads as breathing room, never distorted type)
             items.append(item("text_block", TextBlockSpec(
-                text=sec.body, size_role="body"), gap_before=0.45))
+                text=sec.body, size_role="body"), gap_before=0.45, flex=1.0))
         stack_into(slide, body, ctx, items)
